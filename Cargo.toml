@@ -1,0 +1,20 @@
+[package]
+name = "blue-fire-rando"
+description = "a program with the goal of shuffling around items within blue fire to create a new gameplay experience"
+repository = "https://github.com/bananaturtlesandwich/blue-fire-rando"
+version = "0.1.0"
+authors = ["spuds"]
+edition = "2021"
+
+[dependencies]
+eframe = "*"
+unreal_asset = { git = "https://github.com/astrotechies/unrealmodding", package = "unreal_asset" }
+
+[target.'cfg(windows)'.build-dependencies]
+winres = "*"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+panic = "abort"
