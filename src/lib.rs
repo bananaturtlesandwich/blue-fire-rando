@@ -1,3 +1,5 @@
+mod logic;
+
 #[derive(Default)]
 pub struct Rando {
     item: bool,
