@@ -9,6 +9,8 @@ edition = "2021"
 [dependencies]
 eframe = "*"
 unreal_asset = { git = "https://github.com/astrotechies/unrealmodding", package = "unreal_asset" }
+strum = { version = "*", features = ["derive"] }
+hashbrown = "*"
 
 [build-dependencies]
 winres = "*"
