@@ -39,17 +39,19 @@ impl eframe::App for Rando {
 
                 ui[1].heading(egui::RichText::new("Extra options").underline());
                 ui[1].checkbox(&mut self.treasure, "Treasures e.g Seagull soup");
-                ui[1].checkbox(&mut self.starting, "Starting e.g Dash");
-                ui[1].checkbox(&mut self.life, "Lives e.g 💗");
-                ui[1].checkbox(&mut self.slot, "Spirit slots e.g 🍩");
-                ui[1].checkbox(&mut self.duck, "Ducks e.g <(⭕ ◑ ө ◑ ⭕)>");
-                ui[1].checkbox(&mut self.surprise, "Surprise... ( ¬u¬)");
+                ui[1].checkbox(&mut self.starting, "Dash -===(  -_o)");
+                ui[1].checkbox(&mut self.life, "Lives 💗");
+                ui[1].checkbox(&mut self.slot, "Spirit slots 🍩");
+                ui[1].checkbox(&mut self.duck, "Ducks <(⭕ ◑ ө ◑ ⭕)>");
+                ui[1].checkbox(&mut self.surprise, "Surprise... (   ¬u¬)");
             });
             if ui
                 .button(egui::RichText::new("start rando").strong().size(70.0))
                 .with_new_rect(ui.max_rect())
                 .clicked()
-            {}
+            {
+                logic::randomise(&self)
+            }
         });
     }
 }

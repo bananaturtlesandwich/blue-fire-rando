@@ -7,7 +7,7 @@ authors = ["spuds"]
 edition = "2021"
 
 [dependencies]
-eframe = "*"
+eframe = { version = "*", features = ["dark-light", "persistence"] }
 unreal_asset = { git = "https://github.com/astrotechies/unrealmodding", package = "unreal_asset" }
 strum = { version = "*", features = ["derive"] }
 hashbrown = "*"

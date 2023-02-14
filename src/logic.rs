@@ -53,18 +53,20 @@ macro_rules! hashmap {
     });
 }
 
+const PREFIX: &'static str = "/Game/BlueFire/Maps/World/";
+
 lazy_static::lazy_static! {
     static ref DATA: hashbrown::HashMap<&'static str, Location> = hashmap![
-        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_KeepSouth" => Location {
+        "A02_ArcaneTunnels/A02_GameIntro_KeepSouth" => Location {
             unlocks: &[
-                "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_Exterior",
-                "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_KeepEast",
-                "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom",
+                "A02_ArcaneTunnels/A02_GameIntro_Exterior",
+                "A02_ArcaneTunnels/A02_GameIntro_KeepEast",
+                "A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom",
             ],
             requires: &[],
             checks: &[],
         },
-        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_Exterior" => Location {
+        "A02_ArcaneTunnels/A02_GameIntro_Exterior" => Location {
             unlocks: &[],
             requires: &[],
             checks: &[
@@ -75,8 +77,8 @@ lazy_static::lazy_static! {
                 }
             ]
         },
-        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_KeepEast" => Location {
-            unlocks: &["/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_EastWing"],
+        "A02_ArcaneTunnels/A02_GameIntro_KeepEast" => Location {
+            unlocks: &["A02_ArcaneTunnels/A02_GameIntro_EastWing"],
             requires: &[],
             checks: &[
                 Check {
@@ -91,7 +93,7 @@ lazy_static::lazy_static! {
                 },
             ]
         },
-        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_EastWing" => Location {
+        "A02_ArcaneTunnels/A02_GameIntro_EastWing" => Location {
             unlocks: &[],
             requires: &[],
             checks: &[
@@ -107,8 +109,8 @@ lazy_static::lazy_static! {
                 },
             ]
         },
-        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom" => Location {
-            unlocks: &["/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_KeepWest"],
+        "A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom" => Location {
+            unlocks: &["A02_ArcaneTunnels/A02_GameIntro_KeepWest"],
             requires: &[&[Drop::Item(Items::OldKey)]],
             checks: &[
                 Check {
@@ -130,8 +132,8 @@ lazy_static::lazy_static! {
                 },
             ]
         },
-        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_KeepWest" => Location {
-            unlocks: &["/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_MemorialMain"],
+        "A02_ArcaneTunnels/A02_GameIntro_KeepWest" => Location {
+            unlocks: &["A02_ArcaneTunnels/A02_GameIntro_MemorialMain"],
             requires: &[],
             checks: &[
                 Check {
@@ -141,7 +143,7 @@ lazy_static::lazy_static! {
                 }
             ]
         },
-        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_MemorialMain" => Location {
+        "A02_ArcaneTunnels/A02_GameIntro_MemorialMain" => Location {
             unlocks: &[/* into arcane tunnels */],
             requires: &[],
             checks: &[
