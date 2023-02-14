@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 mod drops;
 pub use drops::*;
+mod seed_gen;
+pub use seed_gen::randomise;
 
 enum Shop {
     Mork = 7,
@@ -17,6 +19,7 @@ enum Context {
     Overworld(&'static str),
 }
 
+#[derive(strum::AsRefStr)]
 enum Drop {
     Item(Items),
     Weapon(Weapons),
@@ -35,44 +38,45 @@ struct Check {
 }
 
 struct Location {
-    path: &'static str,
-    connects_to: &'static [Location],
+    unlocks: &'static [&'static str],
     requires: &'static [&'static [Drop]],
     checks: &'static [Check],
 }
 
-const DATA: Location = Location {
-    path: "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
-    connects_to: &[
-        Location {
-            path: "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_Exterior",
-            connects_to: &[],
+macro_rules! hashmap {
+    [$($key:literal => $value:expr), *] => ({
+        let mut map = hashbrown::HashMap::new();
+        $(
+            map.insert($key, $value);
+        )*
+        map
+    });
+}
+
+lazy_static::lazy_static! {
+    static ref DATA: hashbrown::HashMap<&'static str, Location> = hashmap![
+        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_KeepSouth" => Location {
+            unlocks: &[
+                "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_Exterior",
+                "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_KeepEast",
+                "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom",
+            ],
             requires: &[],
-            checks: &[Check {
-                context: Context::Overworld("A01_FireKeep_EmoteStatue_Levitation"),
-                drop: Drop::Emote(Emotes::Levitation),
-                requires: &[],
-            }],
+            checks: &[],
         },
-        Location {
-            path: "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_KeepEast",
-            connects_to: &[Location {
-                path: "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_EastWing",
-                connects_to: &[],
-                requires: &[],
-                checks: &[
-                    Check {
-                        context: Context::Overworld("Chest_A02_Keep_Key_01"),
-                        drop: Drop::Item(Items::OldKey),
-                        requires: &[],
-                    },
-                    Check {
-                        context: Context::Overworld("Chest_A01_Keep_Shield"),
-                        drop: Drop::Ability(Abilities::Block),
-                        requires: &[],
-                    },
-                ],
-            }],
+        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_Exterior" => Location {
+            unlocks: &[],
+            requires: &[],
+            checks: &[
+                Check {
+                    context: Context::Overworld("A01_FireKeep_EmoteStatue_Levitation"),
+                    drop: Drop::Emote(Emotes::Levitation),
+                    requires: &[],
+                }
+            ]
+        },
+        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_KeepEast" => Location {
+            unlocks: &["/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_EastWing"],
             requires: &[],
             checks: &[
                 Check {
@@ -85,43 +89,26 @@ const DATA: Location = Location {
                     drop: Drop::Item(Items::SapphireOre),
                     requires: &[],
                 },
-            ],
+            ]
         },
-        Location {
-            path: "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom",
-            connects_to: &[Location {
-                path: "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_KeepWest",
-                connects_to: &[Location {
-                    path: "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_MemorialMain",
-                    connects_to: &[
-                        // into arcane tunnels
-                    ],
+        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_EastWing" => Location {
+            unlocks: &[],
+            requires: &[],
+            checks: &[
+                Check {
+                    context: Context::Overworld("Chest_A02_Keep_Key_01"),
+                    drop: Drop::Item(Items::OldKey),
                     requires: &[],
-                    checks: &[
-                        Check {
-                            context: Context::Overworld("Chest_A02_GameIntro"),
-                            drop: Drop::Item(Items::EmeraldOre),
-                            requires: &[],
-                        },
-                        Check {
-                            context: Context::Overworld("Chest_A02_Sword_DiamondWings"),
-                            drop: Drop::Weapon(Weapons::DiamondWings),
-                            requires: &[],
-                        },
-                        Check {
-                            context: Context::Overworld("Dance_Platform_Photo_Chest"),
-                            drop: Drop::Item(Items::Mandoline),
-                            requires: &[&[Drop::Emote(Emotes::Photo)]],
-                        },
-                    ],
-                }],
-                requires: &[],
-                checks: &[Check {
-                    context: Context::Overworld("Chest_A02_Keep_Loot_01"),
-                    drop: Drop::Item(Items::SapphireOre),
+                },
+                Check {
+                    context: Context::Overworld("Chest_A01_Keep_Shield"),
+                    drop: Drop::Ability(Abilities::Block),
                     requires: &[],
-                }],
-            }],
+                },
+            ]
+        },
+        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom" => Location {
+            unlocks: &["/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_KeepWest"],
             requires: &[&[Drop::Item(Items::OldKey)]],
             checks: &[
                 Check {
@@ -141,37 +128,39 @@ const DATA: Location = Location {
                         ],
                     ],
                 },
-            ],
+            ]
         },
-    ],
-    requires: &[],
-    checks: &[],
-};
-
-/*
-i think i'll try to refactor to this format
-hashbrown::HashMap{
-    (
-        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
-        Location {
-            unlocks: &[
-                "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_Exterior",
-                "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_KeepEast",
-                "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom",
-            ],
+        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_KeepWest" => Location {
+            unlocks: &["/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_MemorialMain"],
             requires: &[],
-            checks: &[],
+            checks: &[
+                Check {
+                    context: Context::Overworld("Chest_A02_Keep_Loot_01"),
+                    drop: Drop::Item(Items::SapphireOre),
+                    requires: &[],
+                }
+            ]
+        },
+        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_GameIntro_MemorialMain" => Location {
+            unlocks: &[/* into arcane tunnels */],
+            requires: &[],
+            checks: &[
+                Check {
+                    context: Context::Overworld("Chest_A02_GameIntro"),
+                    drop: Drop::Item(Items::EmeraldOre),
+                    requires: &[],
+                },
+                Check {
+                    context: Context::Overworld("Chest_A02_Sword_DiamondWings"),
+                    drop: Drop::Weapon(Weapons::DiamondWings),
+                    requires: &[],
+                },
+                Check {
+                    context: Context::Overworld("Dance_Platform_Photo_Chest"),
+                    drop: Drop::Item(Items::Mandoline),
+                    requires: &[&[Drop::Emote(Emotes::Photo)]],
+                },
+            ]
         }
-    )
-}
-this decreases nesting, allows multiple maps to connect to other ones and would be more efficient for the algorithm i have in mind
-*/
-
-fn randomise(app: &super::Rando) {
-    todo!(
-        r"
-    put the fire keep data in the new format
-    tidy everything into their own files
-    "
-    );
+    ];
 }

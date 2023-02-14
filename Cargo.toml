@@ -11,6 +11,7 @@ eframe = "*"
 unreal_asset = { git = "https://github.com/astrotechies/unrealmodding", package = "unreal_asset" }
 strum = { version = "*", features = ["derive"] }
 hashbrown = "*"
+lazy_static = "*"
 
 [target.'cfg(windows)'.build-dependencies]
 winres = "*"
