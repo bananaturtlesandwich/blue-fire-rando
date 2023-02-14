@@ -15,6 +15,6 @@ fn main() -> Result<(), eframe::Error> {
             }),
             ..Default::default()
         },
-        Box::new(|_| Box::new(Rando::default())),
+        Box::new(|ctx| Box::new(Rando::new(ctx))),
     )
 }
