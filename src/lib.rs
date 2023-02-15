@@ -10,7 +10,6 @@ pub struct Rando {
     emotes: bool,
     treasure: bool,
     starting: bool,
-    lives: bool,
     ore: bool,
     ducks: bool,
     surprise: bool,
@@ -41,9 +40,9 @@ impl eframe::App for Rando {
                 ui[1].checkbox(&mut self.treasure, "Treasures e.g Seagull soup");
                 ui[1].checkbox(&mut self.starting, "Dash -===(    - _ o)");
                 ui[1].checkbox(&mut self.ore, "Ore  (    $ o $)");
-                ui[1].checkbox(&mut self.lives, "Lives 💗");
                 ui[1].checkbox(&mut self.ducks, "Ducks <(⭕ ◑ ө ◑ ⭕)>");
                 ui[1].checkbox(&mut self.surprise, "Surprise... >:p");
+                ui[1].horizontal(|ui| ui.label("share rando_p.pak for races"));
             });
             if ui
                 .button(egui::RichText::new("start rando").strong().size(70.0))
