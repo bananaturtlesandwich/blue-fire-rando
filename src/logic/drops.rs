@@ -1,4 +1,4 @@
-#[derive(strum::AsRefStr)]
+#[derive(PartialEq, strum::AsRefStr)]
 pub enum Items {
     #[strum(serialize = "0")]
     LargePouch,
@@ -10,8 +10,8 @@ pub enum Items {
     Book,
     #[strum(serialize = "9")]
     Rose,
-    //   #[strum(serialize = "12")]
-    //    ----,
+    #[strum(serialize = "12")]
+    Null,
     #[strum(serialize = "14")]
     Boot,
     #[strum(serialize = "15")]
@@ -24,8 +24,8 @@ pub enum Items {
     RareKey,
     #[strum(serialize = "22")]
     PureShadowCatcher,
-    //   #[strum(serialize = "23")]
-    //    -------------,
+    #[strum(serialize = "23")]
+    Null2,
     #[strum(serialize = "24")]
     RubyOre,
     #[strum(serialize = "25")]
@@ -90,8 +90,8 @@ pub enum Items {
     ForestBug,
     #[strum(serialize = "59")]
     PoisonedPlant,
-    //   #[strum(serialize = "60")]
-    //    ---------------,
+    #[strum(serialize = "60")]
+    Null3,
     #[strum(serialize = "61")]
     Dash,
     #[strum(serialize = "62")]
@@ -166,7 +166,60 @@ pub enum Items {
     RobiBadge,
 }
 
-#[derive(strum::AsRefStr)]
+impl Items {
+    pub fn is_treasure(&self) -> bool {
+        match self {
+            Items::Apple
+            | Items::Boot
+            | Items::FleshEater
+            | Items::IceCrystal
+            | Items::Mandoline
+            | Items::RareCheese
+            | Items::RareGlasses
+            | Items::Rice
+            | Items::SandRelic
+            | Items::SeagulSoup => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_key_item(&self) -> bool {
+        match self {
+            Items::BasicPouch
+            | Items::SmallPouch
+            | Items::LargePouch
+            | Items::ExtraLargePouch
+            | Items::OldKey
+            | Items::SanctuaryStone
+            | Items::HouseKey
+            | Items::BremurPicture
+            | Items::Rose
+            | Items::Necklace
+            | Items::Book
+            | Items::ComposerLetter
+            | Items::OddRock
+            | Items::BeiraVessel
+            | Items::RareSnow
+            | Items::FireEssenceSlot
+            | Items::HouseContract
+            | Items::KeyGraveyardKey
+            | Items::KeyUthasTemple
+            | Items::KeyHolyMaster
+            | Items::KeyGodMaster
+            | Items::KeySteam
+            | Items::KeyFireMaster
+            | Items::Shield
+            | Items::FireBall
+            | Items::WallRun
+            | Items::DoubleJump
+            | Items::SpinAttack
+            | Items::Sprint => true,
+            _ => false,
+        }
+    }
+}
+
+#[derive(PartialEq, strum::AsRefStr)]
 pub enum Weapons {
     #[strum(serialize = "0")]
     DualBlades,
@@ -198,7 +251,7 @@ pub enum Weapons {
     DLCVoidMaster,
 }
 
-#[derive(strum::AsRefStr)]
+#[derive(PartialEq, strum::AsRefStr)]
 pub enum Tunics {
     #[strum(serialize = "0")]
     ShadowCloack,
@@ -268,7 +321,7 @@ pub enum Tunics {
     DiscordWinnerContest,
 }
 
-#[derive(strum::AsRefStr)]
+#[derive(PartialEq, strum::AsRefStr)]
 pub enum Spirits {
     #[strum(serialize = "0")]
     FarasGrace,
@@ -332,7 +385,7 @@ pub enum Spirits {
     ToxicWater,
 }
 
-#[derive(strum::AsRefStr)]
+#[derive(PartialEq, strum::AsRefStr)]
 pub enum Abilities {
     #[strum(serialize = "1")]
     DoubleJump,
@@ -356,7 +409,7 @@ pub enum Abilities {
     SpinAttack,
 }
 
-#[derive(strum::AsRefStr)]
+#[derive(PartialEq, strum::AsRefStr)]
 pub enum Emotes {
     #[strum(serialize = "0")]
     Wave,

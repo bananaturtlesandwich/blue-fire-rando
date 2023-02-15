@@ -19,28 +19,28 @@ enum Context {
     Overworld(&'static str),
 }
 
-#[derive(strum::AsRefStr)]
+#[derive(PartialEq, strum::AsRefStr)]
 enum Drop {
-    Item(Items),
+    Item(Items, u8),
     Weapon(Weapons),
     Tunic(Tunics),
     Spirit(Spirits),
     Life,
-    SpiritSlot,
     Ability(Abilities),
     Emote(Emotes),
+    Ore(u16),
+    Duck,
 }
 
 struct Check {
     context: Context,
     drop: Drop,
-    requires: &'static [&'static [Drop]],
+    requirements: &'static [&'static [Drop]],
 }
 
 struct Location {
     unlocks: &'static [&'static str],
-    requires: &'static [&'static [Drop]],
-    checks: &'static [Check],
+    requirements: &'static [&'static [Drop]],
 }
 
 macro_rules! hashmap {
@@ -55,114 +55,117 @@ macro_rules! hashmap {
 
 const PREFIX: &'static str = "/Game/BlueFire/Maps/World/";
 
+const CHECKS: [Check; 12] = [
+    // A02_ArcaneTunnels/A02_GameIntro_Exterior
+    Check {
+        context: Context::Overworld("A01_FireKeep_EmoteStatue_Levitation"),
+        drop: Drop::Emote(Emotes::Levitation),
+        requirements: &[],
+    },
+    Check {
+        context: Context::Cutscene(
+            "/Game/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Bech",
+        ),
+        drop: Drop::Ore(500),
+        requirements: &[&[Drop::Item(Items::ComposerLetter, 1)]],
+    },
+    // A02_ArcaneTunnels/A02_GameIntro_KeepEast
+    Check {
+        context: Context::Overworld("Chest_A01_TempleGardens_Ability_SpinAttack2"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        requirements: &[],
+    },
+    Check {
+        context: Context::Overworld("Chest_A02_Keep_Loot_02"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        requirements: &[],
+    },
+    // A02_ArcaneTunnels/A02_GameIntro_EastWing
+    Check {
+        context: Context::Overworld("Chest_A02_Keep_Key_01"),
+        drop: Drop::Item(Items::OldKey, 1),
+        requirements: &[],
+    },
+    Check {
+        context: Context::Overworld("Chest_A01_Keep_Shield"),
+        drop: Drop::Ability(Abilities::Block),
+        requirements: &[],
+    },
+    // A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom
+    Check {
+        context: Context::Overworld("A01_FireKeep_EmoteStatue_Techno"),
+        drop: Drop::Emote(Emotes::Techno),
+        requirements: &[],
+    },
+    Check {
+        context: Context::Overworld("Spirit_A02_RiverSpirit"),
+        drop: Drop::Spirit(Spirits::RiverSpirit),
+        requirements: &[
+            &[Drop::Ability(Abilities::Dash)],
+            &[Drop::Ability(Abilities::WallRun)],
+            &[
+                Drop::Ability(Abilities::DoubleJump),
+                Drop::Ability(Abilities::SpinAttack),
+            ],
+        ],
+    },
+    // A02_ArcaneTunnels/A02_GameIntro_KeepWest
+    Check {
+        context: Context::Overworld("Chest_A02_Keep_Loot_01"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        requirements: &[],
+    },
+    // A02_ArcaneTunnels/A02_GameIntro_MemorialMain
+    Check {
+        context: Context::Overworld("Chest_A02_GameIntro"),
+        drop: Drop::Item(Items::EmeraldOre, 1),
+        requirements: &[],
+    },
+    Check {
+        context: Context::Overworld("Chest_A02_Sword_DiamondWings"),
+        drop: Drop::Weapon(Weapons::DiamondWings),
+        requirements: &[],
+    },
+    Check {
+        context: Context::Overworld("Dance_Platform_Photo_Chest"),
+        drop: Drop::Item(Items::Mandoline, 1),
+        requirements: &[&[Drop::Emote(Emotes::Photo)]],
+    },
+];
+
 lazy_static::lazy_static! {
-    static ref DATA: hashbrown::HashMap<&'static str, Location> = hashmap![
+    static ref LOCATIONS: hashbrown::HashMap<&'static str, Location> = hashmap![
         "A02_ArcaneTunnels/A02_GameIntro_KeepSouth" => Location {
             unlocks: &[
                 "A02_ArcaneTunnels/A02_GameIntro_Exterior",
                 "A02_ArcaneTunnels/A02_GameIntro_KeepEast",
                 "A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom",
             ],
-            requires: &[],
-            checks: &[],
+            requirements: &[],
         },
         "A02_ArcaneTunnels/A02_GameIntro_Exterior" => Location {
             unlocks: &[],
-            requires: &[],
-            checks: &[
-                Check {
-                    context: Context::Overworld("A01_FireKeep_EmoteStatue_Levitation"),
-                    drop: Drop::Emote(Emotes::Levitation),
-                    requires: &[],
-                }
-            ]
+            requirements: &[],
         },
         "A02_ArcaneTunnels/A02_GameIntro_KeepEast" => Location {
             unlocks: &["A02_ArcaneTunnels/A02_GameIntro_EastWing"],
-            requires: &[],
-            checks: &[
-                Check {
-                    context: Context::Overworld("Chest_A01_TempleGardens_Ability_SpinAttack2"),
-                    drop: Drop::Item(Items::SapphireOre),
-                    requires: &[],
-                },
-                Check {
-                    context: Context::Overworld("Chest_A02_Keep_Loot_02"),
-                    drop: Drop::Item(Items::SapphireOre),
-                    requires: &[],
-                },
-            ]
+            requirements: &[],
         },
         "A02_ArcaneTunnels/A02_GameIntro_EastWing" => Location {
             unlocks: &[],
-            requires: &[],
-            checks: &[
-                Check {
-                    context: Context::Overworld("Chest_A02_Keep_Key_01"),
-                    drop: Drop::Item(Items::OldKey),
-                    requires: &[],
-                },
-                Check {
-                    context: Context::Overworld("Chest_A01_Keep_Shield"),
-                    drop: Drop::Ability(Abilities::Block),
-                    requires: &[],
-                },
-            ]
+            requirements: &[],
         },
         "A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom" => Location {
             unlocks: &["A02_ArcaneTunnels/A02_GameIntro_KeepWest"],
-            requires: &[&[Drop::Item(Items::OldKey)]],
-            checks: &[
-                Check {
-                    context: Context::Overworld("A01_FireKeep_EmoteStatue_Techno"),
-                    drop: Drop::Emote(Emotes::Techno),
-                    requires: &[],
-                },
-                Check {
-                    context: Context::Overworld("Spirit_A02_RiverSpirit"),
-                    drop: Drop::Spirit(Spirits::RiverSpirit),
-                    requires: &[
-                        &[Drop::Ability(Abilities::Dash)],
-                        &[Drop::Ability(Abilities::WallRun)],
-                        &[
-                            Drop::Ability(Abilities::DoubleJump),
-                            Drop::Ability(Abilities::SpinAttack),
-                        ],
-                    ],
-                },
-            ]
+            requirements: &[&[Drop::Item(Items::OldKey, 1)]],
         },
         "A02_ArcaneTunnels/A02_GameIntro_KeepWest" => Location {
             unlocks: &["A02_ArcaneTunnels/A02_GameIntro_MemorialMain"],
-            requires: &[],
-            checks: &[
-                Check {
-                    context: Context::Overworld("Chest_A02_Keep_Loot_01"),
-                    drop: Drop::Item(Items::SapphireOre),
-                    requires: &[],
-                }
-            ]
+            requirements: &[],
         },
         "A02_ArcaneTunnels/A02_GameIntro_MemorialMain" => Location {
             unlocks: &[/* into arcane tunnels */],
-            requires: &[],
-            checks: &[
-                Check {
-                    context: Context::Overworld("Chest_A02_GameIntro"),
-                    drop: Drop::Item(Items::EmeraldOre),
-                    requires: &[],
-                },
-                Check {
-                    context: Context::Overworld("Chest_A02_Sword_DiamondWings"),
-                    drop: Drop::Weapon(Weapons::DiamondWings),
-                    requires: &[],
-                },
-                Check {
-                    context: Context::Overworld("Dance_Platform_Photo_Chest"),
-                    drop: Drop::Item(Items::Mandoline),
-                    requires: &[&[Drop::Emote(Emotes::Photo)]],
-                },
-            ]
+            requirements: &[],
         }
     ];
 }

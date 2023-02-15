@@ -3,16 +3,16 @@ mod logic;
 #[derive(Default)]
 pub struct Rando {
     item: bool,
-    weapon: bool,
-    tunic: bool,
-    amulet: bool,
-    ability: bool,
-    emote: bool,
+    weapons: bool,
+    tunics: bool,
+    spirits: bool,
+    abilities: bool,
+    emotes: bool,
     treasure: bool,
     starting: bool,
-    life: bool,
-    slot: bool,
-    duck: bool,
+    lives: bool,
+    ore: bool,
+    ducks: bool,
     surprise: bool,
 }
 
@@ -30,20 +30,20 @@ impl eframe::App for Rando {
             });
             ui.columns(2, |ui| {
                 ui[0].heading(egui::RichText::new("Pool options").underline());
-                ui[0].checkbox(&mut self.ability, "Abilities e.g Nuos claw");
-                ui[0].checkbox(&mut self.amulet, "Spirits e.g Aerial rat");
-                ui[0].checkbox(&mut self.weapon, "Weapons e.g Dual blades");
-                ui[0].checkbox(&mut self.emote, "Emotes e.g Hat kid smug");
-                ui[0].checkbox(&mut self.tunic, "Tunics e.g Bunny suit");
-                ui[0].checkbox(&mut self.item, "Items e.g Rose");
+                ui[0].checkbox(&mut self.abilities, "Abilities e.g Nuos claw");
+                ui[0].checkbox(&mut self.spirits, "Spirits e.g Aerial rat");
+                ui[0].checkbox(&mut self.weapons, "Weapons e.g Dual blades");
+                ui[0].checkbox(&mut self.emotes, "Emotes e.g Smug dance");
+                ui[0].checkbox(&mut self.tunics, "Tunics e.g Bunny suit");
+                ui[0].checkbox(&mut self.item, "Items e.g Ruby/Rose");
 
                 ui[1].heading(egui::RichText::new("Extra options").underline());
                 ui[1].checkbox(&mut self.treasure, "Treasures e.g Seagull soup");
-                ui[1].checkbox(&mut self.starting, "Dash -===(  -_o)");
-                ui[1].checkbox(&mut self.life, "Lives 💗");
-                ui[1].checkbox(&mut self.slot, "Spirit slots 🍩");
-                ui[1].checkbox(&mut self.duck, "Ducks <(⭕ ◑ ө ◑ ⭕)>");
-                ui[1].checkbox(&mut self.surprise, "Surprise... (   ¬u¬)");
+                ui[1].checkbox(&mut self.starting, "Dash -===(    - _ o)");
+                ui[1].checkbox(&mut self.ore, "Ore  (    $ o $)");
+                ui[1].checkbox(&mut self.lives, "Lives 💗");
+                ui[1].checkbox(&mut self.ducks, "Ducks <(⭕ ◑ ө ◑ ⭕)>");
+                ui[1].checkbox(&mut self.surprise, "Surprise... >:p");
             });
             if ui
                 .button(egui::RichText::new("start rando").strong().size(70.0))
