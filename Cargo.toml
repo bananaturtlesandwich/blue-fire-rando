@@ -8,12 +8,14 @@ edition = "2021"
 
 [dependencies]
 eframe = { version = "*", features = ["persistence"] }
-egui-modal = "*"
 unreal_asset = { git = "https://github.com/astrotechies/unrealmodding", package = "unreal_asset" }
+unpak = "*"
 strum = { version = "*", features = ["derive"] }
 rand = "*"
 hashbrown = "*"
 lazy_static = "*"
+egui-modal = "*"
+rfd = "*"
 
 [target.'cfg(windows)'.build-dependencies]
 winres = "*"

@@ -2,6 +2,7 @@ mod logic;
 
 pub struct Rando {
     dialog: egui_modal::Modal,
+    pak: std::path::PathBuf,
     item: bool,
     weapons: bool,
     tunics: bool,
@@ -29,6 +30,19 @@ impl Rando {
         };
         Self {
             dialog: egui_modal::Modal::new(&ctx.egui_ctx, "dialog"),
+            pak: match ctx.storage.and_then(|storage| storage.get_string("pak")){
+                Some(path) => path.into(),
+                None => loop {
+                    let Some(path) = rfd::FileDialog::new().set_title("Please select where you have Blue Fire installed").pick_folder() else {
+                        continue
+                    };
+                    if !path.ends_with("Blue Fire"){
+                        continue;
+                    }
+                    break path;
+                }
+                .join("Blue Fire\\Content\\Paks")
+            },
             item: get_bool("item"),
             weapons: get_bool("weapons"),
             tunics: get_bool("tunics"),
@@ -67,7 +81,7 @@ impl eframe::App for Rando {
                 ui[1].heading(egui::RichText::new("Extra options").underline());
                 ui[1].checkbox(&mut self.treasure, "Treasures e.g Seagull soup");
                 // since dash is an ability i might have to think more on how to do this - plus context is funky too
-                ui[1].code( "Dash -===(    - _ o)");
+                ui[1].code("Dash -===(    - _ o)");
                 ui[1].checkbox(&mut self.ore, "Ore  (    $ o $)");
                 // ducks are typically located on the master map - maybe make it so room it's locked in unlocks master map
                 ui[1].code("Ducks <(⭕ ◑ ө ◑ ⭕)>");
@@ -78,19 +92,26 @@ impl eframe::App for Rando {
                 .button(egui::RichText::new("start rando").strong().size(70.0))
                 .with_new_rect(ui.max_rect())
                 .clicked()
-                && !logic::randomise(self)
             {
-                self.dialog.open_dialog(
-                    Some("try again"),
-                    Some("you haven't picked enough checks for anything to be random - include more items in the pool"),
-                    Some(egui_modal::Icon::Warning),
-                );
+                match logic::randomise(self) {
+                    true => self.dialog.open_dialog(
+                        Some("success"),
+                        Some("the spoiler log has been generated"),
+                        Some(egui_modal::Icon::Success),
+                    ),
+                    false => self.dialog.open_dialog(
+                        Some("try again"),
+                        Some("you haven't picked enough checks for anything to be random - include more items in the pool"),
+                        Some(egui_modal::Icon::Warning),
+                    ),
+                }
             }
             self.dialog.show_dialog();
         });
     }
 
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
+        storage.set_string("pak", self.pak.to_str().unwrap_or_default().to_string());
         storage.set_string("item", self.item.to_string());
         storage.set_string("weapons", self.weapons.to_string());
         storage.set_string("tunics", self.tunics.to_string());
