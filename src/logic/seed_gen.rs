@@ -6,30 +6,14 @@ loop {
     If more locations/checks are unlocked then the check(s) that added them are marked as progression
     All the items not marked as progression are purged from the list
 }
-repeats until all locations are now accessible :)
-After that we'll have a fully populated data set
-The generated seed data can then be written appropriately
-
-how to do this in code :/
-
-definitions:
-drop - the thing that you get which is randomised
-check - a place where you can get a drop
-location - a place where you can find checks
-
-variables:
-possible_drops = list of possible drops that gets shuffled each iteration
-available_checks = list of available checks that get populated by possible_drops
-available_locations = list of locations that can be queried for availability and then removed
-progression = list of checks removed from checks that unlock more locations or checks
-in the end...populate available_checks and append to progression then you have data that can be written
+repeats until all locations and checks are now accessible :)
 */
 use super::*;
 
 const BEGINNING: &'static str = "A02_ArcaneTunnels/A02_GameIntro_KeepSouth";
 
 pub fn randomise(app: &crate::Rando) {
-    let (mut pool, unrandomised): (Vec<Check>, Vec<Check>) =
+    let (mut pool, mut unrandomised): (Vec<Check>, Vec<Check>) =
         CHECKS.into_iter().partition(|check| match &check.drop {
             Drop::Item(item, _) => match item.is_treasure() {
                 true => app.treasure,
@@ -43,14 +27,86 @@ pub fn randomise(app: &crate::Rando) {
             Drop::Ore(_) => app.ore,
             Drop::Duck => app.ducks,
         });
-    let mut possible_drops: Vec<Drop> = pool.iter().map(|check| check.drop).collect();
+    let mut possible: Vec<Drop> = pool.iter().map(|check| check.drop.clone()).collect();
+    let mut checks: Vec<Check> = Vec::with_capacity(pool.len());
+    let mut progression: Vec<Check> = Vec::with_capacity(pool.len());
+    let mut locations = vec![BEGINNING];
     let mut rng = rand::thread_rng();
-    loop {
+    while locations.len() != LOCATIONS.len() {
+        // shuffle the possible drops
         use rand::seq::SliceRandom;
-        possible_drops.shuffle(&mut rng);
-        // populate available checks
-        for (i, check) in pool.iter_mut().enumerate() {
-            check.drop = possible_drops[i];
+        possible.shuffle(&mut rng);
+        // update accessible locations
+        for i in 0..locations.len() {
+            for loc in LOCATIONS[locations[i]].unlocks {
+                if locations.contains(loc) {
+                    continue;
+                }
+                // is there any drops currently unlocking a location?
+                if let Some(req) = LOCATIONS[loc].requirements {
+                    // see if there's any requirements met and what they are
+                    let Some(fulfilled) = req.iter().find(|req| {
+                        req.iter().fold(true, |acc, req| {
+                            // don't need to check progression because that's already verified
+                            acc && possible[0..checks.len()].contains(req)
+                        })
+                    }) else {continue};
+                    for req in fulfilled.into_iter() {
+                        // move all the progression items
+                        let Some(i) = possible.iter().position(|drop| drop == req) else {continue};
+                        let mut check = checks.remove(i);
+                        check.drop = possible.remove(i);
+                        progression.push(check);
+                    }
+                }
+                locations.push(loc);
+            }
+        }
+        // update accessible editable checks
+        for i in (0..pool.len()).rev() {
+            if locations.contains(&unrandomised[i].location) {
+                if let Some(req) = unrandomised[i].requirements {
+                    let Some(fulfilled) = req.iter().find(|req| {
+                        req.iter().fold(true, |acc, req| {
+                            // don't need to check progression because that's already verified
+                            acc && possible[0..checks.len()].contains(req)
+                        })
+                    }) else {continue};
+                    for req in fulfilled.into_iter() {
+                        // move all the progression items
+                        let Some(i) = possible.iter().position(|drop| drop == req) else {continue};
+                        let mut check = checks.remove(i);
+                        check.drop = possible.remove(i);
+                        progression.push(check);
+                    }
+                }
+                checks.push(pool.remove(i));
+            }
+        }
+        // update progression with unrandomised
+        for i in (0..unrandomised.len()).rev() {
+            if locations.contains(&unrandomised[i].location) {
+                if let Some(req) = unrandomised[i].requirements {
+                    let Some(fulfilled) = req.iter().find(|req| {
+                    req.iter().fold(true, |acc, req| {
+                        // don't need to check progression because that's already verified
+                        acc && possible[0..checks.len()].contains(req)
+                    })
+                }) else {continue};
+                    for req in fulfilled.into_iter() {
+                        // move all the progression items
+                        let Some(i) = possible.iter().position(|drop| drop == req) else {continue};
+                        let mut check = checks.remove(i);
+                        check.drop = possible.remove(i);
+                        progression.push(check);
+                    }
+                }
+                checks.push(unrandomised.remove(i));
+            }
         }
     }
+    for (check, drop) in checks.iter_mut().zip(possible.into_iter()) {
+        check.drop = drop
+    }
+    progression.append(&mut checks);
 }
