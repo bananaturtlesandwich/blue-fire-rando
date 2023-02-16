@@ -13,20 +13,21 @@ use super::*;
 const BEGINNING: &str = "A02_ArcaneTunnels/A02_GameIntro_KeepSouth";
 
 pub fn randomise(app: &crate::Rando) -> bool {
+    let in_pool = |check: &Check| match &check.drop {
+        Drop::Item(item, _) => match item.is_treasure() {
+            true => app.treasure,
+            false => app.item,
+        },
+        Drop::Weapon(_) => app.weapons,
+        Drop::Tunic(_) => app.tunics,
+        Drop::Spirit(_) => app.spirits,
+        Drop::Ability(_) => app.abilities,
+        Drop::Emote(_) => app.emotes,
+        Drop::Ore(_) => app.ore,
+        Drop::Duck => app.ducks,
+    };
     let (mut pool, mut unrandomised): (Vec<Check>, Vec<Check>) =
-        CHECKS.into_iter().partition(|check| match &check.drop {
-            Drop::Item(item, _) => match item.is_treasure() {
-                true => app.treasure,
-                false => app.item,
-            },
-            Drop::Weapon(_) => app.weapons,
-            Drop::Tunic(_) => app.tunics,
-            Drop::Spirit(_) => app.spirits,
-            Drop::Ability(_) => app.abilities,
-            Drop::Emote(_) => app.emotes,
-            Drop::Ore(_) => app.ore,
-            Drop::Duck => app.ducks,
-        });
+        CHECKS.into_iter().partition(in_pool);
     if pool.len() <= 1 {
         return false;
     }
@@ -50,7 +51,7 @@ pub fn randomise(app: &crate::Rando) -> bool {
                 if let Some(req) = LOCATIONS[loc].requirements {
                     // see if there's any requirements met and what they are
                     let Some(fulfilled) = req.iter().find(|req| {
-                        req.iter().all(|req| possible[0..checks.len()].contains(req))
+                        req.iter().all(|req| possible[0..checks.len()].contains(req) || progression.iter().any(|check| &check.drop==req))
                     }) else {continue};
                     for req in fulfilled.iter() {
                         // move all the progression items
@@ -63,13 +64,12 @@ pub fn randomise(app: &crate::Rando) -> bool {
                 locations.push(loc);
             }
         }
-        dbg!(&locations);
         // update accessible editable checks
         for i in (0..pool.len()).rev() {
             if locations.contains(&unrandomised[i].location) {
                 if let Some(req) = unrandomised[i].requirements {
                     let Some(fulfilled) = req.iter().find(|req| {
-                        req.iter().all(|req| possible[0..checks.len()].contains(req))
+                        req.iter().all(|req| possible[0..checks.len()].contains(req) || progression.iter().any(|check| &check.drop==req))
                     }) else {continue};
                     for req in fulfilled.iter() {
                         // move all the progression items
@@ -87,7 +87,7 @@ pub fn randomise(app: &crate::Rando) -> bool {
             if locations.contains(&unrandomised[i].location) {
                 if let Some(req) = unrandomised[i].requirements {
                     let Some(fulfilled) = req.iter().find(|req| {
-                        req.iter().all(|req| possible[0..checks.len()].contains(req))
+                        req.iter().all(|req| possible[0..checks.len()].contains(req) || progression.iter().any(|check| &check.drop==req))
                     }) else {continue};
                     for req in fulfilled.iter() {
                         // move all the progression items
@@ -97,7 +97,7 @@ pub fn randomise(app: &crate::Rando) -> bool {
                         progression.push(check);
                     }
                 }
-                checks.push(unrandomised.remove(i));
+                progression.push(unrandomised.remove(i));
             }
         }
     }
@@ -105,6 +105,8 @@ pub fn randomise(app: &crate::Rando) -> bool {
         check.drop = drop
     }
     progression.append(&mut checks);
+    progression = progression.into_iter().filter(in_pool).collect();
+    println!("{progression:#?}");
     true
 }
 

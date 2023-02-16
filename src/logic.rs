@@ -4,6 +4,7 @@ pub use drops::*;
 mod generation;
 pub use generation::randomise;
 
+#[derive(Debug)]
 enum Shop {
     Mork = 7,
     SpiritHunter = 9,
@@ -13,13 +14,14 @@ enum Shop {
     Nilo = 19,
 }
 
+#[derive(Debug)]
 enum Context {
     Shop(Shop),
     Cutscene(&'static str),
     Overworld(&'static str),
 }
 
-#[derive(PartialEq, Clone, strum::AsRefStr)]
+#[derive(PartialEq, Clone, Debug, strum::AsRefStr)]
 enum Drop {
     Item(Items, u8),
     Weapon(Weapons),
@@ -31,6 +33,7 @@ enum Drop {
     Duck,
 }
 
+#[derive(Debug)]
 struct Check {
     location: &'static str,
     context: Context,

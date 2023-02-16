@@ -1,4 +1,4 @@
-#[derive(PartialEq, Clone, strum::AsRefStr)]
+#[derive(PartialEq, Clone, Debug, strum::AsRefStr)]
 pub enum Items {
     #[strum(serialize = "0")]
     LargePouch,
@@ -219,7 +219,7 @@ impl Items {
     }
 }
 
-#[derive(PartialEq, Clone, strum::AsRefStr)]
+#[derive(PartialEq, Clone, Debug, strum::AsRefStr)]
 pub enum Weapons {
     #[strum(serialize = "0")]
     DualBlades,
@@ -251,7 +251,7 @@ pub enum Weapons {
     DLCVoidMaster,
 }
 
-#[derive(PartialEq, Clone, strum::AsRefStr)]
+#[derive(PartialEq, Clone, Debug, strum::AsRefStr)]
 pub enum Tunics {
     #[strum(serialize = "0")]
     ShadowCloack,
@@ -321,7 +321,7 @@ pub enum Tunics {
     DiscordWinnerContest,
 }
 
-#[derive(PartialEq, Clone, strum::AsRefStr)]
+#[derive(PartialEq, Clone, Debug, strum::AsRefStr)]
 pub enum Spirits {
     #[strum(serialize = "0")]
     FarasGrace,
@@ -385,7 +385,7 @@ pub enum Spirits {
     ToxicWater,
 }
 
-#[derive(PartialEq, Clone, strum::AsRefStr)]
+#[derive(PartialEq, Clone, Debug, strum::AsRefStr)]
 pub enum Abilities {
     #[strum(serialize = "1")]
     DoubleJump,
@@ -409,7 +409,7 @@ pub enum Abilities {
     SpinAttack,
 }
 
-#[derive(PartialEq, Clone, strum::AsRefStr)]
+#[derive(PartialEq, Clone, Debug, strum::AsRefStr)]
 pub enum Emotes {
     #[strum(serialize = "0")]
     Wave,
