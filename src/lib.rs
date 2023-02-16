@@ -36,7 +36,7 @@ impl Rando {
                     let Some(path) = rfd::FileDialog::new().set_title("Please select where you have Blue Fire installed").pick_folder() else {
                         continue
                     };
-                    if !path.ends_with("Blue Fire"){
+                    if !path.ends_with("Blue Fire") || path.ends_with("Blue Fire\\Blue Fire"){
                         continue;
                     }
                     break path;
@@ -94,14 +94,14 @@ impl eframe::App for Rando {
                 .clicked()
             {
                 match logic::randomise(self) {
-                    true => self.dialog.open_dialog(
+                    Ok(()) => self.dialog.open_dialog(
                         Some("success"),
                         Some("the spoiler log has been generated"),
                         Some(egui_modal::Icon::Success),
                     ),
-                    false => self.dialog.open_dialog(
-                        Some("try again"),
-                        Some("you haven't picked enough checks for anything to be random - include more items in the pool"),
+                    Err(e) => self.dialog.open_dialog(
+                        Some("whoopsie"),
+                        Some(e),
                         Some(egui_modal::Icon::Warning),
                     ),
                 }
@@ -122,5 +122,11 @@ impl eframe::App for Rando {
         storage.set_string("dash", self.dash.to_string());
         storage.set_string("ore", self.ore.to_string());
         storage.set_string("ducks", self.ducks.to_string());
+    }
+}
+
+impl Drop for Rando {
+    fn drop(&mut self) {
+        std::fs::remove_dir_all(&self.pak).unwrap_or_default()
     }
 }

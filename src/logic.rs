@@ -6,13 +6,21 @@ pub use generation::randomise;
 mod writing;
 pub use writing::write;
 
-#[derive(Debug)]
+const MOD: &str = "rando_p/Blue Fire/Content";
+
+#[derive(Debug, Clone, strum::EnumIter, strum::AsRefStr)]
 pub enum Shop {
+    #[strum(serialize = "ShopA")]
     Mork = 7,
+    #[strum(serialize = "ShopC")]
     SpiritHunter = 9,
+    #[strum(serialize = "ShopD")]
     Ari = 10,
+    #[strum(serialize = "ShopE")]
     Poti = 11,
+    #[strum(serialize = "ShopF")]
     Poi = 12,
+    #[strum(serialize = "ShopH")]
     Nilo = 19,
 }
 
@@ -25,11 +33,17 @@ pub enum Context {
 
 #[derive(PartialEq, Clone, Debug, strum::AsRefStr)]
 pub enum Drop {
-    Item(Items, u8),
+    #[strum(serialize = "0")]
+    Item(Items, i32),
+    #[strum(serialize = "1")]
     Weapon(Weapons),
+    #[strum(serialize = "2")]
     Tunic(Tunics),
+    #[strum(serialize = "3")]
     Spirit(Spirits),
+    #[strum(serialize = "6")]
     Ability(Abilities),
+    #[strum(serialize = "7")]
     Emote(Emotes),
     Ore(u16),
     Duck,
@@ -47,8 +61,6 @@ struct Location {
     unlocks: &'static [&'static str],
     requirements: Option<&'static [&'static [Drop]]>,
 }
-
-const PREFIX: &str = "/Game/BlueFire/Maps/World/";
 
 const CHECKS: [Check; 12] = [
     Check {
