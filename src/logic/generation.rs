@@ -66,39 +66,41 @@ pub fn randomise(app: &crate::Rando) -> bool {
         }
         // update accessible editable checks
         for i in (0..pool.len()).rev() {
-            if locations.contains(&unrandomised[i].location) {
-                if let Some(req) = unrandomised[i].requirements {
-                    let Some(fulfilled) = req.iter().find(|req| {
-                        req.iter().all(|req| possible[0..checks.len()].contains(req) || progression.iter().any(|check| &check.drop==req))
-                    }) else {continue};
-                    for req in fulfilled.iter() {
-                        // move all the progression items
-                        let Some(i) = possible.iter().position(|drop| drop == req) else {continue};
-                        let mut check = checks.remove(i);
-                        check.drop = possible.remove(i);
-                        progression.push(check);
-                    }
-                }
-                checks.push(pool.remove(i));
+            if !locations.contains(&pool[i].location) {
+                continue;
             }
+            if let Some(req) = pool[i].requirements {
+                let Some(fulfilled) = req.iter().find(|req| {
+                    req.iter().all(|req| possible[0..checks.len()].contains(req) || progression.iter().any(|check| &check.drop==req))
+                }) else {continue};
+                for req in fulfilled.iter() {
+                    // move all the progression items
+                    let Some(i) = possible.iter().position(|drop| drop == req) else {continue};
+                    let mut check = checks.remove(i);
+                    check.drop = possible.remove(i);
+                    progression.push(check);
+                }
+            }
+            checks.push(pool.remove(i));
         }
         // update progression with unrandomised
         for i in (0..unrandomised.len()).rev() {
             if locations.contains(&unrandomised[i].location) {
-                if let Some(req) = unrandomised[i].requirements {
-                    let Some(fulfilled) = req.iter().find(|req| {
-                        req.iter().all(|req| possible[0..checks.len()].contains(req) || progression.iter().any(|check| &check.drop==req))
-                    }) else {continue};
-                    for req in fulfilled.iter() {
-                        // move all the progression items
-                        let Some(i) = possible.iter().position(|drop| drop == req) else {continue};
-                        let mut check = checks.remove(i);
-                        check.drop = possible.remove(i);
-                        progression.push(check);
-                    }
-                }
-                progression.push(unrandomised.remove(i));
+                continue;
             }
+            if let Some(req) = unrandomised[i].requirements {
+                let Some(fulfilled) = req.iter().find(|req| {
+                    req.iter().all(|req| possible[0..checks.len()].contains(req) || progression.iter().any(|check| &check.drop==req))
+                }) else {continue};
+                for req in fulfilled.iter() {
+                    // move all the progression items
+                    let Some(i) = possible.iter().position(|drop| drop == req) else {continue};
+                    let mut check = checks.remove(i);
+                    check.drop = possible.remove(i);
+                    progression.push(check);
+                }
+            }
+            progression.push(unrandomised.remove(i));
         }
     }
     for (check, drop) in checks.iter_mut().zip(possible.into_iter()) {
@@ -106,7 +108,8 @@ pub fn randomise(app: &crate::Rando) -> bool {
     }
     progression.append(&mut checks);
     progression = progression.into_iter().filter(in_pool).collect();
-    println!("{progression:#?}");
+    std::fs::write("spoiler_log.txt", format!("{progression:#?}")).unwrap_or_default();
+    write(progression, &app.pak);
     true
 }
 
