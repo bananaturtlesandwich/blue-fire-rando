@@ -10,9 +10,9 @@ repeats until all locations and checks are now accessible :)
 */
 use super::*;
 
-const BEGINNING: &'static str = "A02_ArcaneTunnels/A02_GameIntro_KeepSouth";
+const BEGINNING: &str = "A02_ArcaneTunnels/A02_GameIntro_KeepSouth";
 
-pub fn randomise(app: &crate::Rando) {
+pub fn randomise(app: &crate::Rando) -> bool {
     let (mut pool, mut unrandomised): (Vec<Check>, Vec<Check>) =
         CHECKS.into_iter().partition(|check| match &check.drop {
             Drop::Item(item, _) => match item.is_treasure() {
@@ -27,10 +27,14 @@ pub fn randomise(app: &crate::Rando) {
             Drop::Ore(_) => app.ore,
             Drop::Duck => app.ducks,
         });
+    if pool.len() <= 1 {
+        return false;
+    }
     let mut possible: Vec<Drop> = pool.iter().map(|check| check.drop.clone()).collect();
     let mut checks: Vec<Check> = Vec::with_capacity(pool.len());
     let mut progression: Vec<Check> = Vec::with_capacity(pool.len());
-    let mut locations = vec![BEGINNING];
+    let mut locations = Vec::with_capacity(LOCATIONS.len());
+    locations.push(BEGINNING);
     let mut rng = rand::thread_rng();
     while locations.len() != LOCATIONS.len() {
         // shuffle the possible drops
@@ -46,12 +50,9 @@ pub fn randomise(app: &crate::Rando) {
                 if let Some(req) = LOCATIONS[loc].requirements {
                     // see if there's any requirements met and what they are
                     let Some(fulfilled) = req.iter().find(|req| {
-                        req.iter().fold(true, |acc, req| {
-                            // don't need to check progression because that's already verified
-                            acc && possible[0..checks.len()].contains(req)
-                        })
+                        req.iter().all(|req| possible[0..checks.len()].contains(req))
                     }) else {continue};
-                    for req in fulfilled.into_iter() {
+                    for req in fulfilled.iter() {
                         // move all the progression items
                         let Some(i) = possible.iter().position(|drop| drop == req) else {continue};
                         let mut check = checks.remove(i);
@@ -62,17 +63,15 @@ pub fn randomise(app: &crate::Rando) {
                 locations.push(loc);
             }
         }
+        dbg!(&locations);
         // update accessible editable checks
         for i in (0..pool.len()).rev() {
             if locations.contains(&unrandomised[i].location) {
                 if let Some(req) = unrandomised[i].requirements {
                     let Some(fulfilled) = req.iter().find(|req| {
-                        req.iter().fold(true, |acc, req| {
-                            // don't need to check progression because that's already verified
-                            acc && possible[0..checks.len()].contains(req)
-                        })
+                        req.iter().all(|req| possible[0..checks.len()].contains(req))
                     }) else {continue};
-                    for req in fulfilled.into_iter() {
+                    for req in fulfilled.iter() {
                         // move all the progression items
                         let Some(i) = possible.iter().position(|drop| drop == req) else {continue};
                         let mut check = checks.remove(i);
@@ -88,12 +87,9 @@ pub fn randomise(app: &crate::Rando) {
             if locations.contains(&unrandomised[i].location) {
                 if let Some(req) = unrandomised[i].requirements {
                     let Some(fulfilled) = req.iter().find(|req| {
-                    req.iter().fold(true, |acc, req| {
-                        // don't need to check progression because that's already verified
-                        acc && possible[0..checks.len()].contains(req)
-                    })
-                }) else {continue};
-                    for req in fulfilled.into_iter() {
+                        req.iter().all(|req| possible[0..checks.len()].contains(req))
+                    }) else {continue};
+                    for req in fulfilled.iter() {
                         // move all the progression items
                         let Some(i) = possible.iter().position(|drop| drop == req) else {continue};
                         let mut check = checks.remove(i);
@@ -109,4 +105,52 @@ pub fn randomise(app: &crate::Rando) {
         check.drop = drop
     }
     progression.append(&mut checks);
+    true
+}
+
+macro_rules! hashmap {
+    [$($key:literal => $value:expr), *] => ({
+        let mut map = hashbrown::HashMap::new();
+        $(
+            map.insert($key, $value);
+        )*
+        map
+    });
+}
+
+lazy_static::lazy_static! {
+    static ref LOCATIONS: hashbrown::HashMap<&'static str, Location> = hashmap![
+        "A02_ArcaneTunnels/A02_GameIntro_KeepSouth" => Location {
+            unlocks: &[
+                "A02_ArcaneTunnels/A02_GameIntro_Exterior",
+                "A02_ArcaneTunnels/A02_GameIntro_KeepEast",
+                "A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom",
+            ],
+            requirements: None,
+        },
+        "A02_ArcaneTunnels/A02_GameIntro_Exterior" => Location {
+            unlocks: &[],
+            requirements: None,
+        },
+        "A02_ArcaneTunnels/A02_GameIntro_KeepEast" => Location {
+            unlocks: &["A02_ArcaneTunnels/A02_GameIntro_EastWing"],
+            requirements: None,
+        },
+        "A02_ArcaneTunnels/A02_GameIntro_EastWing" => Location {
+            unlocks: &[],
+            requirements: None,
+        },
+        "A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom" => Location {
+            unlocks: &["A02_ArcaneTunnels/A02_GameIntro_KeepWest"],
+            requirements: Some(&[&[Drop::Item(Items::OldKey, 1)]]),
+        },
+        "A02_ArcaneTunnels/A02_GameIntro_KeepWest" => Location {
+            unlocks: &["A02_ArcaneTunnels/A02_GameIntro_MemorialMain"],
+            requirements: None,
+        },
+        "A02_ArcaneTunnels/A02_GameIntro_MemorialMain" => Location {
+            unlocks: &[/* into arcane tunnels */],
+            requirements: None,
+        }
+    ];
 }

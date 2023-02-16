@@ -1,7 +1,7 @@
 mod logic;
 
-#[derive(Default)]
 pub struct Rando {
+    dialog: egui_modal::Modal,
     item: bool,
     weapons: bool,
     tunics: bool,
@@ -13,6 +13,25 @@ pub struct Rando {
     ore: bool,
     ducks: bool,
     surprise: bool,
+}
+
+impl Rando {
+    pub fn new(ctx: &eframe::CreationContext) -> Self {
+        Self {
+            dialog: egui_modal::Modal::new(&ctx.egui_ctx, "dialog"),
+            item: false,
+            weapons: false,
+            tunics: false,
+            spirits: false,
+            abilities: false,
+            emotes: false,
+            treasure: false,
+            starting: false,
+            ore: false,
+            ducks: false,
+            surprise: false,
+        }
+    }
 }
 
 impl eframe::App for Rando {
@@ -42,15 +61,21 @@ impl eframe::App for Rando {
                 ui[1].checkbox(&mut self.ore, "Ore  (    $ o $)");
                 ui[1].checkbox(&mut self.ducks, "Ducks <(⭕ ◑ ө ◑ ⭕)>");
                 ui[1].checkbox(&mut self.surprise, "Surprise... >:p");
-                ui[1].horizontal(|ui| ui.label("share rando_p.pak for races"));
+                ui[1].label("share rando_p.pak for races");
             });
             if ui
                 .button(egui::RichText::new("start rando").strong().size(70.0))
                 .with_new_rect(ui.max_rect())
                 .clicked()
+                && !logic::randomise(self)
             {
-                logic::randomise(&self)
+                self.dialog.open_dialog(
+                    Some("try again"),
+                    Some("you haven't picked enough checks for anything to be random - include more items in the pool"),
+                    Some(egui_modal::Icon::Warning),
+                );
             }
+            self.dialog.show_dialog();
         });
     }
 }

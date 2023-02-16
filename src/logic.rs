@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 mod drops;
 pub use drops::*;
-mod seed_gen;
-pub use seed_gen::randomise;
+mod generation;
+pub use generation::randomise;
 
 enum Shop {
     Mork = 7,
@@ -43,7 +43,7 @@ struct Location {
     requirements: Option<&'static [&'static [Drop]]>,
 }
 
-const PREFIX: &'static str = "/Game/BlueFire/Maps/World/";
+const PREFIX: &str = "/Game/BlueFire/Maps/World/";
 
 const CHECKS: [Check; 12] = [
     Check {
@@ -128,50 +128,3 @@ const CHECKS: [Check; 12] = [
         requirements: Some(&[&[Drop::Emote(Emotes::Photo)]]),
     },
 ];
-
-macro_rules! hashmap {
-    [$($key:literal => $value:expr), *] => ({
-        let mut map = hashbrown::HashMap::new();
-        $(
-            map.insert($key, $value);
-        )*
-        map
-    });
-}
-
-lazy_static::lazy_static! {
-    static ref LOCATIONS: hashbrown::HashMap<&'static str, Location> = hashmap![
-        "A02_ArcaneTunnels/A02_GameIntro_KeepSouth" => Location {
-            unlocks: &[
-                "A02_ArcaneTunnels/A02_GameIntro_Exterior",
-                "A02_ArcaneTunnels/A02_GameIntro_KeepEast",
-                "A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom",
-            ],
-            requirements: None,
-        },
-        "A02_ArcaneTunnels/A02_GameIntro_Exterior" => Location {
-            unlocks: &[],
-            requirements: None,
-        },
-        "A02_ArcaneTunnels/A02_GameIntro_KeepEast" => Location {
-            unlocks: &["A02_ArcaneTunnels/A02_GameIntro_EastWing"],
-            requirements: None,
-        },
-        "A02_ArcaneTunnels/A02_GameIntro_EastWing" => Location {
-            unlocks: &[],
-            requirements: None,
-        },
-        "A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom" => Location {
-            unlocks: &["A02_ArcaneTunnels/A02_GameIntro_KeepWest"],
-            requirements: Some(&[&[Drop::Item(Items::OldKey, 1)]]),
-        },
-        "A02_ArcaneTunnels/A02_GameIntro_KeepWest" => Location {
-            unlocks: &["A02_ArcaneTunnels/A02_GameIntro_MemorialMain"],
-            requirements: None,
-        },
-        "A02_ArcaneTunnels/A02_GameIntro_MemorialMain" => Location {
-            unlocks: &[/* into arcane tunnels */],
-            requirements: None,
-        }
-    ];
-}
