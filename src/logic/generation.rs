@@ -66,8 +66,8 @@ pub fn randomise(app: &crate::Rando) -> bool {
         }
         // update accessible editable checks
         for i in (0..pool.len()).rev() {
-            if locations.contains(&unrandomised[i].location) {
-                if let Some(req) = unrandomised[i].requirements {
+            if locations.contains(&pool[i].location) {
+                if let Some(req) = pool[i].requirements {
                     let Some(fulfilled) = req.iter().find(|req| {
                         req.iter().all(|req| possible[0..checks.len()].contains(req) || progression.iter().any(|check| &check.drop==req))
                     }) else {continue};
@@ -106,7 +106,7 @@ pub fn randomise(app: &crate::Rando) -> bool {
     }
     progression.append(&mut checks);
     progression = progression.into_iter().filter(in_pool).collect();
-    println!("{progression:#?}");
+    std::fs::write("spoiler_log.txt", format!("{progression:#?}")).unwrap_or_default();
     true
 }
 
