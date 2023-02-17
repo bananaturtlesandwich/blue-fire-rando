@@ -96,7 +96,7 @@ impl eframe::App for Rando {
                 match logic::randomise(self) {
                     Ok(()) => self.dialog.open_dialog(
                         Some("success"),
-                        Some("the spoiler log has been generated"),
+                        Some("the seed has been generated, written and installed - enjoy and have fun!"),
                         Some(egui_modal::Icon::Success),
                     ),
                     Err(e) => self.dialog.open_dialog(
@@ -122,12 +122,5 @@ impl eframe::App for Rando {
         storage.set_string("dash", self.dash.to_string());
         storage.set_string("ore", self.ore.to_string());
         storage.set_string("ducks", self.ducks.to_string());
-    }
-}
-
-#[cfg(not(debug_assertions))]
-impl Drop for Rando {
-    fn drop(&mut self) {
-        std::fs::remove_dir_all(self.pak.join("rando_p")).unwrap_or_default()
     }
 }
