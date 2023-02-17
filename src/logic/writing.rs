@@ -25,10 +25,14 @@ impl std::fmt::Display for Error {
         match self {
             Error::UnrealAsset(e) => f.write_str(&e.to_string()),
             Error::Unpak(e) => f.write_str(&e.to_string()),
-            Error::Assumption => f.write_str("data was not formatted as assumed"),
+            Error::Assumption => {
+                f.write_str("data was as expected - you may be on an older version of the game")
+            }
         }
     }
 }
+
+pub const MOD: &str = "rando_p/Blue Fire/Content";
 
 const SAVEGAME: &str = "/Game/BlueFire/Player/Logic/FrameWork/BlueFireSaveGame";
 
@@ -56,7 +60,7 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                         &app.pak,
                         loc.with_extension("uexp"),
                     )?;
-                    let mut savegame = open(loc).map_err(|e| unpak::Error::Other(e.to_string()))?;
+                    let mut savegame = open(&loc)?;
                     let Some(default) = savegame.exports[1].get_normal_export_mut() else {
                         return Err(Error::Assumption)
                     };
@@ -69,7 +73,7 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                     }
                     savegame
                 } else {
-                    open(loc).map_err(|e| unpak::Error::Other(e.to_string()))?
+                    open(&loc).map_err(|e| unpak::Error::Other(e.to_string()))?
                 };
                 let Some(Property::ArrayProperty(shop)) = savegame.exports[1]
                     .get_normal_export_mut()
@@ -87,26 +91,42 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                         serialize_none: true,
                         value: check.drop.get_shop_entry(),
                     },
-                ))
+                ));
+                save(&mut savegame, loc)?;
             }
-            Context::Cutscene(file) => todo!(),
+            Context::Cutscene(file) => {
+                let loc = app.pak.join(file.replacen("/Game", MOD, 1));
+                std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap_or_default();
+                pak.read_from_path_to_file(
+                    &format!("{file}.uasset"),
+                    &app.pak,
+                    loc.with_extension("uasset"),
+                )?;
+                pak.read_from_path_to_file(
+                    &format!("{file}.uexp"),
+                    &app.pak,
+                    loc.with_extension("uexp"),
+                )?;
+                let mut hook = unreal_asset::Asset::new(
+                    std::io::Cursor::new(include_bytes!("../blueprints/Hook.uasset").as_slice()),
+                    Some(std::io::Cursor::new(
+                        include_bytes!("../blueprints/Hook.uexp").as_slice(),
+                    )),
+                );
+                hook.set_engine_version(unreal_asset::engine_version::EngineVersion::VER_UE4_25);
+                hook.parse_data()?;
+                let new_name = file.split('/').last().unwrap_or_default();
+                // edit Hook name refs to name of cutscene and save to there
+                save(&mut hook, format!("{MOD}/BlueFire/Libraries/{new_name}"))?;
+                let mut cutscene = open(&loc)?;
+                // edit UniversalFunction name refs to name of cutscene
+                save(&mut cutscene, &loc)?;
+                todo!("make PR for an editable name map")
+            }
             Context::Overworld(actor) => todo!(),
         }
     }
     Ok(())
-}
-
-use std::fs::File;
-pub fn open(
-    file: impl AsRef<std::path::Path>,
-) -> Result<unreal_asset::Asset<File>, unreal_asset::error::Error> {
-    let mut asset = unreal_asset::Asset::new(
-        File::open(&file)?,
-        File::open(file.as_ref().with_extension("uexp")).ok(),
-    );
-    asset.set_engine_version(unreal_asset::engine_version::EngineVersion::VER_UE4_25);
-    asset.parse_data()?;
-    Ok(asset)
 }
 
 impl Drop {

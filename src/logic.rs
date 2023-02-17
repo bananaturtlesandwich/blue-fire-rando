@@ -5,8 +5,8 @@ mod generation;
 pub use generation::randomise;
 mod writing;
 pub use writing::write;
-
-const MOD: &str = "rando_p/Blue Fire/Content";
+mod io;
+pub use io::*;
 
 #[derive(Debug, Clone, strum::EnumIter, strum::AsRefStr)]
 pub enum Shop {

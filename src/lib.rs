@@ -127,6 +127,6 @@ impl eframe::App for Rando {
 
 impl Drop for Rando {
     fn drop(&mut self) {
-        std::fs::remove_dir_all(&self.pak).unwrap_or_default()
+        std::fs::remove_dir_all(&self.pak.join("rando_p")).unwrap_or_default()
     }
 }
