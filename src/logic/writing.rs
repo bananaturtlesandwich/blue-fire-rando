@@ -68,7 +68,7 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                     .join(SAVEGAME.replacen("/Game", MOD, 1))
                     .with_extension("uasset");
                 let mut savegame = if !loc.exists() {
-                    std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap_or_default();
+                    std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap();
                     pak.read_from_path_to_file(&format!("{SAVEGAME}.uasset"), &pak_path, &loc)?;
                     pak.read_from_path_to_file(
                         &format!("{SAVEGAME}.uexp"),
@@ -109,8 +109,7 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                 save(&mut savegame, loc)?;
             }
             Context::Cutscene(cutscene) => {
-                std::fs::create_dir_all(app.pak.join(MOD).join("BlueFire/Libraries"))
-                    .unwrap_or_default();
+                std::fs::create_dir_all(app.pak.join(MOD).join("BlueFire/Libraries")).unwrap();
                 let mut hook = unreal_asset::Asset::new(
                     std::io::Cursor::new(include_bytes!("../blueprints/hook.uasset").as_slice()),
                     Some(std::io::Cursor::new(
@@ -123,7 +122,7 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                 // edit hook name refs to this new name and save to there
                 save(&mut hook, format!("{MOD}/BlueFire/Libraries/{new_name}"))?;
                 let loc = app.pak.join(cutscene.replacen("/Game", MOD, 1));
-                std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap_or_default();
+                std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap();
                 pak.read_from_path_to_file(
                     &format!("{cutscene}.uasset"),
                     &pak_path,
@@ -145,7 +144,7 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                     .join(format!("{PREFIX}{location}").replacen("/Game", MOD, 1))
                     .with_extension("umap");
                 if !loc.exists() {
-                    std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap_or_default();
+                    std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap();
                     pak.read_from_path_to_file(
                         &format!("{PREFIX}{location}.umap"),
                         &pak_path,
@@ -353,6 +352,30 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
             }
         }
     }
+    // package the mod in the most scuffed way possible
+    std::fs::write("UnrealPak.exe", include_bytes!("../UnrealPak.exe")).unwrap();
+    std::fs::write(
+        "filelist.txt",
+        format!(
+            "\"{}/*.*\" \"../../../*.*\"",
+            app.pak.join("rando_p").to_str().unwrap_or_default()
+        )
+        .replace('/', "\\"),
+    )
+    .unwrap();
+    // for some reason calling with rust doesn't work
+    std::fs::write(
+        "pak.bat",
+        format!(
+            "UnrealPak \"{}\" -create filelist.txt -compress",
+            app.pak.join("rando_p.pak").to_str().unwrap_or_default()
+        ),
+    )
+    .unwrap();
+    std::process::Command::new("./pak.bat").output().unwrap();
+    std::fs::remove_file("UnrealPak.exe").unwrap();
+    std::fs::remove_file("filelist.txt").unwrap();
+    std::fs::remove_file("pak.bat").unwrap();
     Ok(())
 }
 

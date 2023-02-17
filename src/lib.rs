@@ -96,7 +96,7 @@ impl eframe::App for Rando {
                 match logic::randomise(self) {
                     Ok(()) => self.dialog.open_dialog(
                         Some("success"),
-                        Some("the spoiler log has been generated"),
+                        Some("the seed has been generated, written and installed - enjoy and have fun!"),
                         Some(egui_modal::Icon::Success),
                     ),
                     Err(e) => self.dialog.open_dialog(
