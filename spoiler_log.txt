@@ -15,8 +15,18 @@
         context: Overworld(
             "Chest_A01_TempleGardens_Ability_SpinAttack2",
         ),
+        drop: Weapon(
+            DiamondWings,
+        ),
+        requirements: None,
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A02_GameIntro_EastWing",
+        context: Overworld(
+            "Chest_A01_Keep_Shield",
+        ),
         drop: Item(
-            SapphireOre,
+            EmeraldOre,
             1,
         ),
         requirements: None,
@@ -37,8 +47,18 @@
         context: Overworld(
             "Chest_A02_Keep_Loot_01",
         ),
+        drop: Ability(
+            Block,
+        ),
+        requirements: None,
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A02_GameIntro_MemorialMain",
+        context: Overworld(
+            "Chest_A02_Sword_DiamondWings",
+        ),
         drop: Item(
-            EmeraldOre,
+            SapphireOre,
             1,
         ),
         requirements: None,

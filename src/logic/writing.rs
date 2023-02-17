@@ -52,11 +52,8 @@ fn byte_property(name: &str, enum_type: &str, val: &str) -> Property {
 }
 
 pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
-    let pak = unpak::Pak::new_from_path(
-        app.pak.join("Blue Fire-WindowsNoEditor.pak"),
-        unpak::Version::FrozenIndex,
-        None,
-    )?;
+    let pak_path = app.pak.join("Blue Fire-WindowsNoEditor.pak");
+    let pak = unpak::Pak::new_from_path(&pak_path, unpak::Version::FrozenIndex, None)?;
     for Check {
         location,
         context,
@@ -72,10 +69,10 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                     .with_extension("uasset");
                 let mut savegame = if !loc.exists() {
                     std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap_or_default();
-                    pak.read_from_path_to_file(&format!("{SAVEGAME}.uasset"), &app.pak, &loc)?;
+                    pak.read_from_path_to_file(&format!("{SAVEGAME}.uasset"), &pak_path, &loc)?;
                     pak.read_from_path_to_file(
                         &format!("{SAVEGAME}.uexp"),
-                        &app.pak,
+                        &pak_path,
                         loc.with_extension("uexp"),
                     )?;
                     let mut savegame = open(&loc)?;
@@ -129,12 +126,12 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                 std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap_or_default();
                 pak.read_from_path_to_file(
                     &format!("{cutscene}.uasset"),
-                    &app.pak,
+                    &pak_path,
                     loc.with_extension("uasset"),
                 )?;
                 pak.read_from_path_to_file(
                     &format!("{cutscene}.uexp"),
-                    &app.pak,
+                    &pak_path,
                     loc.with_extension("uexp"),
                 )?;
                 let mut cutscene = open(&loc)?;
@@ -146,14 +143,20 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                 let loc = app
                     .pak
                     .join(format!("{PREFIX}{location}").replacen("/Game", MOD, 1))
-                    .with_extension("uasset");
-                std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap_or_default();
-                pak.read_from_path_to_file(&format!("{PREFIX}{location}.uasset"), &app.pak, &loc)?;
-                pak.read_from_path_to_file(
-                    &format!("{PREFIX}{location}.uexp"),
-                    &app.pak,
-                    loc.with_extension("uexp"),
-                )?;
+                    .with_extension("umap");
+                if !loc.exists() {
+                    std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap_or_default();
+                    pak.read_from_path_to_file(
+                        &format!("{PREFIX}{location}.umap"),
+                        &pak_path,
+                        &loc,
+                    )?;
+                    pak.read_from_path_to_file(
+                        &format!("{PREFIX}{location}.uexp"),
+                        &pak_path,
+                        loc.with_extension("uexp"),
+                    )?;
+                }
                 let mut map = open(&loc)?;
                 let Some(i) = map.exports.iter().position(|ex| ex.get_base_export().object_name.content == actor_name) else {
                     return Err(Error::Assumption)
