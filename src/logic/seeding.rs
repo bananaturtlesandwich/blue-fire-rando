@@ -1,16 +1,9 @@
-/*
-Logic is iteratively evaluated:
-loop {
-    Possible drops list is shuffled
-    Available checks are populated using the shuffled drop list
-    If more locations/checks are unlocked then the check(s) that added them are marked as progression
-    All the items not marked as progression are purged from the list
-}
-repeats until all locations and checks are now accessible :)
-*/
 use super::*;
 
 const BEGINNING: &str = "A02_ArcaneTunnels/A02_GameIntro_KeepSouth";
+
+const NOTENOUGH: &str =
+    "you haven't picked enough checks for anything to be random - include more checks in the pool";
 
 pub fn randomise(app: &mut crate::Rando) -> Result<(), String> {
     let in_pool = |check: &Check| match &check.drop {
@@ -29,7 +22,7 @@ pub fn randomise(app: &mut crate::Rando) -> Result<(), String> {
     let (mut pool, mut unrandomised): (Vec<Check>, Vec<Check>) =
         CHECKS.into_iter().partition(in_pool);
     if pool.len() <= 1 {
-        return Err("you haven't picked enough checks for anything to be random - include more checks in the pool".to_string());
+        return Err(NOTENOUGH.to_string());
     }
     let mut possible: Vec<Drop> = pool.iter().map(|check| check.drop.clone()).collect();
     let mut checks: Vec<Check> = Vec::with_capacity(pool.len());
@@ -108,6 +101,9 @@ pub fn randomise(app: &mut crate::Rando) -> Result<(), String> {
     }
     progression.append(&mut checks);
     progression = progression.into_iter().filter(in_pool).collect();
+    if progression.is_empty() {
+        return Err(NOTENOUGH.to_string());
+    }
     std::fs::write("spoiler_log.txt", format!("{progression:#?}")).unwrap_or_default();
     write(progression, app).map_err(|e| e.to_string())
 }

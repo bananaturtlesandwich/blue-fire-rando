@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 mod drops;
 pub use drops::*;
-mod generation;
-pub use generation::randomise;
+mod seeding;
+pub use seeding::randomise;
 mod writing;
 pub use writing::write;
 mod io;

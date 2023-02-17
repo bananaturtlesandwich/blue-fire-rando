@@ -44,8 +44,14 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
         unpak::Version::FrozenIndex,
         None,
     )?;
-    for check in checks {
-        match check.context {
+    for Check {
+        location,
+        context,
+        drop,
+        ..
+    } in checks
+    {
+        match context {
             Context::Shop(shopkeep) => {
                 let loc = app.pak.join(SAVEGAME.replacen("/Game", MOD, 1));
                 let mut savegame = if !loc.exists() {
@@ -89,35 +95,37 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                         property_guid: None,
                         duplication_index: 0,
                         serialize_none: true,
-                        value: check.drop.get_shop_entry(),
+                        value: drop.get_shop_entry(),
                     },
                 ));
                 save(&mut savegame, loc)?;
             }
-            Context::Cutscene(file) => {
-                let loc = app.pak.join(file.replacen("/Game", MOD, 1));
-                std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap_or_default();
-                pak.read_from_path_to_file(
-                    &format!("{file}.uasset"),
-                    &app.pak,
-                    loc.with_extension("uasset"),
-                )?;
-                pak.read_from_path_to_file(
-                    &format!("{file}.uexp"),
-                    &app.pak,
-                    loc.with_extension("uexp"),
-                )?;
+            Context::Cutscene(cutscene) => {
+                std::fs::create_dir_all(app.pak.join(MOD).join("BlueFire/Libraries"))
+                    .unwrap_or_default();
                 let mut hook = unreal_asset::Asset::new(
-                    std::io::Cursor::new(include_bytes!("../blueprints/Hook.uasset").as_slice()),
+                    std::io::Cursor::new(include_bytes!("../blueprints/hook.uasset").as_slice()),
                     Some(std::io::Cursor::new(
-                        include_bytes!("../blueprints/Hook.uexp").as_slice(),
+                        include_bytes!("../blueprints/hook.uexp").as_slice(),
                     )),
                 );
                 hook.set_engine_version(unreal_asset::engine_version::EngineVersion::VER_UE4_25);
                 hook.parse_data()?;
-                let new_name = file.split('/').last().unwrap_or_default();
-                // edit Hook name refs to name of cutscene and save to there
+                let new_name = cutscene.split('/').last().unwrap_or_default();
+                // edit hook name refs to this new name and save to there
                 save(&mut hook, format!("{MOD}/BlueFire/Libraries/{new_name}"))?;
+                let loc = app.pak.join(cutscene.replacen("/Game", MOD, 1));
+                std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap_or_default();
+                pak.read_from_path_to_file(
+                    &format!("{cutscene}.uasset"),
+                    &app.pak,
+                    loc.with_extension("uasset"),
+                )?;
+                pak.read_from_path_to_file(
+                    &format!("{cutscene}.uexp"),
+                    &app.pak,
+                    loc.with_extension("uexp"),
+                )?;
                 let mut cutscene = open(&loc)?;
                 // edit UniversalFunction name refs to name of cutscene
                 save(&mut cutscene, &loc)?;

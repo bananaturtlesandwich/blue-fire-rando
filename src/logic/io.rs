@@ -29,7 +29,7 @@ pub fn save<R: std::io::Seek + std::io::Read>(
     )
 }
 
-/// so i don't have to deal with borrow checker when editing name properties
+// so i don't have to deal with borrow checker when editing name properties
 fn update_names<R: std::io::Seek + std::io::Read>(asset: &mut unreal_asset::Asset<R>) {
     for import in asset.imports.clone().iter() {
         asset.add_fname(&import.class_package.content);

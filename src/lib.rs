@@ -36,12 +36,12 @@ impl Rando {
                     let Some(path) = rfd::FileDialog::new().set_title("Please select where you have Blue Fire installed").pick_folder() else {
                         continue
                     };
-                    if !path.ends_with("Blue Fire") || path.ends_with("Blue Fire\\Blue Fire"){
+                    if !path.ends_with("Blue Fire") || path.ends_with("Blue Fire/Blue Fire"){
                         continue;
                     }
                     break path;
                 }
-                .join("Blue Fire\\Content\\Paks")
+                .join("Blue Fire/Content/Paks")
             },
             item: get_bool("item"),
             weapons: get_bool("weapons"),
