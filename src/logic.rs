@@ -36,7 +36,7 @@ pub enum Context {
 #[derive(PartialEq, Clone, Debug, strum::AsRefStr)]
 pub enum Drop {
     #[strum(serialize = "0")]
-    Item(Items, i32),
+    Item(Items, u8),
     #[strum(serialize = "1")]
     Weapon(Weapons),
     #[strum(serialize = "2")]
