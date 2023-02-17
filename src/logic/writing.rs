@@ -1,4 +1,4 @@
-use unreal_asset::{exports::ExportNormalTrait, properties::Property};
+use unreal_asset::{exports::*, properties::Property, reader::asset_trait::AssetTrait};
 
 use super::*;
 
@@ -40,7 +40,7 @@ const PREFIX: &str = "/Game/BlueFire/Maps/World/";
 
 pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
     let pak = unpak::Pak::new_from_path(
-        dbg!(app.pak.join("Blue Fire-WindowsNoEditor.pak")),
+        app.pak.join("Blue Fire-WindowsNoEditor.pak"),
         unpak::Version::FrozenIndex,
         None,
     )?;
@@ -53,14 +53,13 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
     {
         match context {
             Context::Shop(shopkeep) => {
-                let loc = app.pak.join(SAVEGAME.replacen("/Game", MOD, 1));
+                let loc = app
+                    .pak
+                    .join(SAVEGAME.replacen("/Game", MOD, 1))
+                    .with_extension("uasset");
                 let mut savegame = if !loc.exists() {
                     std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap_or_default();
-                    pak.read_from_path_to_file(
-                        &format!("{SAVEGAME}.uasset"),
-                        &app.pak,
-                        loc.with_extension("uasset"),
-                    )?;
+                    pak.read_from_path_to_file(&format!("{SAVEGAME}.uasset"), &app.pak, &loc)?;
                     pak.read_from_path_to_file(
                         &format!("{SAVEGAME}.uexp"),
                         &app.pak,
@@ -79,7 +78,7 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                     }
                     savegame
                 } else {
-                    open(&loc).map_err(|e| unpak::Error::Other(e.to_string()))?
+                    open(&loc)?
                 };
                 let Some(Property::ArrayProperty(shop)) = savegame.exports[1]
                     .get_normal_export_mut()
@@ -131,7 +130,55 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                 save(&mut cutscene, &loc)?;
                 todo!("make PR for an editable name map")
             }
-            Context::Overworld(actor) => todo!(),
+            Context::Overworld(actor_name) => {
+                let loc = app
+                    .pak
+                    .join(format!("{PREFIX}{location}").replacen("/Game", MOD, 1))
+                    .with_extension("uasset");
+                std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap_or_default();
+                pak.read_from_path_to_file(&format!("{PREFIX}{location}.uasset"), &app.pak, &loc)?;
+                pak.read_from_path_to_file(
+                    &format!("{PREFIX}{location}.uexp"),
+                    &app.pak,
+                    loc.with_extension("uexp"),
+                )?;
+                let mut map = open(&loc)?;
+                let Some(i) = map.exports.iter().position(|ex| ex.get_base_export().object_name.content == actor_name) else {
+                    return Err(Error::Assumption)
+                };
+                let class = map
+                    .get_import(map.exports[i].get_base_export().class_index)
+                    .map(|import| import.object_name.content.as_str())
+                    .unwrap_or_default();
+                let is_chest = matches!(
+                    class,
+                    "Chest_Master_C" | "Chest_Master_Child_C" | "Chest_Dance_C"
+                );
+                #[allow(unused_variables)]
+                match drop {
+                    Drop::Item(item, amount) if is_chest => todo!(),
+                    Drop::Item(item, amount) if class == "Pickup_C" => todo!(),
+                    Drop::Item(item, amount) => todo!(),
+                    Drop::Weapon(weapon) if is_chest => todo!(),
+                    Drop::Weapon(weapon) => todo!(),
+                    Drop::Tunic(tunic) if is_chest => todo!(),
+                    Drop::Tunic(tunic) => todo!(),
+                    Drop::Spirit(spirit) if is_chest => todo!(),
+                    Drop::Spirit(spirit) if class == "Spirit_C" => todo!(),
+                    Drop::Spirit(spirit) => todo!(),
+                    Drop::Ability(ability) if is_chest => todo!(),
+                    Drop::Ability(ability) => todo!(),
+                    Drop::Emote(emote) if class == "EmoteStatue_BP_C" => todo!(),
+                    Drop::Emote(emote) => todo!(),
+                    Drop::Ore(amount) if class == "Pickup_C" => todo!(),
+                    Drop::Ore(amount) => todo!(),
+                    Drop::Duck if is_chest => todo!(),
+                    Drop::Duck if class == "Pickup_C" => todo!(),
+                    Drop::Duck => todo!(),
+                }
+                // find the actor and delete/replace it using the reference in the collectables map to reflect the drop
+                save(&mut map, &loc)?;
+            }
         }
     }
     Ok(())
