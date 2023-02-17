@@ -1,0 +1,57 @@
+[
+    Check {
+        location: "A02_ArcaneTunnels/A02_GameIntro_KeepEast",
+        context: Overworld(
+            "Chest_A02_Keep_Loot_02",
+        ),
+        drop: Item(
+            OldKey,
+            1,
+        ),
+        requirements: None,
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A02_GameIntro_KeepEast",
+        context: Overworld(
+            "Chest_A01_TempleGardens_Ability_SpinAttack2",
+        ),
+        drop: Item(
+            SapphireOre,
+            1,
+        ),
+        requirements: None,
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A02_GameIntro_EastWing",
+        context: Overworld(
+            "Chest_A02_Keep_Key_01",
+        ),
+        drop: Item(
+            SapphireOre,
+            1,
+        ),
+        requirements: None,
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A02_GameIntro_KeepWest",
+        context: Overworld(
+            "Chest_A02_Keep_Loot_01",
+        ),
+        drop: Item(
+            EmeraldOre,
+            1,
+        ),
+        requirements: None,
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A02_GameIntro_MemorialMain",
+        context: Overworld(
+            "Chest_A02_GameIntro",
+        ),
+        drop: Item(
+            SapphireOre,
+            1,
+        ),
+        requirements: None,
+    },
+]

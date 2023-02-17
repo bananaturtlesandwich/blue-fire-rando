@@ -7,6 +7,8 @@ mod writing;
 pub use writing::write;
 mod io;
 pub use io::*;
+mod map;
+pub use map::*;
 
 #[derive(Debug, Clone, strum::EnumIter, strum::AsRefStr)]
 pub enum Shop {
