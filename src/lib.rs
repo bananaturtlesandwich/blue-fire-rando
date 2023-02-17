@@ -124,10 +124,3 @@ impl eframe::App for Rando {
         storage.set_string("ducks", self.ducks.to_string());
     }
 }
-
-#[cfg(not(debug_assertions))]
-impl Drop for Rando {
-    fn drop(&mut self) {
-        std::fs::remove_dir_all(self.pak.join("rando_p")).unwrap_or_default()
-    }
-}

@@ -354,28 +354,14 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
     }
     // package the mod in the most scuffed way possible
     std::fs::write("UnrealPak.exe", include_bytes!("../UnrealPak.exe")).unwrap();
-    std::fs::write(
-        "filelist.txt",
-        format!(
-            "\"{}/*.*\" \"../../../*.*\"",
-            app.pak.join("rando_p").to_str().unwrap_or_default()
-        )
-        .replace('/', "\\"),
-    )
-    .unwrap();
-    // for some reason calling with rust doesn't work
-    std::fs::write(
-        "pak.bat",
-        format!(
-            "UnrealPak \"{}\" -create filelist.txt -compress",
-            app.pak.join("rando_p.pak").to_str().unwrap_or_default()
-        ),
-    )
-    .unwrap();
-    std::process::Command::new("./pak.bat").output().unwrap();
-    std::fs::remove_file("UnrealPak.exe").unwrap();
-    std::fs::remove_file("filelist.txt").unwrap();
+    std::fs::write("pak.bat", include_str!("../pak.bat")).unwrap();
+    // for some reason calling with rust doesn't work so a batch file will do
+    std::process::Command::new("./pak.bat")
+        .arg(app.pak.join("rando_p"))
+        .output()
+        .unwrap();
     std::fs::remove_file("pak.bat").unwrap();
+    std::fs::remove_dir_all(app.pak.join("rando_p")).unwrap_or_default();
     Ok(())
 }
 
