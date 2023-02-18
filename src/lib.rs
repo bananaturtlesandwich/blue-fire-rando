@@ -1,4 +1,5 @@
 mod logic;
+mod actor;
 
 pub struct Rando {
     dialog: egui_modal::Modal,
@@ -81,7 +82,7 @@ impl eframe::App for Rando {
                 ui[1].heading(egui::RichText::new("Extra options").underline());
                 ui[1].checkbox(&mut self.treasure, "Treasures e.g Seagull soup");
                 // since dash is an ability i might have to think more on how to do this - plus context is funky too
-                ui[1].code("Dash -===(    - _ o)");
+                ui[1].checkbox(&mut self.dash, "Dash -===(    - _ o)");
                 ui[1].checkbox(&mut self.ore, "Ore  (    $ o $)");
                 // ducks are typically located on the master map - maybe make it so room it's locked in unlocks master map
                 ui[1].code("Ducks <(⭕ ◑ ө ◑ ⭕)>");

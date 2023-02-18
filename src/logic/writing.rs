@@ -2,34 +2,16 @@ use unreal_asset::{exports::*, properties::*, reader::asset_trait::AssetTrait, t
 
 use super::*;
 
+#[derive(thiserror::Error, Debug)]
 pub enum Error {
-    UnrealAsset(unreal_asset::error::Error),
-    Unpak(unpak::Error),
+    #[error("unreal_asset: {0}")]
+    UnrealAsset(#[from] unreal_asset::error::Error),
+    #[error("unpak: {0}")]
+    Unpak(#[from] unpak::Error),
+    #[error("io: {0}")]
+    Io(#[from] std::io::Error),
+    #[error("data was not as expected - you may have an older version of the game")]
     Assumption,
-}
-
-impl From<unreal_asset::error::Error> for Error {
-    fn from(value: unreal_asset::error::Error) -> Self {
-        Self::UnrealAsset(value)
-    }
-}
-
-impl From<unpak::Error> for Error {
-    fn from(value: unpak::Error) -> Self {
-        Self::Unpak(value)
-    }
-}
-
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Error::UnrealAsset(e) => f.write_str(&e.to_string()),
-            Error::Unpak(e) => f.write_str(&e.to_string()),
-            Error::Assumption => {
-                f.write_str("data was not as expected - you may have an older version of the game")
-            }
-        }
-    }
 }
 
 pub const MOD: &str = "rando_p/Blue Fire/Content";
@@ -51,7 +33,66 @@ fn byte_property(name: &str, enum_type: &str, val: &str) -> Property {
     })
 }
 
-pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
+fn set_byte(
+    name: &str,
+    enum_type: &str,
+    val: &str,
+    export: &mut normal_export::NormalExport,
+) -> Result<(), Error> {
+    match export.properties.iter_mut().find_map(|prop| {
+        cast!(Property, ByteProperty, prop).filter(|byte| byte.name.content == name)
+    }) {
+        Some(byte) => {
+            let int_property::BytePropertyValue::FName(name) = &mut byte.value else {
+                return Err(Error::Assumption);
+            };
+            name.content = format!("{}::NewEnumerator{}", enum_type, val)
+        }
+        None => export.properties.push(byte_property(name, enum_type, val)),
+    }
+    Ok(())
+}
+
+fn get_savegame(
+    app: &crate::Rando,
+    pak: &unpak::Pak,
+    pak_path: &std::path::PathBuf,
+) -> Result<(Asset<std::fs::File>, std::path::PathBuf), Error> {
+    let loc = app
+        .pak
+        .join(SAVEGAME.replacen("/Game", MOD, 1))
+        .with_extension("uasset");
+    let savegame = if !loc.exists() {
+        std::fs::create_dir_all(loc.parent().expect("is a file"))?;
+        pak.read_from_path_to_file(&format!("{SAVEGAME}.uasset"), pak_path, &loc)?;
+        pak.read_from_path_to_file(
+            &format!("{SAVEGAME}.uexp"),
+            pak_path,
+            loc.with_extension("uexp"),
+        )?;
+        let mut savegame = open(&loc)?;
+        let Some(default) = savegame.exports[1].get_normal_export_mut() else {
+            return Err(Error::Assumption);
+        };
+        if let Some(dash) = cast!(Property, StructProperty, &mut default.properties[2])
+            .and_then(|inventory| cast!(Property, BoolProperty, &mut inventory.value[1]))
+        {
+            dash.value = !app.dash
+        }
+        use strum::IntoEnumIterator;
+        for shop in Shop::iter() {
+            if let Property::ArrayProperty(shop) = &mut default.properties[shop as usize] {
+                shop.value.clear();
+            }
+        }
+        savegame
+    } else {
+        open(&loc)?
+    };
+    Ok((savegame, loc))
+}
+
+pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
     let pak_path = app.pak.join("Blue Fire-WindowsNoEditor.pak");
     let pak = unpak::Pak::new_from_path(&pak_path, unpak::Version::FrozenIndex, None)?;
     for Check {
@@ -63,53 +104,27 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
     {
         match context {
             Context::Shop(shopkeep) => {
-                let loc = app
-                    .pak
-                    .join(SAVEGAME.replacen("/Game", MOD, 1))
-                    .with_extension("uasset");
-                let mut savegame = if !loc.exists() {
-                    std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap();
-                    pak.read_from_path_to_file(&format!("{SAVEGAME}.uasset"), &pak_path, &loc)?;
-                    pak.read_from_path_to_file(
-                        &format!("{SAVEGAME}.uexp"),
-                        &pak_path,
-                        loc.with_extension("uexp"),
-                    )?;
-                    let mut savegame = open(&loc)?;
-                    let Some(default) = savegame.exports[1].get_normal_export_mut() else {
-                        return Err(Error::Assumption)
-                    };
-                    use strum::IntoEnumIterator;
-                    for shop in Shop::iter() {
-                        let Property::ArrayProperty(shop) = &mut default.properties[shop as usize] else {
-                            return Err(Error::Assumption);
-                        };
-                        shop.value.clear();
-                    }
-                    savegame
-                } else {
-                    open(&loc)?
-                };
-                let Some(Property::ArrayProperty(shop)) = savegame.exports[1]
+                let (mut savegame, loc) = get_savegame(app, &pak, &pak_path)?;
+                if let Some(Property::ArrayProperty(shop)) = savegame.exports[1]
                     .get_normal_export_mut()
-                    .map(|norm| &mut norm.properties[shopkeep.clone() as usize]) else {
-                        return Err(Error::Assumption);
-                    };
-                shop.value.push(Property::StructProperty(
-                    unreal_asset::properties::struct_property::StructProperty {
-                        name: FName::from_slice(shopkeep.as_ref()),
-                        struct_type: Some(FName::from_slice("Inventory")),
-                        struct_guid: None,
-                        property_guid: None,
-                        duplication_index: 0,
-                        serialize_none: true,
-                        value: drop.get_shop_entry(),
-                    },
-                ));
+                    .map(|norm| &mut norm.properties[shopkeep.clone() as usize])
+                {
+                    shop.value.push(Property::StructProperty(
+                        unreal_asset::properties::struct_property::StructProperty {
+                            name: FName::from_slice(shopkeep.as_ref()),
+                            struct_type: Some(FName::from_slice("Inventory")),
+                            struct_guid: None,
+                            property_guid: None,
+                            duplication_index: 0,
+                            serialize_none: true,
+                            value: drop.as_shop_entry(),
+                        },
+                    ));
+                };
                 save(&mut savegame, loc)?;
             }
             Context::Cutscene(cutscene) => {
-                std::fs::create_dir_all(app.pak.join(MOD).join("BlueFire/Libraries")).unwrap();
+                std::fs::create_dir_all(app.pak.join(MOD).join("BlueFire/Libraries"))?;
                 let mut hook = unreal_asset::Asset::new(
                     std::io::Cursor::new(include_bytes!("../blueprints/hook.uasset").as_slice()),
                     Some(std::io::Cursor::new(
@@ -122,7 +137,7 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                 // edit hook name refs to this new name and save to there
                 save(&mut hook, format!("{MOD}/BlueFire/Libraries/{new_name}"))?;
                 let loc = app.pak.join(cutscene.replacen("/Game", MOD, 1));
-                std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap();
+                std::fs::create_dir_all(loc.parent().expect("is a file"))?;
                 pak.read_from_path_to_file(
                     &format!("{cutscene}.uasset"),
                     &pak_path,
@@ -144,7 +159,7 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                     .join(format!("{PREFIX}{location}").replacen("/Game", MOD, 1))
                     .with_extension("umap");
                 if !loc.exists() {
-                    std::fs::create_dir_all(loc.parent().expect("is a file")).unwrap();
+                    std::fs::create_dir_all(loc.parent().expect("is a file"))?;
                     pak.read_from_path_to_file(
                         &format!("{PREFIX}{location}.umap"),
                         &pak_path,
@@ -168,25 +183,6 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                     class,
                     "Chest_Master_C" | "Chest_Master_Child_C" | "Chest_Dance_C"
                 );
-                fn set_byte(
-                    name: &str,
-                    enum_type: &str,
-                    val: &str,
-                    export: &mut normal_export::NormalExport,
-                ) -> Result<(), Error> {
-                    match export.properties.iter_mut().find_map(|prop| {
-                        cast!(Property, ByteProperty, prop).filter(|byte| byte.name.content == name)
-                    }) {
-                        Some(byte) => {
-                            let int_property::BytePropertyValue::FName(name) = &mut byte.value else {
-                                return Err(Error::Assumption);
-                            };
-                            name.content = format!("{}::NewEnumerator{}", enum_type, val)
-                        }
-                        None => export.properties.push(byte_property(name, enum_type, val)),
-                    }
-                    Ok(())
-                }
                 #[allow(unused_variables)]
                 match &drop {
                     Drop::Item(item, amount) if is_chest => {
@@ -258,7 +254,7 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                             return Err(Error::Assumption)
                         };
                         set_byte("Type", "InventoryItemType", drop.as_ref(), chest)?;
-                        set_byte("Spirit", "Spirits", spirit.as_ref(), chest)?;
+                        set_byte("Amulet", "Spirits", spirit.as_ref(), chest)?;
                     }
                     Drop::Spirit(spirit) if class == "Spirit_C" => {
                         let Some(spirit_bp) = map.exports[i].get_normal_export_mut() else {
@@ -350,23 +346,99 @@ pub fn write(checks: Vec<Check>, app: &mut crate::Rando) -> Result<(), Error> {
                 // find the actor and delete/replace it using the reference in the collectables map to reflect the drop
                 save(&mut map, &loc)?;
             }
+            Context::Starting => {
+                fn add_item(savegame: &mut Asset<std::fs::File>, drop: Drop) {
+                    if let Some(inventory) = savegame.exports[1]
+                        .get_normal_export_mut()
+                        .and_then(|default| {
+                            cast!(Property, StructProperty, &mut default.properties[3])
+                        })
+                        .and_then(|stats| cast!(Property, ArrayProperty, &mut stats.value[6]))
+                    {
+                        inventory
+                            .value
+                            .push(unreal_asset::properties::Property::StructProperty(
+                                unreal_asset::properties::struct_property::StructProperty {
+                                    name: FName::from_slice(
+                                        "Inventory_23_288399C5416269F828550FB7376E7942",
+                                    ),
+                                    struct_type: Some(FName::from_slice("Inventory")),
+                                    struct_guid: None,
+                                    property_guid: None,
+                                    duplication_index: 0,
+                                    serialize_none: true,
+                                    value: drop.as_shop_entry(),
+                                },
+                            ));
+                    }
+                }
+                let (mut savegame, loc) = get_savegame(app, &pak, &pak_path)?;
+                match &drop {
+                    Drop::Ability(ability) => {
+                        add_item(&mut savegame, Drop::Item(ability.as_item(), 1));
+                        if let Some(flag) = savegame.exports[1]
+                            .get_normal_export_mut()
+                            .and_then(|default| {
+                                cast!(Property, StructProperty, &mut default.properties[2])
+                            })
+                            .and_then(|abilities| {
+                                cast!(
+                                    Property,
+                                    BoolProperty,
+                                    &mut abilities.value[ability.savegame_index()]
+                                )
+                            })
+                        {
+                            flag.value = true;
+                        }
+                    }
+                    Drop::Emote(emote) => {
+                        if let Some(emotes) =
+                            savegame.exports[1]
+                                .get_normal_export_mut()
+                                .and_then(|default| {
+                                    cast!(Property, ArrayProperty, &mut default.properties[15])
+                                })
+                        {
+                            emotes.value.push(byte_property(
+                                &emotes.value.len().to_string(),
+                                "E_Emotes",
+                                emote.as_ref(),
+                            ))
+                        }
+                    }
+                    Drop::Ore(amount) => {
+                        if let Some(currency) = savegame.exports[1]
+                            .get_normal_export_mut()
+                            .and_then(|default| {
+                                cast!(Property, StructProperty, &mut default.properties[3])
+                            })
+                            .and_then(|stats| cast!(Property, IntProperty, &mut stats.value[0]))
+                        {
+                            currency.value += *amount as i32;
+                        }
+                    }
+                    Drop::Duck => add_item(&mut savegame, Drop::Item(Items::Duck, 1)),
+                    _ => add_item(&mut savegame, drop),
+                }
+                save(&mut savegame, loc)?;
+            }
         }
     }
     // package the mod in the most scuffed way possible
-    std::fs::write("UnrealPak.exe", include_bytes!("../UnrealPak.exe")).unwrap();
-    std::fs::write("pak.bat", include_str!("../pak.bat")).unwrap();
+    std::fs::write("UnrealPak.exe", include_bytes!("../UnrealPak.exe"))?;
+    std::fs::write("pak.bat", include_str!("../pak.bat"))?;
     // for some reason calling with rust doesn't work so a batch file will do
     std::process::Command::new("./pak.bat")
         .arg(app.pak.join("rando_p"))
-        .output()
-        .unwrap();
-    std::fs::remove_file("pak.bat").unwrap();
-    std::fs::remove_dir_all(app.pak.join("rando_p")).unwrap_or_default();
+        .output()?;
+    std::fs::remove_file("pak.bat")?;
+    std::fs::remove_dir_all(app.pak.join("rando_p"))?;
     Ok(())
 }
 
 impl Drop {
-    pub fn get_shop_entry(&self) -> Vec<unreal_asset::properties::Property> {
+    pub fn as_shop_entry(&self) -> Vec<unreal_asset::properties::Property> {
         use int_property::*;
         [
             byte_property(
@@ -453,5 +525,36 @@ impl Drop {
             ),
         ]
         .to_vec()
+    }
+}
+
+impl Abilities {
+    pub fn as_item(&self) -> Items {
+        match self {
+            Abilities::DoubleJump => Items::DoubleJump,
+            Abilities::Dash => Items::Dash,
+            Abilities::Attack => todo!(),
+            Abilities::DownSmash => Items::DownSmash,
+            Abilities::WallRun => Items::WallRun,
+            Abilities::Grind => todo!(),
+            Abilities::Sprint => Items::Sprint,
+            Abilities::Spell => Items::FireBall,
+            Abilities::Block => Items::Shield,
+            Abilities::SpinAttack => Items::SpinAttack,
+        }
+    }
+    pub fn savegame_index(&self) -> usize {
+        match self {
+            Abilities::DoubleJump => 2,
+            Abilities::Dash => 1,
+            Abilities::Attack => 0,
+            Abilities::DownSmash => 5,
+            Abilities::WallRun => 3,
+            Abilities::Grind => 7,
+            Abilities::Sprint => 4,
+            Abilities::Spell => 6,
+            Abilities::Block => 8,
+            Abilities::SpinAttack => 9,
+        }
     }
 }
