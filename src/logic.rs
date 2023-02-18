@@ -26,7 +26,7 @@ pub enum Shop {
 
 #[derive(Debug)]
 pub enum Context {
-    Shop(Shop),
+    Shop(Shop, u16),
     Cutscene(&'static str),
     Overworld(&'static str),
     Starting,
@@ -63,7 +63,13 @@ struct Location {
     requirements: Option<&'static [&'static [Drop]]>,
 }
 
-const CHECKS: [Check; 13] = [
+const CHECKS: [Check; 14] = [
+    Check {
+        location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
+        context: Context::Starting,
+        drop: Drop::Emote(Emotes::Hello2),
+        requirements: None,
+    },
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
         context: Context::Starting,

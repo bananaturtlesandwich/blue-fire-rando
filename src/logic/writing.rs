@@ -62,34 +62,37 @@ fn get_savegame(
         .pak
         .join(SAVEGAME.replacen("/Game", MOD, 1))
         .with_extension("uasset");
-    let savegame = if !loc.exists() {
-        std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-        pak.read_from_path_to_file(&format!("{SAVEGAME}.uasset"), pak_path, &loc)?;
-        pak.read_from_path_to_file(
-            &format!("{SAVEGAME}.uexp"),
-            pak_path,
-            loc.with_extension("uexp"),
-        )?;
-        let mut savegame = open(&loc)?;
-        let Some(default) = savegame.exports[1].get_normal_export_mut() else {
-            return Err(Error::Assumption);
-        };
-        if let Some(dash) = cast!(Property, StructProperty, &mut default.properties[2])
-            .and_then(|inventory| cast!(Property, BoolProperty, &mut inventory.value[1]))
-        {
-            dash.value = !app.dash
-        }
-        use strum::IntoEnumIterator;
-        for shop in Shop::iter() {
-            if let Property::ArrayProperty(shop) = &mut default.properties[shop as usize] {
-                shop.value.clear();
+    Ok((
+        if !loc.exists() {
+            std::fs::create_dir_all(loc.parent().expect("is a file"))?;
+            pak.read_from_path_to_file(&format!("{SAVEGAME}.uasset"), pak_path, &loc)?;
+            pak.read_from_path_to_file(
+                &format!("{SAVEGAME}.uexp"),
+                pak_path,
+                loc.with_extension("uexp"),
+            )?;
+            let mut savegame = open(&loc)?;
+            let Some(default) = savegame.exports[1].get_normal_export_mut() else {
+                return Err(Error::Assumption);
+            };
+            if app.dash {
+                if let Some(dash) = cast!(Property, StructProperty, &mut default.properties[2])
+                    .and_then(|inventory| cast!(Property, BoolProperty, &mut inventory.value[1]))
+                {
+                    dash.value = false
+                }
             }
-        }
-        savegame
-    } else {
-        open(&loc)?
-    };
-    Ok((savegame, loc))
+            if app.emotes {
+                if let Some(emotes) = cast!(Property, ArrayProperty, &mut default.properties[15]) {
+                    emotes.value.clear()
+                }
+            }
+            savegame
+        } else {
+            open(&loc)?
+        },
+        loc,
+    ))
 }
 
 pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
@@ -103,7 +106,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
     } in checks
     {
         match context {
-            Context::Shop(shopkeep) => {
+            Context::Shop(shopkeep, price) => {
                 let (mut savegame, loc) = get_savegame(app, &pak, &pak_path)?;
                 if let Some(Property::ArrayProperty(shop)) = savegame.exports[1]
                     .get_normal_export_mut()
@@ -117,7 +120,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                             property_guid: None,
                             duplication_index: 0,
                             serialize_none: true,
-                            value: drop.as_shop_entry(),
+                            value: drop.as_shop_entry(price),
                         },
                     ));
                 };
@@ -367,7 +370,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                                     property_guid: None,
                                     duplication_index: 0,
                                     serialize_none: true,
-                                    value: drop.as_shop_entry(),
+                                    value: drop.as_shop_entry(0),
                                 },
                             ));
                     }
@@ -425,6 +428,17 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
             }
         }
     }
+    // change the logo so people know it worked
+    let logo_path = app
+        .pak
+        .join(MOD)
+        .join("BlueFire/HUD/Menu/Blue-Fire-Logo.uasset");
+    std::fs::create_dir_all(logo_path.parent().expect("is a file"))?;
+    std::fs::write(&logo_path, include_bytes!("../blueprints/logo.uasset"))?;
+    std::fs::write(
+        logo_path.with_extension("uexp"),
+        include_bytes!("../blueprints/logo.uexp"),
+    )?;
     // package the mod in the most scuffed way possible
     std::fs::write("UnrealPak.exe", include_bytes!("../UnrealPak.exe"))?;
     std::fs::write("pak.bat", include_str!("../pak.bat"))?;
@@ -433,12 +447,11 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
         .arg(app.pak.join("rando_p"))
         .output()?;
     std::fs::remove_file("pak.bat")?;
-    std::fs::remove_dir_all(app.pak.join("rando_p"))?;
     Ok(())
 }
 
 impl Drop {
-    pub fn as_shop_entry(&self) -> Vec<unreal_asset::properties::Property> {
+    pub fn as_shop_entry(&self, price: u16) -> Vec<unreal_asset::properties::Property> {
         use int_property::*;
         [
             byte_property(
@@ -512,7 +525,7 @@ impl Drop {
                 name: FName::from_slice("Price_26_80A37F3645AE8292A9F311B86094C095"),
                 property_guid: None,
                 duplication_index: 0,
-                value: 500,
+                value: price as i32,
             }),
             byte_property(
                 "Ability_29_EBF42DD143E9F82EC9303082A50329F0",
