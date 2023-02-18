@@ -5,8 +5,6 @@ mod seeding;
 pub use seeding::randomise;
 mod writing;
 pub use writing::write;
-mod io;
-pub use io::*;
 
 #[derive(Debug, Clone, strum::EnumIter, strum::AsRefStr)]
 pub enum Shop {
