@@ -1,4 +1,3 @@
-use std::fs::File;
 use unreal_asset::{exports::*, properties::Property, types::*, *};
 
 mod delete;
@@ -11,7 +10,11 @@ mod transform;
 pub use transform::*;
 
 /// gets all exports related to the given actor
-fn get_actor_exports(index: usize, asset: &Asset<File>, offset: usize) -> Vec<Export> {
+fn get_actor_exports<C: std::io::Seek + std::io::Read>(
+    index: usize,
+    asset: &Asset<C>,
+    offset: usize,
+) -> Vec<Export> {
     // get references to all the actor's children
     let mut child_indexes: Vec<PackageIndex> = asset.exports[index]
         .get_base_export()
@@ -47,7 +50,7 @@ fn get_actor_exports(index: usize, asset: &Asset<File>, offset: usize) -> Vec<Ex
 }
 
 /// creates and assigns a unique name
-fn give_unique_name(orig: &mut FName, asset: &mut Asset<File>) {
+fn give_unique_name<C: std::io::Seek + std::io::Read>(orig: &mut FName, asset: &mut Asset<C>) {
     // for the cases where the number is unnecessary
     if asset.search_name_reference(&orig.content).is_none() {
         *orig = asset.add_fname(&orig.content);

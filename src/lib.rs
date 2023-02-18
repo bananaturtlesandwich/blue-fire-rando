@@ -107,6 +107,7 @@ impl eframe::App for Rando {
                         Some(egui_modal::Icon::Warning),
                     ),
                 }
+                std::fs::remove_dir_all(self.pak.join("rando_p")).unwrap_or_default();
             }
             self.dialog.show_dialog();
         });

@@ -1,5 +1,5 @@
 use super::*;
-use crate::io::*;
+use crate::{io::*, map::*};
 use unreal_asset::{exports::*, properties::*, reader::asset_trait::AssetTrait, types::FName, *};
 
 #[derive(thiserror::Error, Debug)]
@@ -106,13 +106,13 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
     } in checks
     {
         match context {
-            Context::Shop(shopkeep, price) => {
+            Context::Shop(shopkeep, index) => {
                 let (mut savegame, loc) = get_savegame(app, &pak, &pak_path)?;
                 if let Some(Property::ArrayProperty(shop)) = savegame.exports[1]
                     .get_normal_export_mut()
                     .map(|norm| &mut norm.properties[shopkeep.clone() as usize])
                 {
-                    shop.value.push(Property::StructProperty(
+                    shop.value[index] = Property::StructProperty(
                         unreal_asset::properties::struct_property::StructProperty {
                             name: FName::from_slice(shopkeep.as_ref()),
                             struct_type: Some(FName::from_slice("Inventory")),
@@ -120,22 +120,18 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                             property_guid: None,
                             duplication_index: 0,
                             serialize_none: true,
-                            value: drop.as_shop_entry(price),
+                            value: drop.as_shop_entry(),
                         },
-                    ));
+                    );
                 };
                 save(&mut savegame, loc)?;
             }
             Context::Cutscene(cutscene) => {
                 std::fs::create_dir_all(app.pak.join(MOD).join("BlueFire/Libraries"))?;
-                let mut hook = unreal_asset::Asset::new(
-                    std::io::Cursor::new(include_bytes!("../blueprints/hook.uasset").as_slice()),
-                    Some(std::io::Cursor::new(
-                        include_bytes!("../blueprints/hook.uexp").as_slice(),
-                    )),
-                );
-                hook.set_engine_version(unreal_asset::engine_version::EngineVersion::VER_UE4_25);
-                hook.parse_data()?;
+                let mut hook = open_from_bytes(
+                    include_bytes!("../blueprints/hook.uasset").as_slice(),
+                    include_bytes!("../blueprints/hook.uexp").as_slice(),
+                )?;
                 let new_name = cutscene.split('/').last().unwrap_or_default();
                 // edit hook name refs to this new name and save to there
                 save(&mut hook, format!("{MOD}/BlueFire/Libraries/{new_name}"))?;
@@ -186,7 +182,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     class,
                     "Chest_Master_C" | "Chest_Master_Child_C" | "Chest_Dance_C"
                 );
-                #[allow(unused_variables)]
+                let insert = map.exports.len();
                 match &drop {
                     Drop::Item(item, amount) if is_chest => {
                         let Some(chest) = map.exports[i].get_normal_export_mut() else {
@@ -233,9 +229,25 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         };
                         set_byte("Type", "PickUpList", "1", pickup)?;
                         set_byte("Item", "Items", item.as_ref(), pickup)?;
-                        todo!("duplicate the pickup on the amount")
+                        for _ in 0..amount - 1 {
+                            duplicate(i, &mut map)
+                        }
                     }
-                    Drop::Item(item, amount) => todo!(),
+                    Drop::Item(item, amount) => {
+                        delete(i, &mut map);
+                        transplant(
+                            21,
+                            &mut map,
+                            &open_from_bytes(
+                                include_bytes!("../blueprints/collectables.umap").as_slice(),
+                                include_bytes!("../blueprints/collectables.uexp").as_slice(),
+                            )?,
+                        );
+                        if let Some(norm) = map.exports[insert].get_normal_export_mut() {
+                            set_byte("Type", "InventoryItemType", drop.as_ref(), norm)?;
+                            set_byte("Items", "Abilities", item.as_ref(), norm)?
+                        }
+                    }
                     Drop::Weapon(weapon) if is_chest => {
                         let Some(chest) = map.exports[i].get_normal_export_mut() else {
                             return Err(Error::Assumption)
@@ -243,7 +255,23 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         set_byte("Type", "InventoryItemType", drop.as_ref(), chest)?;
                         set_byte("Weapon", "Weapons", weapon.as_ref(), chest)?;
                     }
-                    Drop::Weapon(weapon) => todo!(),
+                    Drop::Weapon(weapon) => {
+                        transplant(
+                            21,
+                            &mut map,
+                            &open_from_bytes(
+                                include_bytes!("../blueprints/collectables.umap").as_slice(),
+                                include_bytes!("../blueprints/collectables.uexp").as_slice(),
+                            )?,
+                        );
+                        if let Some(norm) = map.exports[insert].get_normal_export_mut() {
+                            set_byte("Type", "InventoryItemType", drop.as_ref(), norm)?;
+                            set_byte("Weapon", "Weapons", weapon.as_ref(), norm)?
+                        }
+                        let loc = get_location(i, &map);
+                        set_location(insert, &mut map, loc);
+                        delete(i, &mut map);
+                    }
                     Drop::Tunic(tunic) if is_chest => {
                         let Some(chest) = map.exports[i].get_normal_export_mut() else {
                             return Err(Error::Assumption)
@@ -251,7 +279,23 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         set_byte("Type", "InventoryItemType", drop.as_ref(), chest)?;
                         set_byte("Tunic", "Tunics", tunic.as_ref(), chest)?;
                     }
-                    Drop::Tunic(tunic) => todo!(),
+                    Drop::Tunic(tunic) => {
+                        transplant(
+                            21,
+                            &mut map,
+                            &open_from_bytes(
+                                include_bytes!("../blueprints/collectables.umap").as_slice(),
+                                include_bytes!("../blueprints/collectables.uexp").as_slice(),
+                            )?,
+                        );
+                        if let Some(norm) = map.exports[insert].get_normal_export_mut() {
+                            set_byte("Type", "InventoryItemType", drop.as_ref(), norm)?;
+                            set_byte("Tunic", "Tunics", tunic.as_ref(), norm)?
+                        }
+                        let loc = get_location(i, &map);
+                        set_location(insert, &mut map, loc);
+                        delete(i, &mut map);
+                    }
                     Drop::Spirit(spirit) if is_chest => {
                         let Some(chest) = map.exports[i].get_normal_export_mut() else {
                             return Err(Error::Assumption)
@@ -265,7 +309,23 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         };
                         set_byte("Spirit", "Spirits", spirit.as_ref(), spirit_bp)?;
                     }
-                    Drop::Spirit(spirit) => todo!(),
+                    Drop::Spirit(spirit) => {
+                        transplant(
+                            5,
+                            &mut map,
+                            &open_from_bytes(
+                                include_bytes!("../blueprints/collectables.umap").as_slice(),
+                                include_bytes!("../blueprints/collectables.uexp").as_slice(),
+                            )?,
+                        );
+                        if let Some(norm) = map.exports[insert].get_normal_export_mut() {
+                            set_byte("Type", "InventoryItemType", drop.as_ref(), norm)?;
+                            set_byte("Spirit", "Spirits", spirit.as_ref(), norm)?
+                        }
+                        let loc = get_location(i, &map);
+                        set_location(insert, &mut map, loc);
+                        delete(i, &mut map);
+                    }
                     Drop::Ability(ability) if is_chest => {
                         let Some(chest) = map.exports[i].get_normal_export_mut() else {
                             return Err(Error::Assumption)
@@ -273,7 +333,23 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         set_byte("Type", "InventoryItemType", drop.as_ref(), chest)?;
                         set_byte("Ability", "Abilities", ability.as_ref(), chest)?;
                     }
-                    Drop::Ability(ability) => todo!(),
+                    Drop::Ability(ability) => {
+                        transplant(
+                            21,
+                            &mut map,
+                            &open_from_bytes(
+                                include_bytes!("../blueprints/collectables.umap").as_slice(),
+                                include_bytes!("../blueprints/collectables.uexp").as_slice(),
+                            )?,
+                        );
+                        if let Some(norm) = map.exports[insert].get_normal_export_mut() {
+                            set_byte("Type", "InventoryItemType", drop.as_ref(), norm)?;
+                            set_byte("Ability", "Abilities", ability.as_ref(), norm)?
+                        }
+                        let loc = get_location(i, &map);
+                        set_location(insert, &mut map, loc);
+                        delete(i, &mut map);
+                    }
                     Drop::Emote(emote) if class == "EmoteStatue_BP_C" => {
                         let Some(statue) = map.exports[i].get_normal_export_mut() else {
                             return Err(Error::Assumption)
@@ -302,49 +378,19 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         }
                     }
                     Drop::Ore(amount) => todo!(),
-                    Drop::Duck if is_chest => {
-                        let Some(chest) = map.exports[i].get_normal_export_mut() else {
-                            return Err(Error::Assumption)
-                        };
-                        set_byte("Type", "InventoryItemType", drop.as_ref(), chest)?;
-                        set_byte("Item", "Items", Items::Duck.as_ref(), chest)?;
-                        match chest.properties.iter_mut().find_map(|prop| {
-                            cast!(Property, BoolProperty, prop)
-                                .filter(|bool| bool.name.content == "KeyItem")
-                        }) {
-                            Some(key_item) => key_item.value = true,
-                            None => chest.properties.push(Property::BoolProperty(
-                                int_property::BoolProperty {
-                                    name: FName::from_slice("KeyItem"),
-                                    property_guid: None,
-                                    duplication_index: 0,
-                                    value: true,
-                                },
-                            )),
-                        }
-                        match chest.properties.iter_mut().find_map(|prop| {
-                            cast!(Property, IntProperty, prop)
-                                .filter(|amount| amount.name.content == "Amount")
-                        }) {
-                            Some(num) => num.value = 1,
-                            None => chest.properties.push(Property::IntProperty(
-                                int_property::IntProperty {
-                                    name: FName::from_slice("Amount"),
-                                    property_guid: None,
-                                    duplication_index: 0,
-                                    value: 1,
-                                },
-                            )),
-                        }
+                    Drop::Duck => {
+                        transplant(
+                            45,
+                            &mut map,
+                            &open_from_bytes(
+                                include_bytes!("../blueprints/collectables.umap").as_slice(),
+                                include_bytes!("../blueprints/collectables.uexp").as_slice(),
+                            )?,
+                        );
+                        let loc = get_location(i, &map);
+                        set_location(insert, &mut map, loc);
+                        delete(i, &mut map);
                     }
-                    Drop::Duck if class == "Pickup_C" => {
-                        let Some(pickup) = map.exports[i].get_normal_export_mut() else {
-                            return Err(Error::Assumption)
-                        };
-                        set_byte("Type", "PickUpList", "1", pickup)?;
-                        set_byte("Item", "Items", Items::Duck.as_ref(), pickup)?;
-                    }
-                    Drop::Duck => todo!(),
                 }
                 // find the actor and delete/replace it using the reference in the collectables map to reflect the drop
                 save(&mut map, &loc)?;
@@ -370,7 +416,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                                     property_guid: None,
                                     duplication_index: 0,
                                     serialize_none: true,
-                                    value: drop.as_shop_entry(0),
+                                    value: drop.as_shop_entry(),
                                 },
                             ));
                     }
@@ -451,7 +497,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
 }
 
 impl Drop {
-    pub fn as_shop_entry(&self, price: u16) -> Vec<unreal_asset::properties::Property> {
+    pub fn as_shop_entry(&self) -> Vec<unreal_asset::properties::Property> {
         use int_property::*;
         [
             byte_property(
@@ -525,7 +571,7 @@ impl Drop {
                 name: FName::from_slice("Price_26_80A37F3645AE8292A9F311B86094C095"),
                 property_guid: None,
                 duplication_index: 0,
-                value: price as i32,
+                value: 500,
             }),
             byte_property(
                 "Ability_29_EBF42DD143E9F82EC9303082A50329F0",

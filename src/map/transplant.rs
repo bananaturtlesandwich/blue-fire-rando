@@ -1,7 +1,10 @@
-use std::fs::File;
 use unreal_asset::{exports::*, reader::asset_trait::AssetTrait, types::*, *};
 
-pub fn transplant(index: usize, recipient: &mut Asset<File>, donor: &Asset<File>) {
+pub fn transplant<C: std::io::Seek + std::io::Read, D: std::io::Seek + std::io::Read>(
+    index: usize,
+    recipient: &mut Asset<C>,
+    donor: &Asset<D>,
+) {
     let mut children = super::get_actor_exports(index, donor, recipient.exports.len());
 
     // make sure the actor has a unique object name
