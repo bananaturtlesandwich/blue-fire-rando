@@ -1,59 +1,175 @@
-use std::fs::File;
-use unreal_asset::{
-    exports::{ExportBaseTrait, ExportNormalTrait},
-    properties::Property,
-};
+use unreal_asset::{exports::*, properties::*, types::*, *};
 
-pub fn open(
-    file: impl AsRef<std::path::Path>,
-) -> Result<unreal_asset::Asset<File>, unreal_asset::error::Error> {
-    let mut asset = unreal_asset::Asset::new(
-        File::open(&file)?,
-        File::open(file.as_ref().with_extension("uexp")).ok(),
-    );
-    asset.set_engine_version(unreal_asset::engine_version::EngineVersion::VER_UE4_25);
-    asset.parse_data()?;
-    Ok(asset)
-}
+mod delete;
+pub use delete::delete;
+mod transplant;
+pub use transplant::transplant;
+mod duplicate;
+pub use duplicate::duplicate;
+mod transform;
+pub use transform::*;
 
-pub fn save<R: std::io::Seek + std::io::Read>(
-    asset: &mut unreal_asset::Asset<R>,
-    path: impl AsRef<std::path::Path>,
-) -> Result<(), unreal_asset::error::Error> {
-    update_names(asset);
-    asset.write_data(
-        &mut File::create(&path)?,
-        File::create(path.as_ref().with_extension("uexp"))
-            .ok()
-            .as_mut(),
-    )
-}
+/// gets all exports related to the given actor
+fn get_actor_exports<C: std::io::Seek + std::io::Read>(
+    index: usize,
+    asset: &Asset<C>,
+    offset: usize,
+) -> Vec<Export> {
+    // get references to all the actor's children
+    let mut child_indexes: Vec<PackageIndex> = asset.exports[index]
+        .get_base_export()
+        .create_before_serialization_dependencies
+        .iter()
+        .filter(|dep| dep.is_export())
+        // dw PackageIndex is just a wrapper around i32 which is cloned by default anyway
+        .cloned()
+        .collect();
+    // add the top-level actor reference
+    child_indexes.insert(0, PackageIndex::new(index as i32 + 1));
 
-// so i don't have to deal with borrow checker when editing name properties
-fn update_names<R: std::io::Seek + std::io::Read>(asset: &mut unreal_asset::Asset<R>) {
-    for import in asset.imports.clone().iter() {
-        asset.add_fname(&import.class_package.content);
-        asset.add_fname(&import.class_name.content);
-        asset.add_fname(&import.object_name.content);
-    }
-    for export in asset.exports.clone().iter() {
-        asset.add_fname(&export.get_base_export().object_name.content);
-        // resolve the rest of the name references
-        if let Some(norm) = export.get_normal_export() {
-            for prop in norm.properties.iter() {
-                update_prop_name(prop, asset, false);
-            }
+    // get all the exports from those indexes
+    let mut children: Vec<Export> = child_indexes
+        .iter()
+        .filter_map(|index| asset.get_export(*index))
+        // i'm pretty sure i have to clone here so i can modify then insert data
+        .cloned()
+        .collect();
+
+    let package_offset = (offset + 1) as i32;
+    // update export references to what they will be once added
+    for (i, child_index) in child_indexes.into_iter().enumerate() {
+        for child in children.iter_mut() {
+            on_export_refs(child, |index| {
+                if index == &child_index {
+                    index.index = package_offset + i as i32;
+                }
+            });
         }
     }
+    children
 }
 
-fn update_prop_name<R: std::io::Seek + std::io::Read>(
+/// creates and assigns a unique name
+fn give_unique_name<C: std::io::Seek + std::io::Read>(orig: &mut FName, asset: &mut Asset<C>) {
+    // for the cases where the number is unnecessary
+    if asset.search_name_reference(&orig.content).is_none() {
+        *orig = asset.add_fname(&orig.content);
+        return;
+    }
+    let mut name = orig.content.clone();
+    let mut id: u16 = match name.rfind(|ch: char| ch.to_digit(10).is_none()) {
+        Some(index) if index != name.len() - 1 => {
+            name.drain(index + 1..).collect::<String>().parse().unwrap()
+        }
+        _ => 1,
+    };
+    while asset
+        .search_name_reference(&format!("{}{}", &name, id))
+        .is_some()
+    {
+        id += 1;
+    }
+    *orig = asset.add_fname(&(name + &id.to_string()))
+}
+
+/// on all possible export references
+fn on_export_refs(export: &mut Export, mut func: impl FnMut(&mut PackageIndex)) {
+    if let Some(norm) = export.get_normal_export_mut() {
+        for prop in norm.properties.iter_mut() {
+            on_props(prop, &mut func);
+        }
+    }
+    let export = export.get_base_export_mut();
+    export
+        .create_before_create_dependencies
+        .iter_mut()
+        .for_each(&mut func);
+    export
+        .create_before_serialization_dependencies
+        .iter_mut()
+        .for_each(&mut func);
+    export
+        .serialization_before_create_dependencies
+        .iter_mut()
+        .for_each(&mut func);
+    func(&mut export.outer_index);
+}
+
+/// on all of an export's possible references to imports
+fn on_import_refs(export: &mut Export, mut func: impl FnMut(&mut PackageIndex)) {
+    if let Some(norm) = export.get_normal_export_mut() {
+        for prop in norm.properties.iter_mut() {
+            on_props(prop, &mut func);
+        }
+    }
+    let export = export.get_base_export_mut();
+    func(&mut export.class_index);
+    func(&mut export.template_index);
+    // not serialization_before_serialization because only the first few map exports have those
+    export
+        .serialization_before_create_dependencies
+        .iter_mut()
+        .for_each(&mut func);
+    export
+        .create_before_serialization_dependencies
+        .iter_mut()
+        .for_each(&mut func);
+}
+
+/// on any possible references stashed away in properties
+fn on_props(prop: &mut Property, func: &mut impl FnMut(&mut PackageIndex)) {
+    match prop {
+        Property::ObjectProperty(obj) => {
+            func(&mut obj.value);
+        }
+        Property::ArrayProperty(arr) => {
+            for entry in arr.value.iter_mut() {
+                on_props(entry, func);
+            }
+        }
+        Property::MapProperty(map) => {
+            for val in map.value.values_mut() {
+                on_props(val, func);
+            }
+        }
+        Property::SetProperty(set) => {
+            for entry in set.value.value.iter_mut() {
+                on_props(entry, func);
+            }
+            for entry in set.removed_items.value.iter_mut() {
+                on_props(entry, func);
+            }
+        }
+        Property::DelegateProperty(del) => func(&mut del.value.object),
+        Property::MulticastDelegateProperty(del) => {
+            for delegate in del.value.iter_mut() {
+                func(&mut delegate.object)
+            }
+        }
+        Property::MulticastSparseDelegateProperty(del) => {
+            for delegate in del.value.iter_mut() {
+                func(&mut delegate.object)
+            }
+        }
+        Property::MulticastInlineDelegateProperty(del) => {
+            for delegate in del.value.iter_mut() {
+                func(&mut delegate.object)
+            }
+        }
+        Property::StructProperty(struc) => {
+            for entry in struc.value.iter_mut() {
+                on_props(entry, func);
+            }
+        }
+        _ => (),
+    }
+}
+
+fn add_prop_names<C: std::io::Read + std::io::Seek>(
     prop: &Property,
-    asset: &mut unreal_asset::Asset<R>,
+    asset: &mut Asset<C>,
     is_array: bool,
 ) {
-    use unreal_asset::properties::PropertyDataTrait;
-    use unreal_asset::types::ToFName;
     asset.add_fname(&prop.to_fname().content);
     // the name of properties in arrays is their index
     if !is_array {
@@ -122,12 +238,12 @@ fn update_prop_name<R: std::io::Seek + std::io::Read>(
                 asset.add_fname(&typ.content);
             }
             for prop in prop.value.iter() {
-                update_prop_name(prop, asset, false);
+                add_prop_names(prop, asset, false);
             }
         }
         Property::ArrayProperty(prop) => {
             for prop in prop.value.iter() {
-                update_prop_name(prop, asset, true);
+                add_prop_names(prop, asset, true);
             }
         }
         Property::EnumProperty(prop) => {
@@ -141,16 +257,16 @@ fn update_prop_name<R: std::io::Seek + std::io::Read>(
         }
         Property::SetProperty(prop) => {
             for prop in prop.value.value.iter() {
-                update_prop_name(prop, asset, true);
+                add_prop_names(prop, asset, true);
             }
             for prop in prop.removed_items.value.iter() {
-                update_prop_name(prop, asset, true);
+                add_prop_names(prop, asset, true);
             }
         }
         Property::MapProperty(prop) => {
             for (_, key, value) in prop.value.iter() {
-                update_prop_name(key, asset, false);
-                update_prop_name(value, asset, false);
+                add_prop_names(key, asset, false);
+                add_prop_names(value, asset, false);
             }
         }
         Property::MaterialAttributesInputProperty(prop) => {
@@ -198,13 +314,13 @@ fn update_prop_name<R: std::io::Seek + std::io::Read>(
         }
         Property::NiagaraVariableProperty(prop) => {
             for prop in prop.struct_property.value.iter() {
-                update_prop_name(prop, asset, false);
+                add_prop_names(prop, asset, false);
             }
             asset.add_fname(&prop.variable_name.content);
         }
         Property::NiagaraVariableWithOffsetProperty(prop) => {
             for prop in prop.niagara_variable.struct_property.value.iter() {
-                update_prop_name(prop, asset, false);
+                add_prop_names(prop, asset, false);
             }
             asset.add_fname(&prop.niagara_variable.variable_name.content);
         }
