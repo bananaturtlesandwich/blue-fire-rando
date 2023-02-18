@@ -47,8 +47,26 @@ pub fn transplant<C: std::io::Seek + std::io::Read, D: std::io::Seek + std::io::
                     &import.class_name,
                     &import.object_name,
                 ) {
-                    Some(existing) => existing,
-                    None => {
+                    Some(existing)
+                        if donor.get_import(import.outer_index).map(|import| {
+                            (
+                                &import.class_package.content,
+                                &import.class_name.content,
+                                &import.object_name.content,
+                            )
+                        }) == recipient.get_import(PackageIndex::new(existing)).map(
+                            |import| {
+                                (
+                                    &import.class_package.content,
+                                    &import.class_name.content,
+                                    &import.object_name.content,
+                                )
+                            },
+                        ) =>
+                    {
+                        existing
+                    }
+                    _ => {
                         -import_offset
                             - match imports.iter().position(|imp: &Import| {
                                 imp.class_package.content == import.class_package.content
@@ -67,6 +85,15 @@ pub fn transplant<C: std::io::Seek + std::io::Read, D: std::io::Seek + std::io::
             }
         })
     }
+    // add export names
+    for export in children.iter() {
+        recipient.add_fname(&export.get_base_export().object_name.content);
+        if let Some(norm) = export.get_normal_export() {
+            for prop in norm.properties.iter() {
+                super::add_prop_names(prop, recipient, false)
+            }
+        }
+    }
     // finally add the exports
     recipient.exports.append(&mut children);
 
@@ -80,8 +107,26 @@ pub fn transplant<C: std::io::Seek + std::io::Read, D: std::io::Seek + std::io::
                 &parent.class_name,
                 &parent.object_name,
             ) {
-                Some(existing) => existing,
-                None => {
+                Some(existing)
+                    if donor.get_import(parent.outer_index).map(|import| {
+                        (
+                            &import.class_package.content,
+                            &import.class_name.content,
+                            &import.object_name.content,
+                        )
+                    }) == recipient
+                        .get_import(PackageIndex::new(existing))
+                        .map(|import| {
+                            (
+                                &import.class_package.content,
+                                &import.class_name.content,
+                                &import.object_name.content,
+                            )
+                        }) =>
+                {
+                    existing
+                }
+                _ => {
                     -import_offset
                         - match imports.iter().position(|import: &Import| {
                             import.class_package.content == parent.class_package.content
@@ -99,6 +144,12 @@ pub fn transplant<C: std::io::Seek + std::io::Read, D: std::io::Seek + std::io::
             }
         }
         i += 1;
+    }
+    // add import names
+    for import in imports.iter() {
+        recipient.add_fname(&import.class_package.content);
+        recipient.add_fname(&import.class_name.content);
+        recipient.add_fname(&import.object_name.content);
     }
     recipient.imports.append(&mut imports);
 }

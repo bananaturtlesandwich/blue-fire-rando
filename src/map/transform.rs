@@ -36,7 +36,7 @@ pub fn get_location(index: usize, asset: &Asset<std::fs::File>) -> Vector<f32> {
         .unwrap_or(DEFAULT)
 }
 
-pub fn set_location(index: usize, asset: &mut Asset<std::fs::File>, mut new: Vector<f32>) {
+pub fn set_location(index: usize, asset: &mut Asset<std::fs::File>, new: Vector<f32>) {
     let Some(transform) = get_transform_index(index, asset) else {
         return
     };
