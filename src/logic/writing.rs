@@ -224,29 +224,30 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         }
                     }
                     Drop::Item(item, amount) if class == "Pickup_C" => {
-                        let Some(pickup) = map.exports[i].get_normal_export_mut() else {
-                            return Err(Error::Assumption)
+                        if let Some(pickup) = map.exports[i].get_normal_export_mut() {
+                            set_byte("Type", "PickUpList", "1", pickup)?;
+                            set_byte("Item", "Items", item.as_ref(), pickup)?;
                         };
-                        set_byte("Type", "PickUpList", "1", pickup)?;
-                        set_byte("Item", "Items", item.as_ref(), pickup)?;
                         for _ in 0..amount - 1 {
                             duplicate(i, &mut map)
                         }
                     }
                     Drop::Item(item, amount) => {
-                        delete(i, &mut map);
                         transplant(
-                            21,
+                            5,
                             &mut map,
                             &open_from_bytes(
-                                include_bytes!("../blueprints/collectables.umap").as_slice(),
-                                include_bytes!("../blueprints/collectables.uexp").as_slice(),
+                                include_bytes!("../blueprints/collectibles.umap").as_slice(),
+                                include_bytes!("../blueprints/collectibles.uexp").as_slice(),
                             )?,
                         );
-                        if let Some(norm) = map.exports[insert].get_normal_export_mut() {
-                            set_byte("Type", "InventoryItemType", drop.as_ref(), norm)?;
-                            set_byte("Items", "Abilities", item.as_ref(), norm)?
-                        }
+                        if let Some(pickup) = map.exports[i].get_normal_export_mut() {
+                            set_byte("Type", "PickUpList", "1", pickup)?;
+                            set_byte("Item", "Items", item.as_ref(), pickup)?;
+                        };
+                        let loc = get_location(i, &map);
+                        set_location(insert, &mut map, loc);
+                        delete(i, &mut map);
                     }
                     Drop::Weapon(weapon) if is_chest => {
                         let Some(chest) = map.exports[i].get_normal_export_mut() else {
@@ -257,11 +258,11 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     }
                     Drop::Weapon(weapon) => {
                         transplant(
-                            21,
+                            36,
                             &mut map,
                             &open_from_bytes(
-                                include_bytes!("../blueprints/collectables.umap").as_slice(),
-                                include_bytes!("../blueprints/collectables.uexp").as_slice(),
+                                include_bytes!("../blueprints/collectibles.umap").as_slice(),
+                                include_bytes!("../blueprints/collectibles.uexp").as_slice(),
                             )?,
                         );
                         if let Some(norm) = map.exports[insert].get_normal_export_mut() {
@@ -281,11 +282,11 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     }
                     Drop::Tunic(tunic) => {
                         transplant(
-                            21,
+                            36,
                             &mut map,
                             &open_from_bytes(
-                                include_bytes!("../blueprints/collectables.umap").as_slice(),
-                                include_bytes!("../blueprints/collectables.uexp").as_slice(),
+                                include_bytes!("../blueprints/collectibles.umap").as_slice(),
+                                include_bytes!("../blueprints/collectibles.uexp").as_slice(),
                             )?,
                         );
                         if let Some(norm) = map.exports[insert].get_normal_export_mut() {
@@ -311,11 +312,11 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     }
                     Drop::Spirit(spirit) => {
                         transplant(
-                            5,
+                            26,
                             &mut map,
                             &open_from_bytes(
-                                include_bytes!("../blueprints/collectables.umap").as_slice(),
-                                include_bytes!("../blueprints/collectables.uexp").as_slice(),
+                                include_bytes!("../blueprints/collectibles.umap").as_slice(),
+                                include_bytes!("../blueprints/collectibles.uexp").as_slice(),
                             )?,
                         );
                         if let Some(norm) = map.exports[insert].get_normal_export_mut() {
@@ -335,11 +336,11 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     }
                     Drop::Ability(ability) => {
                         transplant(
-                            21,
+                            36,
                             &mut map,
                             &open_from_bytes(
-                                include_bytes!("../blueprints/collectables.umap").as_slice(),
-                                include_bytes!("../blueprints/collectables.uexp").as_slice(),
+                                include_bytes!("../blueprints/collectibles.umap").as_slice(),
+                                include_bytes!("../blueprints/collectibles.uexp").as_slice(),
                             )?,
                         );
                         if let Some(norm) = map.exports[insert].get_normal_export_mut() {
@@ -356,7 +357,22 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         };
                         set_byte("Emote", "E_Emotes", emote.as_ref(), statue)?;
                     }
-                    Drop::Emote(emote) => todo!(),
+                    Drop::Emote(emote) => {
+                        transplant(
+                            20,
+                            &mut map,
+                            &open_from_bytes(
+                                include_bytes!("../blueprints/collectibles.umap").as_slice(),
+                                include_bytes!("../blueprints/collectibles.uexp").as_slice(),
+                            )?,
+                        );
+                        if let Some(norm) = map.exports[insert].get_normal_export_mut() {
+                            set_byte("Emote", "E_Emotes", emote.as_ref(), norm)?
+                        }
+                        let loc = get_location(i, &map);
+                        set_location(insert, &mut map, loc);
+                        delete(i, &mut map);
+                    }
                     Drop::Ore(amount) if class == "Pickup_C" => {
                         let Some(pickup) = map.exports[i].get_normal_export_mut() else {
                             return Err(Error::Assumption)
@@ -377,14 +393,42 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                             )),
                         }
                     }
-                    Drop::Ore(amount) => todo!(),
-                    Drop::Duck => {
+                    Drop::Ore(amount) => {
                         transplant(
-                            45,
+                            5,
                             &mut map,
                             &open_from_bytes(
-                                include_bytes!("../blueprints/collectables.umap").as_slice(),
-                                include_bytes!("../blueprints/collectables.uexp").as_slice(),
+                                include_bytes!("../blueprints/collectibles.umap").as_slice(),
+                                include_bytes!("../blueprints/collectibles.uexp").as_slice(),
+                            )?,
+                        );
+                        if let Some(pickup) = map.exports[insert].get_normal_export_mut() {
+                            match pickup.properties.iter_mut().find_map(|prop| {
+                                cast!(Property, IntProperty, prop)
+                                    .filter(|amount| amount.name.content == "Souls/LifeAmount")
+                            }) {
+                                Some(num) => num.value = *amount as i32,
+                                None => pickup.properties.push(Property::IntProperty(
+                                    int_property::IntProperty {
+                                        name: FName::from_slice("Souls/LifeAmount"),
+                                        property_guid: None,
+                                        duplication_index: 0,
+                                        value: *amount as i32,
+                                    },
+                                )),
+                            }
+                        }
+                        let loc = get_location(i, &map);
+                        set_location(insert, &mut map, loc);
+                        delete(i, &mut map);
+                    }
+                    Drop::Duck => {
+                        transplant(
+                            18,
+                            &mut map,
+                            &open_from_bytes(
+                                include_bytes!("../blueprints/collectibles.umap").as_slice(),
+                                include_bytes!("../blueprints/collectibles.uexp").as_slice(),
                             )?,
                         );
                         let loc = get_location(i, &map);

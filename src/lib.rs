@@ -82,12 +82,16 @@ impl eframe::App for Rando {
 
                 ui[1].heading(egui::RichText::new("Extra options").underline());
                 ui[1].checkbox(&mut self.treasure, "Treasures e.g Seagull soup");
-                // since dash is an ability i might have to think more on how to do this - plus context is funky too
                 ui[1].checkbox(&mut self.dash, "Dash -===(    - _ o)");
                 ui[1].checkbox(&mut self.ore, "Ore  (    $ o $)");
-                // ducks are typically located on the master map - maybe make it so room it's locked in unlocks master map
-                ui[1].code("Ducks <(⭕ ◑ ө ◑ ⭕)>");
-                ui[1].label("atm all the app does is make a spoiler log for fire keep");
+                ui[1].checkbox(&mut self.ducks, "Ducks <(⭕ ◑ ө ◑ ⭕)>");
+                ui[1].horizontal(|ui|{
+                    let size = ui.fonts(|fonts| fonts.glyph_width(&egui::TextStyle::Body.resolve(ui.style()), ' '));
+                    ui.spacing_mut().item_spacing.x = size;
+                    ui.label("chat about this in the");
+                    ui.hyperlink_to("discord", "https://discord.gg/bluefire");
+                    ui.label("!");
+                });
                 ui[1].label("share rando_p.pak for races");
             });
             if ui

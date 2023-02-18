@@ -51,9 +51,9 @@ pub fn set_location(index: usize, asset: &mut Asset<std::fs::File>, new: Vector<
         Some(scale) => {
             if let Property::StructProperty(struc) = scale {
                 if let Property::VectorProperty(vec) = &mut struc.value[0] {
-                    vec.value.x.0 = -new.x;
-                    vec.value.y.0 = new.z;
-                    vec.value.z.0 = new.y;
+                    vec.value.x.0 = new.x;
+                    vec.value.y.0 = new.y;
+                    vec.value.z.0 = new.z;
                 }
             }
         }
@@ -70,7 +70,7 @@ pub fn set_location(index: usize, asset: &mut Asset<std::fs::File>, new: Vector<
                     name: FName::from_slice("RelativeLocation"),
                     property_guid: None,
                     duplication_index: 0,
-                    value: Vector::new(new.x.into(), new.z.into(), new.y.into()),
+                    value: Vector::new(new.x.into(), new.y.into(), new.z.into()),
                 })],
             })),
     }
