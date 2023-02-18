@@ -5,7 +5,7 @@ const BEGINNING: &str = "A02_ArcaneTunnels/A02_GameIntro_KeepSouth";
 const NOTENOUGH: &str =
     "you haven't picked enough checks for anything to be random - include more checks in the pool";
 
-pub fn randomise(app: &mut crate::Rando) -> Result<(), String> {
+pub fn randomise(app: &crate::Rando) -> Result<(), String> {
     let in_pool = |check: &Check| match &check.drop {
         Drop::Item(item, _) => match item.is_treasure() {
             true => app.treasure,
@@ -14,7 +14,10 @@ pub fn randomise(app: &mut crate::Rando) -> Result<(), String> {
         Drop::Weapon(_) => app.weapons,
         Drop::Tunic(_) => app.tunics,
         Drop::Spirit(_) => app.spirits,
-        Drop::Ability(_) => app.abilities,
+        Drop::Ability(ability) => match ability == &Abilities::Dash {
+            true => app.dash,
+            false => app.abilities,
+        },
         Drop::Emote(_) => app.emotes,
         Drop::Ore(_) => app.ore,
         Drop::Duck => app.ducks,

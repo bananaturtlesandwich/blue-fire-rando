@@ -16,6 +16,7 @@ hashbrown = "*"
 lazy_static = "*"
 egui-modal = "*"
 rfd = "*"
+thiserror = "*"
 
 [target.'cfg(windows)'.build-dependencies]
 winres = "*"

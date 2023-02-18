@@ -7,8 +7,6 @@ mod writing;
 pub use writing::write;
 mod io;
 pub use io::*;
-mod map;
-pub use map::*;
 
 #[derive(Debug, Clone, strum::EnumIter, strum::AsRefStr)]
 pub enum Shop {
@@ -31,6 +29,7 @@ pub enum Context {
     Shop(Shop),
     Cutscene(&'static str),
     Overworld(&'static str),
+    Starting,
 }
 
 #[derive(PartialEq, Clone, Debug, strum::AsRefStr)]
@@ -64,7 +63,13 @@ struct Location {
     requirements: Option<&'static [&'static [Drop]]>,
 }
 
-const CHECKS: [Check; 12] = [
+const CHECKS: [Check; 13] = [
+    Check {
+        location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
+        context: Context::Starting,
+        drop: Drop::Ability(Abilities::Dash),
+        requirements: None,
+    },
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_Exterior",
         context: Context::Overworld("A01_FireKeep_EmoteStatue_Levitation"),
