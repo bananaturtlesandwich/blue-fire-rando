@@ -63,7 +63,7 @@ struct Location {
     requirements: Option<&'static [&'static [Drop]]>,
 }
 
-const CHECKS: [Check; 14] = [
+const CHECKS: [Check; 15] = [
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
         context: Context::Starting,
@@ -89,6 +89,23 @@ const CHECKS: [Check; 14] = [
         ),
         drop: Drop::Ore(500),
         requirements: Some(&[&[Drop::Item(Items::ComposerLetter, 1)]]),
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A02_GameIntro",
+        context: Context::Overworld("Duck"),
+        drop: Drop::Duck,
+        requirements: Some(&[
+            &[
+                Drop::Ability(Abilities::DoubleJump),
+                Drop::Ability(Abilities::SpinAttack),
+                Drop::Spirit(Spirits::HolyCentry),
+            ],
+            &[
+                Drop::Ability(Abilities::Dash),
+                Drop::Ability(Abilities::SpinAttack),
+                Drop::Spirit(Spirits::PossesedBook),
+            ],
+        ]),
     },
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepEast",

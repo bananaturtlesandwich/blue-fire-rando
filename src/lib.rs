@@ -1,5 +1,5 @@
-mod actor;
 mod logic;
+mod map;
 
 pub struct Rando {
     dialog: egui_modal::Modal,

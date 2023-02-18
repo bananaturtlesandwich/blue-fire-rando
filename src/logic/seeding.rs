@@ -132,6 +132,10 @@ lazy_static::lazy_static! {
             requirements: None,
         },
         "A02_ArcaneTunnels/A02_GameIntro_Exterior" => Location {
+            unlocks: &["A02_ArcaneTunnels/A02_GameIntro"],
+            requirements: None,
+        },
+        "A02_ArcaneTunnels/A02_GameIntro" => Location {
             unlocks: &[],
             requirements: None,
         },

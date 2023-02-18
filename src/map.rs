@@ -2,7 +2,13 @@ use std::fs::File;
 use unreal_asset::{exports::*, properties::Property, types::*, *};
 
 mod delete;
+pub use delete::delete;
 mod transplant;
+pub use transplant::transplant;
+mod duplicate;
+pub use duplicate::duplicate;
+mod transform;
+pub use transform::*;
 
 /// gets all exports related to the given actor
 fn get_actor_exports(index: usize, asset: &Asset<File>, offset: usize) -> Vec<Export> {
