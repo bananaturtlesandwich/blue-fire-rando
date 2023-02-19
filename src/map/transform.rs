@@ -11,7 +11,10 @@ const DEFAULT: Vector<f32> = Vector {
     z: 0.0,
 };
 
-pub fn get_location(index: usize, asset: &Asset<std::fs::File>) -> Vector<f32> {
+pub fn get_location<C: std::io::Read + std::io::Seek>(
+    index: usize,
+    asset: &Asset<C>,
+) -> Vector<f32> {
     let Some(transform) = get_transform_index(index, asset) else {
         return DEFAULT
     };
@@ -36,7 +39,11 @@ pub fn get_location(index: usize, asset: &Asset<std::fs::File>) -> Vector<f32> {
         .unwrap_or(DEFAULT)
 }
 
-pub fn set_location(index: usize, asset: &mut Asset<std::fs::File>, new: Vector<f32>) {
+pub fn set_location<C: std::io::Read + std::io::Seek>(
+    index: usize,
+    asset: &mut Asset<C>,
+    new: Vector<f32>,
+) {
     let Some(transform) = get_transform_index(index, asset) else {
         return
     };
@@ -76,7 +83,10 @@ pub fn set_location(index: usize, asset: &mut Asset<std::fs::File>, new: Vector<
     }
 }
 
-fn get_transform_index(index: usize, asset: &Asset<std::fs::File>) -> Option<usize> {
+fn get_transform_index<C: std::io::Read + std::io::Seek>(
+    index: usize,
+    asset: &Asset<C>,
+) -> Option<usize> {
     asset.exports[index].get_normal_export().and_then(|norm| {
         // normally these are further back so reversed should be a bit faster
         norm.properties.iter().rev().find_map(|prop| {

@@ -61,7 +61,7 @@ struct Location {
     requirements: Option<&'static [&'static [Drop]]>,
 }
 
-const CHECKS: [Check; 15] = [
+const CHECKS: [Check; 17] = [
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
         context: Context::Starting,
@@ -118,6 +118,12 @@ const CHECKS: [Check; 15] = [
         requirements: None,
     },
     Check {
+        location: "A02_ArcaneTunnels/A02_GameIntro_KeepEast",
+        context: Context::Overworld("Pickup"),
+        drop: Drop::Ore(250),
+        requirements: None,
+    },
+    Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_EastWing",
         context: Context::Overworld("Chest_A02_Keep_Key_01"),
         drop: Drop::Item(Items::OldKey, 1),
@@ -164,6 +170,12 @@ const CHECKS: [Check; 15] = [
         location: "A02_ArcaneTunnels/A02_GameIntro_MemorialMain",
         context: Context::Overworld("Chest_A02_Sword_DiamondWings"),
         drop: Drop::Weapon(Weapons::DiamondWings),
+        requirements: None,
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A02_GameIntro_MemorialMain",
+        context: Context::Overworld("A02_FireKeep_EmoteStatue_Celebration"),
+        drop: Drop::Emote(Emotes::Celebration),
         requirements: None,
     },
     Check {

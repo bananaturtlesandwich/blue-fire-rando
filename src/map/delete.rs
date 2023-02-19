@@ -1,7 +1,7 @@
 use unreal_asset::{exports::*, types::*, *};
 
 /// delete an actor from a map
-pub fn delete(index: usize, map: &mut Asset<std::fs::File>) {
+pub fn delete<C: std::io::Read + std::io::Seek>(index: usize, map: &mut Asset<C>) {
     let val = PackageIndex::new(index as i32 + 1);
     if let Some(level) = map
         .exports
