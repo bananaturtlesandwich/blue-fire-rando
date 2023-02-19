@@ -234,17 +234,31 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     }
                     Drop::Item(item, amount) => {
                         transplant(
-                            5,
+                            36,
                             &mut map,
                             &open_from_bytes(
                                 include_bytes!("../blueprints/collectibles.umap").as_slice(),
                                 include_bytes!("../blueprints/collectibles.uexp").as_slice(),
                             )?,
                         );
-                        if let Some(pickup) = map.exports[i].get_normal_export_mut() {
-                            set_byte("Type", "PickUpList", "1", pickup)?;
-                            set_byte("Item", "Items", item.as_ref(), pickup)?;
-                        };
+                        if let Some(norm) = map.exports[insert].get_normal_export_mut() {
+                            set_byte("Type", "InventoryItemType", drop.as_ref(), norm)?;
+                            set_byte("Item", "Items", item.as_ref(), norm)?;
+                            match norm.properties.iter_mut().find_map(|prop| {
+                                cast!(Property, StrProperty, prop)
+                                    .filter(|id| id.name.content == "ID")
+                            }) {
+                                Some(id) => id.value = Some(actor_name.to_string()),
+                                None => norm.properties.push(Property::StrProperty(
+                                    str_property::StrProperty {
+                                        name: FName::from_slice("Amount"),
+                                        property_guid: None,
+                                        duplication_index: 0,
+                                        value: Some(actor_name.to_string()),
+                                    },
+                                )),
+                            }
+                        }
                         let loc = get_location(i, &map);
                         set_location(insert, &mut map, loc);
                         delete(i, &mut map);
@@ -267,7 +281,21 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         );
                         if let Some(norm) = map.exports[insert].get_normal_export_mut() {
                             set_byte("Type", "InventoryItemType", drop.as_ref(), norm)?;
-                            set_byte("Weapon", "Weapons", weapon.as_ref(), norm)?
+                            set_byte("Weapon", "Weapons", weapon.as_ref(), norm)?;
+                            match norm.properties.iter_mut().find_map(|prop| {
+                                cast!(Property, StrProperty, prop)
+                                    .filter(|id| id.name.content == "ID")
+                            }) {
+                                Some(id) => id.value = Some(actor_name.to_string()),
+                                None => norm.properties.push(Property::StrProperty(
+                                    str_property::StrProperty {
+                                        name: FName::from_slice("Amount"),
+                                        property_guid: None,
+                                        duplication_index: 0,
+                                        value: Some(actor_name.to_string()),
+                                    },
+                                )),
+                            }
                         }
                         let loc = get_location(i, &map);
                         set_location(insert, &mut map, loc);
@@ -291,7 +319,21 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         );
                         if let Some(norm) = map.exports[insert].get_normal_export_mut() {
                             set_byte("Type", "InventoryItemType", drop.as_ref(), norm)?;
-                            set_byte("Tunic", "Tunics", tunic.as_ref(), norm)?
+                            set_byte("Tunic", "Tunics", tunic.as_ref(), norm)?;
+                            match norm.properties.iter_mut().find_map(|prop| {
+                                cast!(Property, StrProperty, prop)
+                                    .filter(|id| id.name.content == "ID")
+                            }) {
+                                Some(id) => id.value = Some(actor_name.to_string()),
+                                None => norm.properties.push(Property::StrProperty(
+                                    str_property::StrProperty {
+                                        name: FName::from_slice("Amount"),
+                                        property_guid: None,
+                                        duplication_index: 0,
+                                        value: Some(actor_name.to_string()),
+                                    },
+                                )),
+                            }
                         }
                         let loc = get_location(i, &map);
                         set_location(insert, &mut map, loc);
@@ -321,7 +363,21 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         );
                         if let Some(norm) = map.exports[insert].get_normal_export_mut() {
                             set_byte("Type", "InventoryItemType", drop.as_ref(), norm)?;
-                            set_byte("Spirit", "Spirits", spirit.as_ref(), norm)?
+                            set_byte("Spirit", "Spirits", spirit.as_ref(), norm)?;
+                            match norm.properties.iter_mut().find_map(|prop| {
+                                cast!(Property, StrProperty, prop)
+                                    .filter(|id| id.name.content == "ID")
+                            }) {
+                                Some(id) => id.value = Some(actor_name.to_string()),
+                                None => norm.properties.push(Property::StrProperty(
+                                    str_property::StrProperty {
+                                        name: FName::from_slice("Amount"),
+                                        property_guid: None,
+                                        duplication_index: 0,
+                                        value: Some(actor_name.to_string()),
+                                    },
+                                )),
+                            }
                         }
                         let loc = get_location(i, &map);
                         set_location(insert, &mut map, loc);
@@ -345,7 +401,21 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         );
                         if let Some(norm) = map.exports[insert].get_normal_export_mut() {
                             set_byte("Type", "InventoryItemType", drop.as_ref(), norm)?;
-                            set_byte("Ability", "Abilities", ability.as_ref(), norm)?
+                            set_byte("Ability", "Abilities", ability.as_ref(), norm)?;
+                            match norm.properties.iter_mut().find_map(|prop| {
+                                cast!(Property, StrProperty, prop)
+                                    .filter(|id| id.name.content == "ID")
+                            }) {
+                                Some(id) => id.value = Some(actor_name.to_string()),
+                                None => norm.properties.push(Property::StrProperty(
+                                    str_property::StrProperty {
+                                        name: FName::from_slice("Amount"),
+                                        property_guid: None,
+                                        duplication_index: 0,
+                                        value: Some(actor_name.to_string()),
+                                    },
+                                )),
+                            }
                         }
                         let loc = get_location(i, &map);
                         set_location(insert, &mut map, loc);
@@ -367,7 +437,21 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                             )?,
                         );
                         if let Some(norm) = map.exports[insert].get_normal_export_mut() {
-                            set_byte("Emote", "E_Emotes", emote.as_ref(), norm)?
+                            set_byte("Emote", "E_Emotes", emote.as_ref(), norm)?;
+                            match norm.properties.iter_mut().find_map(|prop| {
+                                cast!(Property, StrProperty, prop)
+                                    .filter(|id| id.name.content == "ID")
+                            }) {
+                                Some(id) => id.value = Some(actor_name.to_string()),
+                                None => norm.properties.push(Property::StrProperty(
+                                    str_property::StrProperty {
+                                        name: FName::from_slice("Amount"),
+                                        property_guid: None,
+                                        duplication_index: 0,
+                                        value: Some(actor_name.to_string()),
+                                    },
+                                )),
+                            }
                         }
                         let loc = get_location(i, &map);
                         set_location(insert, &mut map, loc);
@@ -414,6 +498,20 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                                         property_guid: None,
                                         duplication_index: 0,
                                         value: *amount as i32,
+                                    },
+                                )),
+                            }
+                            match pickup.properties.iter_mut().find_map(|prop| {
+                                cast!(Property, StrProperty, prop)
+                                    .filter(|id| id.name.content == "ID")
+                            }) {
+                                Some(id) => id.value = Some(actor_name.to_string()),
+                                None => pickup.properties.push(Property::StrProperty(
+                                    str_property::StrProperty {
+                                        name: FName::from_slice("Amount"),
+                                        property_guid: None,
+                                        duplication_index: 0,
+                                        value: Some(actor_name.to_string()),
                                     },
                                 )),
                             }
