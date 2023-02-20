@@ -43,7 +43,7 @@ impl Rando {
                     }
                     break path;
                 }
-                .join("Blue Fire/Content/Paks")
+                .join("Blue Fire\\Content\\Paks")
             },
             item: get_bool("item"),
             weapons: get_bool("weapons"),
@@ -57,6 +57,23 @@ impl Rando {
             ducks: get_bool("ducks"),
         }
     }
+}
+
+macro_rules! notify {
+    ($self:expr, $result: expr, $message: literal) => {
+        match $result {
+            Ok(_) => $self.dialog.open_dialog(
+                Some("success"),
+                Some($message),
+                Some(egui_modal::Icon::Success),
+            ),
+            Err(e) => {
+                $self
+                    .dialog
+                    .open_dialog(Some("whoopsie"), Some(e), Some(egui_modal::Icon::Warning))
+            }
+        }
+    };
 }
 
 impl eframe::App for Rando {
@@ -85,34 +102,60 @@ impl eframe::App for Rando {
                 ui[1].checkbox(&mut self.dash, "Dash -===(    - _ o)");
                 ui[1].checkbox(&mut self.ore, "Ore  (    $ o $)");
                 ui[1].checkbox(&mut self.ducks, "Ducks <(⭕ ◑ ө ◑ ⭕)>");
+                let size = ui[1].fonts(|fonts| fonts.glyph_width(&egui::TextStyle::Body.resolve(ui[1].style()), ' '));
                 ui[1].horizontal(|ui|{
-                    let size = ui.fonts(|fonts| fonts.glyph_width(&egui::TextStyle::Body.resolve(ui.style()), ' '));
                     ui.spacing_mut().item_spacing.x = size;
-                    ui.label("chat about this in the");
+                    ui.label("chat about the rando on");
                     ui.hyperlink_to("discord", "https://discord.gg/bluefire");
-                    ui.label("!");
+                    ui.label("-");
                 });
-                ui[1].label("share rando_p.pak for races");
+                ui[1].horizontal(|ui|{
+                    ui.spacing_mut().item_spacing.x = size;
+                    ui.label("share");
+                    if ui.link("rando_p.pak").clicked() {
+                        notify!(
+                            self,
+                            std::process::Command::new(
+                                #[cfg(target_os="windows")]
+                                "explorer",
+                                #[cfg(target_os="macos")]
+                                "open",
+                                #[cfg(target_os="linux")]
+                                "xdg-open",
+                            ).arg(&self.pak)
+                            .spawn(),
+                            "share rando_p.pak and tell people to put it in the same folder - if rando_p.pak isn't in the folder click the start rando button to generate one"
+                        )
+                    }
+                    ui.label("to race!")
+                });
             });
-            if ui
-                .button(egui::RichText::new("start rando").strong().size(70.0))
-                .with_new_rect(ui.max_rect())
-                .clicked()
-            {
-                match logic::randomise(self) {
-                    Ok(()) => self.dialog.open_dialog(
-                        Some("success"),
-                        Some("the seed has been generated, written and installed - enjoy and have fun!"),
-                        Some(egui_modal::Icon::Success),
-                    ),
-                    Err(e) => self.dialog.open_dialog(
-                        Some("whoopsie"),
-                        Some(e),
-                        Some(egui_modal::Icon::Warning),
-                    ),
+            ui.vertical_centered_justified(|ui|{
+                if ui.button("remove rando").clicked() {
+                    notify!(
+                        self,
+                        std::fs::remove_file(self.pak.join("rando_p.pak")),
+                        "the randomness has successfully been removed from the game - hope to see you again!"
+                    )
                 }
-                std::fs::remove_dir_all(self.pak.join("rando_p")).unwrap_or_default();
-            }
+                if ui.button("start game").clicked() {
+                    notify!(
+                        self,
+                        std::process::Command::new(
+                            self.pak.join("../../Binaries/Win64/PROA34-Win64-Shipping.exe")
+                        ).spawn(),
+                        "game found and launched successfully"
+                    )
+                }
+                if ui.button(egui::RichText::new("start rando").strong().size(70.0)).clicked() {
+                    notify!(
+                        self,
+                        logic::randomise(self),
+                        "seed has been generated, written and installed!"
+                    );
+                    std::fs::remove_dir_all(self.pak.join("rando_p")).unwrap_or_default();
+                }
+            });
             self.dialog.show_dialog();
         });
     }
