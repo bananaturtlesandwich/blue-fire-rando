@@ -153,41 +153,6 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                 todo!("make PR for an editable name map")
             }
             Context::Overworld(name) => {
-                fn replace<C: std::io::Read + std::io::Seek>(
-                    i: &mut usize,
-                    actor: usize,
-                    map: &mut Asset<C>,
-                    name: &str,
-                ) -> Result<(), Error> {
-                    let donor = open_from_bytes(
-                        include_bytes!("../blueprints/collectibles.umap").as_slice(),
-                        include_bytes!("../blueprints/collectibles.uexp").as_slice(),
-                    )?;
-                    delete(*i, map);
-                    let insert = map.exports.len();
-                    transplant(actor, map, &donor);
-                    let loc = get_location(*i, &map);
-                    set_location(insert, map, loc);
-                    let Some(norm) = &mut map.exports[insert].get_normal_export_mut() else {
-                        return Err(Error::Assumption)
-                    };
-                    match norm.properties.iter_mut().find_map(|prop| {
-                        cast!(Property, StrProperty, prop).filter(|id| id.name.content == "ID")
-                    }) {
-                        Some(id) => id.value = Some(name.to_string()),
-                        None => {
-                            norm.properties
-                                .push(Property::StrProperty(str_property::StrProperty {
-                                    name: FName::from_slice("ID"),
-                                    property_guid: None,
-                                    duplication_index: 0,
-                                    value: Some(name.to_string()),
-                                }))
-                        }
-                    }
-                    *i = insert;
-                    Ok(())
-                }
                 let loc = app
                     .pak
                     .join(format!("{PREFIX}{location}").replacen("/Game", MOD, 1))
@@ -219,6 +184,36 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         "Chest_Master_C" | "Chest_Master_Child_C" | "Chest_Dance_C"
                     )
                 };
+                let mut replace = |actor: usize| -> Result<(), Error> {
+                    let donor = open_from_bytes(
+                        include_bytes!("../blueprints/collectibles.umap").as_slice(),
+                        include_bytes!("../blueprints/collectibles.uexp").as_slice(),
+                    )?;
+                    delete(i, &mut map);
+                    let insert = map.exports.len();
+                    transplant(actor, &mut map, &donor);
+                    let loc = get_location(i, &map);
+                    set_location(insert, &mut map, loc);
+                    let Some(norm) = &mut map.exports[insert].get_normal_export_mut() else {
+                        return Err(Error::Assumption)
+                    };
+                    match norm.properties.iter_mut().find_map(|prop| {
+                        cast!(Property, StrProperty, prop).filter(|id| id.name.content == "ID")
+                    }) {
+                        Some(id) => id.value = Some(name.to_string()),
+                        None => {
+                            norm.properties
+                                .push(Property::StrProperty(str_property::StrProperty {
+                                    name: FName::from_slice("ID"),
+                                    property_guid: None,
+                                    duplication_index: 0,
+                                    value: Some(name.to_string()),
+                                }))
+                        }
+                    }
+                    i = insert;
+                    Ok(())
+                };
                 match &drop {
                     Drop::Item(item, amount) if class == "Pickup_C" => {
                         let Some(pickup) = map.exports[i].get_normal_export_mut() else {
@@ -232,7 +227,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     }
                     Drop::Item(item, amount) => {
                         if !is_chest() {
-                            replace(&mut i, 36, &mut map, name)?;
+                            replace(36)?;
                         }
                         let Some(chest) = map.exports[i].get_normal_export_mut() else {
                             return Err(Error::Assumption)
@@ -271,7 +266,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     }
                     Drop::Weapon(weapon) => {
                         if !is_chest() {
-                            replace(&mut i, 36, &mut map, name)?;
+                            replace(36)?;
                         }
                         let Some(chest) = map.exports[i].get_normal_export_mut() else {
                             return Err(Error::Assumption)
@@ -281,7 +276,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     }
                     Drop::Tunic(tunic) => {
                         if !is_chest() {
-                            replace(&mut i, 36, &mut map, name)?;
+                            replace(36)?;
                         }
                         let Some(chest) = map.exports[i].get_normal_export_mut() else {
                             return Err(Error::Assumption)
@@ -298,7 +293,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     }
                     Drop::Spirit(spirit) => {
                         if class != "Spirit_C" {
-                            replace(&mut i, 26, &mut map, name)?;
+                            replace(26)?;
                         }
                         let Some(spirit_bp) = map.exports[i].get_normal_export_mut() else {
                             return Err(Error::Assumption)
@@ -307,7 +302,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     }
                     Drop::Ability(ability) => {
                         if !is_chest() {
-                            replace(&mut i, 36, &mut map, name)?;
+                            replace(36)?;
                         }
                         let Some(chest) = map.exports[i].get_normal_export_mut() else {
                             return Err(Error::Assumption)
@@ -317,7 +312,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     }
                     Drop::Emote(emote) => {
                         if class != "EmoteStatue_BP_C" {
-                            replace(&mut i, 20, &mut map, name)?;
+                            replace(20)?;
                         }
                         let Some(statue) = map.exports[i].get_normal_export_mut() else {
                             return Err(Error::Assumption)
@@ -326,7 +321,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     }
                     Drop::Ore(amount) => {
                         if class != "Pickup_C" {
-                            replace(&mut i, 5, &mut map, name)?;
+                            replace(5)?;
                         }
                         let Some(pickup) = map.exports[i].get_normal_export_mut() else {
                             return Err(Error::Assumption)
@@ -347,7 +342,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                             )),
                         }
                     }
-                    Drop::Duck => replace(&mut i, 18, &mut map, name)?,
+                    Drop::Duck => replace(18)?,
                 }
                 save(&mut map, &loc)?;
             }
