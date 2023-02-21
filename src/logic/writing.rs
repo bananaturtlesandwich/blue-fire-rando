@@ -40,19 +40,21 @@ fn get_savegame(
             )?;
             let mut savegame = open(&loc)?;
             let Some(default) = savegame.exports[1].get_normal_export_mut() else {
-                return Err(Error::Assumption);
+                return Err(Error::Assumption)
             };
             if app.dash {
-                if let Some(dash) = cast!(Property, StructProperty, &mut default.properties[2])
-                    .and_then(|inventory| cast!(Property, BoolProperty, &mut inventory.value[1]))
+                let Some(dash) = cast!(Property, StructProperty, &mut default.properties[2])
+                    .and_then(|inventory| cast!(Property, BoolProperty, &mut inventory.value[1])) else
                 {
-                    dash.value = false
-                }
+                    return Err(Error::Assumption)
+                };
+                dash.value = false;
             }
             if app.emotes {
-                if let Some(emotes) = cast!(Property, ArrayProperty, &mut default.properties[15]) {
-                    emotes.value.clear()
-                }
+                let Some(emotes) = cast!(Property, ArrayProperty, &mut default.properties[15]) else {
+                    return Err(Error::Assumption)
+                };
+                emotes.value.clear()
             }
             savegame
         } else {
@@ -86,7 +88,7 @@ fn set_byte(
     }) {
         Some(byte) => {
             let int_property::BytePropertyValue::FName(name) = &mut byte.value else {
-                return Err(Error::Assumption);
+                return Err(Error::Assumption)
             };
             name.content = format!("{}::NewEnumerator{}", enum_type, val)
         }
@@ -108,22 +110,23 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
         match context {
             Context::Shop(shopkeep, index) => {
                 let (mut savegame, loc) = get_savegame(app, &pak, &pak_path)?;
-                if let Some(Property::ArrayProperty(shop)) = savegame.exports[1]
+                let Some(Property::ArrayProperty(shop)) = savegame.exports[1]
                     .get_normal_export_mut()
                     .map(|norm| &mut norm.properties[shopkeep.clone() as usize])
-                {
-                    shop.value[index] = Property::StructProperty(
-                        unreal_asset::properties::struct_property::StructProperty {
-                            name: FName::from_slice(shopkeep.as_ref()),
-                            struct_type: Some(FName::from_slice("Inventory")),
-                            struct_guid: None,
-                            property_guid: None,
-                            duplication_index: 0,
-                            serialize_none: true,
-                            value: drop.as_shop_entry(),
-                        },
-                    );
+                else {
+                    return Err(Error::Assumption)
                 };
+                shop.value[index] = Property::StructProperty(
+                    unreal_asset::properties::struct_property::StructProperty {
+                        name: FName::from_slice(shopkeep.as_ref()),
+                        struct_type: Some(FName::from_slice("Inventory")),
+                        struct_guid: None,
+                        property_guid: None,
+                        duplication_index: 0,
+                        serialize_none: true,
+                        value: drop.as_shop_entry(),
+                    },
+                );
                 save(&mut savegame, loc)?;
             }
             Context::Cutscene(cutscene) => {
@@ -420,36 +423,38 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                 save(&mut map, &loc)?;
             }
             Context::Starting => {
-                fn add_item(savegame: &mut Asset<std::fs::File>, drop: Drop) {
-                    if let Some(inventory) = savegame.exports[1]
+                fn add_item(savegame: &mut Asset<std::fs::File>, drop: Drop) -> Result<(), Error> {
+                    let Some(inventory) = savegame.exports[1]
                         .get_normal_export_mut()
                         .and_then(|default| {
                             cast!(Property, StructProperty, &mut default.properties[3])
                         })
                         .and_then(|stats| cast!(Property, ArrayProperty, &mut stats.value[6]))
-                    {
-                        inventory
-                            .value
-                            .push(unreal_asset::properties::Property::StructProperty(
-                                unreal_asset::properties::struct_property::StructProperty {
-                                    name: FName::from_slice(
-                                        "Inventory_23_288399C5416269F828550FB7376E7942",
-                                    ),
-                                    struct_type: Some(FName::from_slice("Inventory")),
-                                    struct_guid: None,
-                                    property_guid: None,
-                                    duplication_index: 0,
-                                    serialize_none: true,
-                                    value: drop.as_shop_entry(),
-                                },
-                            ));
-                    }
+                    else {
+                        return Err(Error::Assumption)
+                    };
+                    inventory
+                        .value
+                        .push(unreal_asset::properties::Property::StructProperty(
+                            unreal_asset::properties::struct_property::StructProperty {
+                                name: FName::from_slice(
+                                    "Inventory_23_288399C5416269F828550FB7376E7942",
+                                ),
+                                struct_type: Some(FName::from_slice("Inventory")),
+                                struct_guid: None,
+                                property_guid: None,
+                                duplication_index: 0,
+                                serialize_none: true,
+                                value: drop.as_shop_entry(),
+                            },
+                        ));
+                    Ok(())
                 }
                 let (mut savegame, loc) = get_savegame(app, &pak, &pak_path)?;
                 match &drop {
                     Drop::Ability(ability) => {
-                        add_item(&mut savegame, Drop::Item(ability.as_item(), 1));
-                        if let Some(flag) = savegame.exports[1]
+                        add_item(&mut savegame, Drop::Item(ability.as_item(), 1))?;
+                        let Some(flag) = savegame.exports[1]
                             .get_normal_export_mut()
                             .and_then(|default| {
                                 cast!(Property, StructProperty, &mut default.properties[2])
@@ -461,38 +466,40 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                                     &mut abilities.value[ability.savegame_index()]
                                 )
                             })
-                        {
-                            flag.value = true;
-                        }
+                        else {
+                            return Err(Error::Assumption)
+                        };
+                        flag.value = true;
                     }
                     Drop::Emote(emote) => {
-                        if let Some(emotes) =
+                        let Some(emotes) =
                             savegame.exports[1]
                                 .get_normal_export_mut()
                                 .and_then(|default| {
                                     cast!(Property, ArrayProperty, &mut default.properties[15])
-                                })
-                        {
-                            emotes.value.push(byte_property(
-                                &emotes.value.len().to_string(),
-                                "E_Emotes",
-                                emote.as_ref(),
-                            ))
-                        }
+                                }) else {
+                                    return Err(Error::Assumption)
+                                };
+                        emotes.value.push(byte_property(
+                            &emotes.value.len().to_string(),
+                            "E_Emotes",
+                            emote.as_ref(),
+                        ))
                     }
                     Drop::Ore(amount) => {
-                        if let Some(currency) = savegame.exports[1]
+                        let Some(currency) = savegame.exports[1]
                             .get_normal_export_mut()
                             .and_then(|default| {
                                 cast!(Property, StructProperty, &mut default.properties[3])
                             })
-                            .and_then(|stats| cast!(Property, IntProperty, &mut stats.value[0]))
+                            .and_then(|stats| cast!(Property, IntProperty, &mut stats.value[0])) else
                         {
-                            currency.value += *amount;
-                        }
+                            return Err(Error::Assumption)
+                        };
+                        currency.value += *amount;
                     }
-                    Drop::Duck => add_item(&mut savegame, Drop::Item(Items::Duck, 1)),
-                    _ => add_item(&mut savegame, drop),
+                    Drop::Duck => add_item(&mut savegame, Drop::Item(Items::Duck, 1))?,
+                    _ => add_item(&mut savegame, drop)?,
                 }
                 save(&mut savegame, loc)?;
             }
@@ -537,10 +544,10 @@ impl Drop {
                 name: FName::from_slice("Amount_6_185C591747EF40A592FB63886FDB4281"),
                 property_guid: None,
                 duplication_index: 0,
-                value: if let Drop::Item(_, amount) = self {
-                    *amount
-                } else {
-                    1
+                value: match self {
+                    Drop::Item(_, amount) => *amount,
+                    Drop::Ore(_) => 0,
+                    _ => 1,
                 },
             }),
             Property::BoolProperty(BoolProperty {
@@ -553,10 +560,10 @@ impl Drop {
                 name: FName::from_slice("OriginalAmount_11_58C3C17D426D49A439C0EE85D7E9B6EC"),
                 property_guid: None,
                 duplication_index: 0,
-                value: if let Drop::Item(_, amount) = self {
-                    *amount
-                } else {
-                    1
+                value: match self {
+                    Drop::Item(_, amount) => *amount,
+                    Drop::Ore(_) => 0,
+                    _ => 1,
                 },
             }),
             byte_property(
