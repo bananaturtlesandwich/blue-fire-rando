@@ -127,7 +127,8 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                 save(&mut savegame, loc)?;
             }
             Context::Cutscene(cutscene) => {
-                std::fs::create_dir_all(app.pak.join(MOD).join("BlueFire/Libraries"))?;
+                let loc = app.pak.join(MOD).join("BlueFire/Libraries");
+                std::fs::create_dir_all(&loc)?;
                 let mut hook = open_from_bytes(
                     include_bytes!("../blueprints/hook.uasset").as_slice(),
                     include_bytes!("../blueprints/hook.uexp").as_slice(),
@@ -177,23 +178,40 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     }
                     _ => KismetExpression::ExFalse(ExFalse::default()),
                 });
-                let new_name = cutscene.split('/').last().unwrap_or_default();
-                todo!("edit hook name refs to new name");
-                save(&mut hook, format!("{MOD}/BlueFire/Libraries/{new_name}"))?;
-                let loc = app.pak.join(cutscene.replacen("/Game", MOD, 1));
+                let new_name = format!("{}_Hook", cutscene.split('/').last().unwrap_or_default());
+                let self_refs: Vec<usize> = hook
+                    .get_name_map_index_list()
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(i, name)| name.contains("hook").then_some(i))
+                    .collect();
+                for i in self_refs {
+                    let name = hook.get_name_reference_mut(i as i32);
+                    *name = name.replace("hook", &new_name);
+                }
+                save(&mut hook, loc.join(&new_name).with_extension("uasset"))?;
+                let loc = app
+                    .pak
+                    .join(cutscene.replacen("/Game", MOD, 1))
+                    .with_extension("uasset");
                 std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-                pak.read_from_path_to_file(
-                    &format!("{cutscene}.uasset"),
-                    &pak_path,
-                    loc.with_extension("uasset"),
-                )?;
+                pak.read_from_path_to_file(&format!("{cutscene}.uasset"), &pak_path, &loc)?;
                 pak.read_from_path_to_file(
                     &format!("{cutscene}.uexp"),
                     &pak_path,
                     loc.with_extension("uexp"),
                 )?;
                 let mut cutscene = open(&loc)?;
-                todo!("edit hook name refs to UniversalFunctions");
+                let universal_refs: Vec<usize> = cutscene
+                    .get_name_map_index_list()
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(i, name)| name.contains("UniversalFunctions").then_some(i))
+                    .collect();
+                for i in universal_refs {
+                    let name = cutscene.get_name_reference_mut(i as i32);
+                    *name = name.replace("UniversalFunctions", &new_name);
+                }
                 save(&mut cutscene, &loc)?;
             }
             Context::Overworld(name) => {
@@ -265,8 +283,19 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         };
                         set_byte("Type", "PickUpList", "1", pickup)?;
                         set_byte("Item", "Items", item.as_ref(), pickup)?;
-                        for _ in 0..amount - 1 {
-                            duplicate(i, &mut map)
+                        match pickup.properties.iter_mut().find_map(|prop| {
+                            cast!(Property, IntProperty, prop)
+                                .filter(|amount| amount.name.content == "Souls/LifeAmount")
+                        }) {
+                            Some(num) => num.value = *amount,
+                            None => pickup.properties.push(Property::IntProperty(
+                                int_property::IntProperty {
+                                    name: FName::from_slice("Souls/LifeAmount"),
+                                    property_guid: None,
+                                    duplication_index: 0,
+                                    value: *amount,
+                                },
+                            )),
                         }
                     }
                     Drop::Item(item, amount) => {
