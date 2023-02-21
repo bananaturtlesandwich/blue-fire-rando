@@ -156,7 +156,30 @@ lazy_static::lazy_static! {
             requirements: None,
         },
         "A02_ArcaneTunnels/A02_GameIntro_MemorialMain" => Location {
-            unlocks: &[/* into arcane tunnels */],
+            unlocks: &["A02_ArcaneTunnels/A02_NorthArcane"],
+            requirements: None,
+        },
+        "A02_ArcaneTunnels/A02_NorthArcane" => Location {
+            unlocks: &["A02_ArcaneTunnels/A02_SouthArcane"],
+            requirements: None,
+        },
+        "A02_ArcaneTunnels/A02_SouthArcane" => Location {
+            unlocks: &[
+                "A02_ArcaneTunnels/A02_EastArcane",
+                "A02_CentralWaterWay_CenterAccess"
+            ],
+            requirements: None,
+        },
+        "A02_ArcaneTunnels/A02_EastArcane" => Location {
+            unlocks: &["A02_ArcaneTunnels/A02_Arcane",/* into crossroads */],
+            requirements: None,
+        },
+        "A02_ArcaneTunnels/A02_Arcane" => Location {
+            unlocks: &[],
+            requirements: None,
+        },
+        "A02_CentralWaterWay_CenterAccess" => Location {
+            unlocks: &[],
             requirements: None,
         }
     ];
