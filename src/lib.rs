@@ -99,15 +99,14 @@ impl eframe::App for Rando {
 
                 ui[1].heading(egui::RichText::new("Extra options").underline());
                 ui[1].checkbox(&mut self.treasure, "Treasures e.g Seagull soup");
-                ui[1].checkbox(&mut self.dash, "Dash -===(    - _ o)");
-                ui[1].checkbox(&mut self.ore, "Ore  (    $ o $)");
+                ui[1].checkbox(&mut self.dash, "Dash -=====(    - _ o)");
+                ui[1].checkbox(&mut self.ore, "Ore  (>    $ o $)>");
                 ui[1].checkbox(&mut self.ducks, "Ducks <(⭕ ◑ ө ◑ ⭕)>");
                 let size = ui[1].fonts(|fonts| fonts.glyph_width(&egui::TextStyle::Body.resolve(ui[1].style()), ' '));
                 ui[1].horizontal(|ui|{
                     ui.spacing_mut().item_spacing.x = size;
                     ui.label("chat about the rando on");
                     ui.hyperlink_to("discord", "https://discord.gg/bluefire");
-                    ui.label("-");
                 });
                 ui[1].horizontal(|ui|{
                     ui.spacing_mut().item_spacing.x = size;
@@ -124,7 +123,7 @@ impl eframe::App for Rando {
                                 "xdg-open",
                             ).arg(&self.pak)
                             .spawn(),
-                            "share rando_p.pak and tell people to put it in the same folder - if rando_p.pak isn't in the folder click the start rando button to generate one"
+                            "share it and tell people to put it in the same folder you found it in - if you don't see rando_p.pak click 'start rando' to generate one"
                         )
                     }
                     ui.label("to race!")

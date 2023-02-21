@@ -132,6 +132,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     include_bytes!("../blueprints/hook.uasset").as_slice(),
                     include_bytes!("../blueprints/hook.uexp").as_slice(),
                 )?;
+                // edit the item given by the kismet bytecode in the hook
                 let new_name = cutscene.split('/').last().unwrap_or_default();
                 // edit hook name refs to this new name and save to there
                 save(&mut hook, format!("{MOD}/BlueFire/Libraries/{new_name}"))?;
@@ -326,7 +327,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         let Some(pickup) = map.exports[i].get_normal_export_mut() else {
                             return Err(Error::Assumption)
                         };
-                        set_byte("Type", "PickUpList", "0", pickup)?;
+                        set_byte("Type", "PickUpList", "5", pickup)?;
                         match pickup.properties.iter_mut().find_map(|prop| {
                             cast!(Property, IntProperty, prop)
                                 .filter(|amount| amount.name.content == "Souls/LifeAmount")
