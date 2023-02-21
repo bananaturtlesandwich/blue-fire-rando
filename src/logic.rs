@@ -33,7 +33,7 @@ pub enum Context {
 #[derive(PartialEq, Clone, Debug, strum::AsRefStr)]
 pub enum Drop {
     #[strum(serialize = "0")]
-    Item(Items, u8),
+    Item(Items, i32),
     #[strum(serialize = "1")]
     Weapon(Weapons),
     #[strum(serialize = "2")]
@@ -44,8 +44,36 @@ pub enum Drop {
     Ability(Abilities),
     #[strum(serialize = "7")]
     Emote(Emotes),
-    Ore(u16),
+    Ore(i32),
     Duck,
+}
+
+impl Drop {
+    fn as_u8(&self) -> u8 {
+        match self {
+            Drop::Item(_, _) => 0,
+            Drop::Weapon(_) => 1,
+            Drop::Tunic(_) => 2,
+            Drop::Spirit(_) => 3,
+            Drop::Ability(_) => 6,
+            Drop::Emote(_) => 7,
+            Drop::Ore(_) => 8,
+            Drop::Duck => 9,
+        }
+    }
+
+    fn inner_as_u8(&self) -> u8 {
+        match self {
+            Drop::Item(inner, _) => inner.clone() as u8,
+            Drop::Weapon(inner) => inner.clone() as u8,
+            Drop::Tunic(inner) => inner.clone() as u8,
+            Drop::Spirit(inner) => inner.clone() as u8,
+            Drop::Ability(inner) => inner.clone() as u8,
+            Drop::Emote(inner) => inner.clone() as u8,
+            Drop::Ore(inner) => inner.clone() as u8,
+            Drop::Duck => 80,
+        }
+    }
 }
 
 #[derive(Debug)]
