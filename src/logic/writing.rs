@@ -133,8 +133,52 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     include_bytes!("../blueprints/hook.uexp").as_slice(),
                 )?;
                 // edit the item given by the kismet bytecode in the hook
+                let exports::Export::FunctionExport(
+                    exports::function_export::FunctionExport{
+                        struct_export: struct_export::StructExport{
+                            script_bytecode:Some(bytecode),
+                            ..
+                        },
+                        ..
+                    }
+                ) = &mut hook.exports[69] else {
+                    return Err(Error::Assumption)
+                };
+                use unreal_asset::kismet::*;
+                let [
+                    KismetExpression::ExLet(item_type),
+                    KismetExpression::ExLet(index),
+                    KismetExpression::ExLet(amount),
+                    KismetExpression::ExLetBool(key_item)
+                ] = &mut bytecode[0..4] else {
+                    return Err(Error::Assumption)
+                };
+                let (
+                    KismetExpression::ExByteConst(item_type),
+                    KismetExpression::ExByteConst(index),
+                    KismetExpression::ExIntConst(amount),
+                ) = (
+                    item_type.expression.as_mut(),
+                    index.expression.as_mut(),
+                    amount.expression.as_mut(),
+                ) else {
+                    return Err(Error::Assumption)
+                };
+                item_type.value = drop.as_u8();
+                index.value = drop.inner_as_u8();
+                amount.value = match &drop {
+                    Drop::Item(_, amount) => *amount,
+                    Drop::Ore(amount) => *amount,
+                    _ => 1,
+                };
+                key_item.assignment_expression = Box::new(match &drop {
+                    Drop::Item(item, _) if item.is_key_item() => {
+                        KismetExpression::ExTrue(ExTrue::default())
+                    }
+                    _ => KismetExpression::ExFalse(ExFalse::default()),
+                });
                 let new_name = cutscene.split('/').last().unwrap_or_default();
-                // edit hook name refs to this new name and save to there
+                todo!("edit hook name refs to new name");
                 save(&mut hook, format!("{MOD}/BlueFire/Libraries/{new_name}"))?;
                 let loc = app.pak.join(cutscene.replacen("/Game", MOD, 1));
                 std::fs::create_dir_all(loc.parent().expect("is a file"))?;
@@ -149,9 +193,8 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     loc.with_extension("uexp"),
                 )?;
                 let mut cutscene = open(&loc)?;
-                // edit UniversalFunction name refs to name of cutscene
+                todo!("edit hook name refs to UniversalFunctions");
                 save(&mut cutscene, &loc)?;
-                todo!("make PR for an editable name map")
             }
             Context::Overworld(name) => {
                 let loc = app
@@ -254,13 +297,13 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                             cast!(Property, IntProperty, prop)
                                 .filter(|amount| amount.name.content == "Amount")
                         }) {
-                            Some(num) => num.value = *amount as i32,
+                            Some(num) => num.value = *amount,
                             None => chest.properties.push(Property::IntProperty(
                                 int_property::IntProperty {
                                     name: FName::from_slice("Amount"),
                                     property_guid: None,
                                     duplication_index: 0,
-                                    value: *amount as i32,
+                                    value: *amount,
                                 },
                             )),
                         }
@@ -332,13 +375,13 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                             cast!(Property, IntProperty, prop)
                                 .filter(|amount| amount.name.content == "Souls/LifeAmount")
                         }) {
-                            Some(num) => num.value = *amount as i32,
+                            Some(num) => num.value = *amount,
                             None => pickup.properties.push(Property::IntProperty(
                                 int_property::IntProperty {
                                     name: FName::from_slice("Souls/LifeAmount"),
                                     property_guid: None,
                                     duplication_index: 0,
-                                    value: *amount as i32,
+                                    value: *amount,
                                 },
                             )),
                         }
@@ -416,7 +459,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                             })
                             .and_then(|stats| cast!(Property, IntProperty, &mut stats.value[0]))
                         {
-                            currency.value += *amount as i32;
+                            currency.value += *amount;
                         }
                     }
                     Drop::Duck => add_item(&mut savegame, Drop::Item(Items::Duck, 1)),
@@ -466,7 +509,7 @@ impl Drop {
                 property_guid: None,
                 duplication_index: 0,
                 value: if let Drop::Item(_, amount) = self {
-                    *amount as i32
+                    *amount
                 } else {
                     1
                 },
@@ -482,7 +525,7 @@ impl Drop {
                 property_guid: None,
                 duplication_index: 0,
                 value: if let Drop::Item(_, amount) = self {
-                    *amount as i32
+                    *amount
                 } else {
                     1
                 },
