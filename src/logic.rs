@@ -70,7 +70,7 @@ impl Drop {
             Drop::Spirit(inner) => inner.clone() as u8,
             Drop::Ability(inner) => inner.clone() as u8,
             Drop::Emote(inner) => inner.clone() as u8,
-            Drop::Ore(inner) => inner.clone() as u8,
+            Drop::Ore(inner) => *inner as u8,
             Drop::Duck => 80,
         }
     }
