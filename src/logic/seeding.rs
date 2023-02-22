@@ -166,7 +166,7 @@ lazy_static::lazy_static! {
         "A02_ArcaneTunnels/A02_SouthArcane" => Location {
             unlocks: &[
                 "A02_ArcaneTunnels/A02_EastArcane",
-                "A02_CentralWaterWay_CenterAccess"
+                "A02_ArcaneTunnels/A02_CentralWaterWay_CenterAccess"
             ],
             requirements: None,
         },
@@ -178,7 +178,7 @@ lazy_static::lazy_static! {
             unlocks: &[],
             requirements: None,
         },
-        "A02_CentralWaterWay_CenterAccess" => Location {
+        "A02_ArcaneTunnels/A02_CentralWaterWay_CenterAccess" => Location {
             unlocks: &[],
             requirements: None,
         }

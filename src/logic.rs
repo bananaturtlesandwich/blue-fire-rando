@@ -46,7 +46,9 @@ pub enum Drop {
     Ability(Abilities),
     #[strum(serialize = "7")]
     Emote(Emotes),
+    #[strum(serialize = "0")]
     Ore(i32),
+    #[strum(serialize = "0")]
     Duck,
 }
 

@@ -534,10 +534,11 @@ impl Drop {
             byte_property(
                 "Item_3_54327288464702F41977D48660F8979E",
                 "Items",
-                if let Drop::Item(item, _) = self {
-                    item.as_ref()
-                } else {
-                    "25"
+                match self {
+                    Drop::Item(item, _) => item.as_ref(),
+                    Drop::Ore(_) => Items::KinbankDebitCard.as_ref(),
+                    Drop::Duck => Items::Duck.as_ref(),
+                    _ => "25",
                 },
             ),
             Property::IntProperty(IntProperty {
@@ -546,7 +547,7 @@ impl Drop {
                 duplication_index: 0,
                 value: match self {
                     Drop::Item(_, amount) => *amount,
-                    Drop::Ore(_) => 0,
+                    Drop::Ore(_) => -1,
                     _ => 1,
                 },
             }),
@@ -602,7 +603,11 @@ impl Drop {
                 name: FName::from_slice("Price_26_80A37F3645AE8292A9F311B86094C095"),
                 property_guid: None,
                 duplication_index: 0,
-                value: 500,
+                value: if let Drop::Ore(amount) = self {
+                    *amount
+                } else {
+                    500
+                },
             }),
             byte_property(
                 "Ability_29_EBF42DD143E9F82EC9303082A50329F0",
