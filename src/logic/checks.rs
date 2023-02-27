@@ -26,24 +26,13 @@ pub const CHECKS: [Check; 46] = [
             "/Game/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Bitoven",
         ),
         drop: Drop::Ore(500),
-        requirements: Some(&[&[Drop::Item(Items::ComposerLetter, 1)]]),
+        requirements: Some(&[Requirement::Item(Items::ComposerLetter)]),
     },
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro",
         context: Context::Overworld("Duck"),
         drop: Drop::Duck,
-        requirements: Some(&[
-            &[
-                Drop::Ability(Abilities::DoubleJump),
-                Drop::Ability(Abilities::SpinAttack),
-                Drop::Spirit(Spirits::HolyCentry),
-            ],
-            &[
-                Drop::Ability(Abilities::Dash),
-                Drop::Ability(Abilities::SpinAttack),
-                Drop::Spirit(Spirits::PossesedBook),
-            ],
-        ]),
+        requirements: Some(&[Requirement::Movement(&[Move::no_walljump(6, 0)])]),
     },
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepEast",
@@ -85,14 +74,11 @@ pub const CHECKS: [Check; 46] = [
         location: "A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom",
         context: Context::Overworld("Spirit_A02_RiverSpirit"),
         drop: Drop::Spirit(Spirits::RiverSpirit),
-        requirements: Some(&[
-            &[Drop::Ability(Abilities::Dash)],
-            &[Drop::Ability(Abilities::WallRun)],
-            &[
-                Drop::Ability(Abilities::DoubleJump),
-                Drop::Ability(Abilities::SpinAttack),
-            ],
-        ]),
+        requirements: Some(&[Requirement::Movement(&[
+            Move::no_walljump(0, 1),
+            Move::no_walljump(6, 1),
+            Move::with_walljump(3, 0),
+        ])]),
     },
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepWest",
@@ -122,7 +108,7 @@ pub const CHECKS: [Check; 46] = [
         location: "A02_ArcaneTunnels/A02_GameIntro_MemorialMain",
         context: Context::Overworld("Dance_Platform_Photo_Chest"),
         drop: Drop::Item(Items::Mandoline, 1),
-        requirements: Some(&[&[Drop::Emote(Emotes::Photo)]]),
+        requirements: Some(&[Requirement::Emote(Emotes::Photo)]),
     },
     // Arcane Tunnels
     Check {
@@ -153,7 +139,7 @@ pub const CHECKS: [Check; 46] = [
         location: "A02_ArcaneTunnels/A02_SouthArcane",
         context: Context::Overworld("Dance_Platform_KungFu_Chest"),
         drop: Drop::Item(Items::Boot, 1),
-        requirements: Some(&[&[Drop::Emote(Emotes::KungFu)]]),
+        requirements: Some(&[Requirement::Emote(Emotes::KungFu)]),
     },
     Check {
         location: "A02_ArcaneTunnels/A02_CentralWaterWay_CenterAccess",
@@ -183,7 +169,7 @@ pub const CHECKS: [Check; 46] = [
         location: "A02_ArcaneTunnels/A02_SouthArcane",
         context: Context::Overworld("Dance_Platform_Celebration_Chest"),
         drop: Drop::Item(Items::Rice, 1),
-        requirements: Some(&[&[Drop::Emote(Emotes::Celebration)]]),
+        requirements: Some(&[Requirement::Emote(Emotes::Celebration)]),
     },
     Check {
         location: "A02_ArcaneTunnels/A02_SouthArcane",
@@ -201,45 +187,13 @@ pub const CHECKS: [Check; 46] = [
         location: "A02_ArcaneTunnels/A02_NorthArcane",
         context: Context::Overworld("Pickup4"),
         drop: Drop::Ore(250),
-        requirements: Some(&[
-            &[
-                Drop::Ability(Abilities::WallRun),
-                Drop::Ability(Abilities::DoubleJump),
-                Drop::Ability(Abilities::Dash),
-            ],
-            &[
-                Drop::Ability(Abilities::WallRun),
-                Drop::Ability(Abilities::SpinAttack),
-                Drop::Ability(Abilities::Dash),
-            ],
-            &[
-                Drop::Ability(Abilities::WallRun),
-                Drop::Ability(Abilities::Spell),
-                Drop::Ability(Abilities::Dash),
-            ],
-        ]),
+        requirements: Some(&[Requirement::Movement(&[Move::with_walljump(0, 4)])]),
     },
     Check {
         location: "A02_ArcaneTunnels/A02_NorthArcane",
         context: Context::Overworld("Chest_A02_NorthArcane_Loot_04"),
         drop: Drop::Item(Items::SapphireOre, 1),
-        requirements: Some(&[
-            &[
-                Drop::Ability(Abilities::WallRun),
-                Drop::Ability(Abilities::DoubleJump),
-                Drop::Ability(Abilities::Dash),
-            ],
-            &[
-                Drop::Ability(Abilities::WallRun),
-                Drop::Ability(Abilities::SpinAttack),
-                Drop::Ability(Abilities::Dash),
-            ],
-            &[
-                Drop::Ability(Abilities::WallRun),
-                Drop::Ability(Abilities::Spell),
-                Drop::Ability(Abilities::Dash),
-            ],
-        ]),
+        requirements: Some(&[Requirement::Movement(&[Move::with_walljump(0, 4)])]),
     },
     Check {
         location: "A02_ArcaneTunnels/A02_EastArcane",
@@ -318,31 +272,19 @@ pub const CHECKS: [Check; 46] = [
         location: "A02_ArcaneTunnels/A02_EastArcane",
         context: Context::Overworld("Chest_A02_EastArcane_Loot_03"),
         drop: Drop::Item(Items::EmeraldOre, 1),
-        requirements: Some(&[
-            &[Drop::Ability(Abilities::Dash)],
-            &[Drop::Ability(Abilities::DoubleJump)],
-            &[Drop::Ability(Abilities::SpinAttack)],
-        ]),
+        requirements: Some(&[Requirement::Movement(&[Move::no_walljump(0, 1)])]),
     },
     Check {
         location: "A02_ArcaneTunnels/A02_EastArcane",
         context: Context::Overworld("Pickup_A02_Arcane_SR_Loot"),
         drop: Drop::Ore(400),
-        requirements: Some(&[
-            &[Drop::Ability(Abilities::Dash)],
-            &[Drop::Ability(Abilities::DoubleJump)],
-            &[Drop::Ability(Abilities::SpinAttack)],
-        ]),
+        requirements: Some(&[Requirement::Movement(&[Move::no_walljump(0, 1)])]),
     },
     // AND THESE ONES ARE NAMED FINE???
     Check {
         location: "A02_ArcaneTunnels/A02_EastArcane",
         context: Context::Overworld("Pickup_A02_Arcane_SR_Loot2"),
         drop: Drop::Ore(400),
-        requirements: Some(&[
-            &[Drop::Ability(Abilities::Dash)],
-            &[Drop::Ability(Abilities::DoubleJump)],
-            &[Drop::Ability(Abilities::SpinAttack)],
-        ]),
+        requirements: Some(&[Requirement::Movement(&[Move::no_walljump(0, 1)])]),
     },
 ];

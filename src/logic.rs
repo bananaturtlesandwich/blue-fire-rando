@@ -8,7 +8,7 @@ pub use writing::write;
 mod checks;
 pub use checks::CHECKS;
 
-#[derive(Debug, Clone, strum::EnumIter, strum::AsRefStr)]
+#[derive(Debug, Clone, Copy, strum::EnumIter, strum::AsRefStr)]
 pub enum Shop {
     #[strum(serialize = "ShopA")]
     Mork = 7,
@@ -32,7 +32,7 @@ pub enum Context {
     Starting,
 }
 
-#[derive(PartialEq, Clone, Debug, strum::AsRefStr)]
+#[derive(PartialEq, Clone, Copy, Debug, strum::AsRefStr)]
 pub enum Drop {
     #[strum(serialize = "0")]
     Item(Items, i32),
@@ -68,12 +68,12 @@ impl Drop {
 
     fn inner_as_u8(&self) -> u8 {
         match self {
-            Drop::Item(inner, _) => inner.clone() as u8,
-            Drop::Weapon(inner) => inner.clone() as u8,
-            Drop::Tunic(inner) => inner.clone() as u8,
-            Drop::Spirit(inner) => inner.clone() as u8,
-            Drop::Ability(inner) => inner.clone() as u8,
-            Drop::Emote(inner) => inner.clone() as u8,
+            Drop::Item(inner, _) => *inner as u8,
+            Drop::Weapon(inner) => *inner as u8,
+            Drop::Tunic(inner) => *inner as u8,
+            Drop::Spirit(inner) => *inner as u8,
+            Drop::Ability(inner) => *inner as u8,
+            Drop::Emote(inner) => *inner as u8,
             Drop::Ore(inner) => *inner as u8,
             Drop::Duck => 80,
         }
@@ -85,10 +85,42 @@ pub struct Check {
     location: &'static str,
     context: Context,
     drop: Drop,
-    requirements: Option<&'static [&'static [Drop]]>,
+    requirements: Option<&'static [Requirement]>,
 }
 
 struct Location {
     unlocks: &'static [&'static str],
-    requirements: Option<&'static [&'static [Drop]]>,
+    requirements: Option<&'static [Requirement]>,
+}
+
+#[derive(Debug)]
+enum Requirement {
+    Location(&'static str),
+    Movement(&'static [Move]),
+    Item(Items),
+    Emote(Emotes),
+}
+
+#[derive(Debug)]
+struct Move {
+    extra_height: u8,
+    horizontal: u8,
+    walljump: bool,
+}
+
+impl Move {
+    const fn with_walljump(extra_height: u8, horizontal: u8) -> Self {
+        Self {
+            extra_height,
+            horizontal,
+            walljump: true,
+        }
+    }
+    const fn no_walljump(extra_height: u8, horizontal: u8) -> Self {
+        Self {
+            extra_height,
+            horizontal,
+            walljump: false,
+        }
+    }
 }
