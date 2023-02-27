@@ -27,7 +27,7 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
     if pool.len() <= 1 {
         return Err(NOTENOUGH.to_string());
     }
-    let mut possible: Vec<Drop> = pool.iter().map(|check| check.drop.clone()).collect();
+    let mut possible: Vec<Drop> = pool.iter().map(|check| check.drop).collect();
     let mut checks: Vec<Check> = Vec::with_capacity(pool.len());
     let mut progression: Vec<Check> = Vec::with_capacity(pool.len());
     let mut locations = Vec::with_capacity(LOCATIONS.len());

@@ -112,7 +112,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                 let (mut savegame, loc) = get_savegame(app, &pak, &pak_path)?;
                 let Some(Property::ArrayProperty(shop)) = savegame.exports[1]
                     .get_normal_export_mut()
-                    .map(|norm| &mut norm.properties[shopkeep.clone() as usize])
+                    .map(|norm| &mut norm.properties[shopkeep as usize])
                 else {
                     return Err(Error::Assumption)
                 };
@@ -241,7 +241,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                 };
                 let class = map
                     .get_import(map.exports[i].get_base_export().class_index)
-                    .map(|import| import.object_name.content.clone())
+                    .map(|import| import.object_name.content.to_owned())
                     .unwrap_or_default();
                 let is_chest = || {
                     matches!(
