@@ -3,7 +3,7 @@ mod logic;
 mod map;
 
 pub struct Rando {
-    dialog: egui_modal::Modal,
+    notifs: egui_modal::Modal,
     pak: std::path::PathBuf,
     item: bool,
     weapons: bool,
@@ -31,7 +31,7 @@ impl Rando {
                 .unwrap_or_default()
         };
         Self {
-            dialog: egui_modal::Modal::new(&ctx.egui_ctx, "dialog"),
+            notifs: egui_modal::Modal::new(&ctx.egui_ctx, "dialog"),
             pak: match ctx.storage.and_then(|storage| storage.get_string("pak")){
                 Some(path) => path.into(),
                 None => loop {
@@ -62,14 +62,14 @@ impl Rando {
 macro_rules! notify {
     ($self:expr, $result: expr, $message: literal) => {
         match $result {
-            Ok(_) => $self.dialog.open_dialog(
+            Ok(_) => $self.notifs.open_dialog(
                 Some("success"),
                 Some($message),
                 Some(egui_modal::Icon::Success),
             ),
             Err(e) => {
                 $self
-                    .dialog
+                    .notifs
                     .open_dialog(Some("whoopsie"), Some(e), Some(egui_modal::Icon::Warning))
             }
         }
@@ -163,7 +163,7 @@ impl eframe::App for Rando {
                     std::fs::remove_dir_all(self.pak.join("rando_p")).unwrap_or_default();
                 }
             });
-            self.dialog.show_dialog();
+            self.notifs.show_dialog();
         });
     }
 
