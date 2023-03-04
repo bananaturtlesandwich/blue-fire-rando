@@ -418,10 +418,29 @@ lazy_static::lazy_static! {
             locks: None,
         },
         "A02_ArcaneTunnels/A02_EastArcane" => Location {
-            unlocks: &["A02_ArcaneTunnels/A02_Arcane",/* into crossroads */],
+            unlocks: &[
+                "A02_ArcaneTunnels/A02_Arcane",
+                "A01_StoneHeartCity/A01_CrossRoads"
+            ],
             locks: None,
         },
         "A02_ArcaneTunnels/A02_Arcane" => Location {
+            unlocks: &[],
+            locks: None,
+        },
+        "A01_StoneHeartCity/A01_CrossRoads" => Location {
+            unlocks: &["A01_StoneHeartCity/A01_Well","A01_StoneHeartCity/A01_CliffPath"],
+            locks: None,
+        },
+        "A01_StoneHeartCity/A01_Well" => Location {
+            unlocks: &[],
+            locks: Some(&[Lock::Movement(&[Move{
+                extra_height: 0,
+                horizontal: 1,
+                walljump: false
+            }])]),
+        },
+        "A01_StoneHeartCity/A01_CliffPath" => Location {
             unlocks: &[],
             locks: None,
         },

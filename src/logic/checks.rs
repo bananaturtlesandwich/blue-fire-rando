@@ -1,6 +1,6 @@
 use super::*;
 
-pub const CHECKS: [Check; 46] = [
+pub const CHECKS: [Check; 62] = [
     // Fire Keep
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -26,13 +26,16 @@ pub const CHECKS: [Check; 46] = [
             "/Game/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Bitoven",
         ),
         drop: Drop::Ore(500),
-        locks: Some(&[Lock::Item(Items::ComposerLetter)]),
+        locks: Some(&[
+            Lock::Location("A06_RustCity"),
+            Lock::Item(Items::ComposerLetter),
+        ]),
     },
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro",
         context: Context::Overworld("Duck"),
         drop: Drop::Duck,
-        locks: Some(&[Lock::Movement(&[Move::no_walljump(6, 0)])]),
+        locks: Some(&[Lock::Movement(&[Move::no_walljump(5, 0)])]),
     },
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepEast",
@@ -75,8 +78,8 @@ pub const CHECKS: [Check; 46] = [
         context: Context::Overworld("Spirit_A02_RiverSpirit"),
         drop: Drop::Spirit(Spirits::RiverSpirit),
         locks: Some(&[Lock::Movement(&[
-            Move::no_walljump(0, 1),
-            Move::no_walljump(6, 1),
+            Move::no_walljump(0, 2),
+            Move::no_walljump(5, 0),
             Move::walljump(3, 0),
         ])]),
     },
@@ -230,19 +233,19 @@ pub const CHECKS: [Check; 46] = [
         location: "A02_ArcaneTunnels/A02_EastArcane",
         context: Context::Shop(Shop::SpiritHunter, 0),
         drop: Drop::Spirit(Spirits::StormCentry),
-        locks: None,
+        locks: Some(&[Lock::Item(Items::SmallPouch)]),
     },
     Check {
         location: "A02_ArcaneTunnels/A02_EastArcane",
         context: Context::Shop(Shop::SpiritHunter, 1),
         drop: Drop::Spirit(Spirits::BloodPhantom),
-        locks: None,
+        locks: Some(&[Lock::Item(Items::SmallPouch)]),
     },
     Check {
         location: "A02_ArcaneTunnels/A02_EastArcane",
         context: Context::Shop(Shop::SpiritHunter, 2),
         drop: Drop::Spirit(Spirits::FrozenSoul),
-        locks: None,
+        locks: Some(&[Lock::Item(Items::SmallPouch)]),
     },
     Check {
         location: "A02_ArcaneTunnels/A02_EastArcane",
@@ -287,4 +290,117 @@ pub const CHECKS: [Check; 46] = [
         drop: Drop::Ore(400),
         locks: Some(&[Lock::Movement(&[Move::no_walljump(0, 1)])]),
     },
+    // Crossroads
+    Check {
+        location: "A01_StoneHeartCity/A01_CrossRoads",
+        context: Context::Overworld("Pickup49"),
+        drop: Drop::Ore(50),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CrossRoads",
+        context: Context::Overworld("Pickup47"),
+        drop: Drop::Ore(50),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_Well",
+        context: Context::Overworld("Check_A01_CrossRoads_Loot"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: Some(&[
+            Lock::Movement(&[Move::no_walljump(1, 0)]),
+            Lock::Movement(&[Move::no_walljump(0, 2)]),
+            Lock::Movement(&[Move::walljump(0, 0)]),
+        ]),
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_Well",
+        context: Context::Overworld("Chest_A01_Well_SpinAttack"),
+        drop: Drop::Ability(Abilities::SpinAttack),
+        locks: Some(&[
+            Lock::Movement(&[Move::no_walljump(1, 0)]),
+            Lock::Movement(&[Move::no_walljump(0, 2)]),
+            Lock::Movement(&[Move::walljump(0, 0)]),
+        ]),
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_Well",
+        context: Context::Overworld("Pickup57"),
+        drop: Drop::Ore(500),
+        locks: Some(&[
+            Lock::Movement(&[Move::no_walljump(1, 0)]),
+            Lock::Movement(&[Move::no_walljump(0, 2)]),
+            Lock::Movement(&[Move::walljump(0, 0)]),
+        ]),
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CrossRoads",
+        context: Context::Overworld("Pickup7"),
+        drop: Drop::Ore(50),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CrossRoads",
+        context: Context::Overworld("Pickup14"),
+        drop: Drop::Ore(50),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CrossRoads",
+        context: Context::Overworld("Pickup15"),
+        drop: Drop::Ore(50),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CrossRoads",
+        context: Context::Overworld("Pickup11"),
+        drop: Drop::Ore(50),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CrossRoads",
+        context: Context::Overworld("Pickup12"),
+        drop: Drop::Ore(50),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CrossRoads",
+        context: Context::Overworld("Pickup56"),
+        drop: Drop::Ore(50),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CrossRoads",
+        context: Context::Overworld("Chest_A01_CrossRoads_Loot_02"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CrossRoads",
+        context: Context::Overworld("Pickup50"),
+        drop: Drop::Ore(50),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CrossRoads",
+        context: Context::Overworld("Chest_A01_CrossRoads_Loot_03"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: Some(&[Lock::Movement(&[Move::no_walljump(0, 1)])]),
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CrossRoads",
+        context: Context::Overworld("Dance_Platform_Techno_Chest"),
+        drop: Drop::Tunic(Tunics::Galaxy),
+        locks: Some(&[
+            Lock::Emote(Emotes::Techno),
+            Lock::Movement(&[Move::no_walljump(0, 1)]),
+        ]),
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CrossRoads",
+        context: Context::Overworld("Chest_A01_CrossRoads_Loot_01"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: None,
+    },
+    // Stoneheart City
 ];
