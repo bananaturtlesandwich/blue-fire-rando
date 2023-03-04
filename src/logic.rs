@@ -32,7 +32,7 @@ pub enum Context {
     Starting,
 }
 
-#[derive(PartialEq, Clone, Copy, Debug, strum::AsRefStr)]
+#[derive(Clone, Copy, Debug, strum::AsRefStr)]
 pub enum Drop {
     #[strum(serialize = "0")]
     Item(Items, i32),
@@ -50,6 +50,21 @@ pub enum Drop {
     Ore(i32),
     #[strum(serialize = "0")]
     Duck,
+}
+
+impl PartialEq for Drop {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Item(l0, _), Self::Item(r0, _)) => l0 == r0,
+            (Self::Weapon(l0), Self::Weapon(r0)) => l0 == r0,
+            (Self::Tunic(l0), Self::Tunic(r0)) => l0 == r0,
+            (Self::Spirit(l0), Self::Spirit(r0)) => l0 == r0,
+            (Self::Ability(l0), Self::Ability(r0)) => l0 == r0,
+            (Self::Emote(l0), Self::Emote(r0)) => l0 == r0,
+            (Self::Ore(l0), Self::Ore(r0)) => l0 == r0,
+            _ => core::mem::discriminant(self) == core::mem::discriminant(other),
+        }
+    }
 }
 
 impl Drop {
