@@ -1,6 +1,6 @@
 use super::*;
 
-pub const CHECKS: [Check; 103] = [
+pub const CHECKS: [Check; 105] = [
     // Fire Keep
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -305,7 +305,7 @@ pub const CHECKS: [Check; 103] = [
     },
     Check {
         location: "A01_StoneHeartCity/A01_Well",
-        context: Context::Overworld("Check_A01_CrossRoads_Loot"),
+        context: Context::Overworld("Chest_A01_CrossRoads_Loot"),
         drop: Drop::Item(Items::SapphireOre, 1),
         locks: &[
             Lock::Movement(&[Move::no_walljump(1, 0)]),
@@ -352,6 +352,26 @@ pub const CHECKS: [Check; 103] = [
             Lock::Movement(&[Move::no_walljump(0, 2)]),
             Lock::Movement(&[Move::walljump(0, 0)]),
         ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_Well",
+        context: Context::Overworld("Pickup60"),
+        drop: Drop::Ore(500),
+        locks: Some(&[
+            Lock::Movement(&[Move::no_walljump(1, 0)]),
+            Lock::Movement(&[Move::no_walljump(0, 2)]),
+            Lock::Movement(&[Move::walljump(0, 0)]),
+        ]),
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_Well",
+        context: Context::Overworld("Pickup5"),
+        drop: Drop::Ore(500),
+        locks: Some(&[
+            Lock::Movement(&[Move::no_walljump(1, 0)]),
+            Lock::Movement(&[Move::no_walljump(0, 2)]),
+            Lock::Movement(&[Move::walljump(0, 0)]),
+        ]),
     },
     Check {
         location: "A01_StoneHeartCity/A01_CrossRoads",
@@ -542,7 +562,7 @@ pub const CHECKS: [Check; 103] = [
     },
     Check {
         location: "A01_StoneHeartCity/A01_CliffPath",
-        context: Context::Overworld("Pickup_45"),
+        context: Context::Overworld("Pickup45"),
         drop: Drop::Ore(150),
         locks: &[],
     },
@@ -554,13 +574,13 @@ pub const CHECKS: [Check; 103] = [
     },
     Check {
         location: "A01_StoneHeartCity/A01_CliffPath",
-        context: Context::Overworld("Pickup_46"),
+        context: Context::Overworld("Pickup46"),
         drop: Drop::Ore(100),
         locks: &[],
     },
     Check {
         location: "A01_StoneHeartCity/A01_CliffPath",
-        context: Context::Overworld("Pickup_54"),
+        context: Context::Overworld("Pickup54"),
         drop: Drop::Ore(100),
         locks: &[],
     },
@@ -627,13 +647,13 @@ pub const CHECKS: [Check; 103] = [
     },
     Check {
         location: "A01_StoneHeartCity/A01_CliffPath",
-        context: Context::Overworld("Pickup_29"),
+        context: Context::Overworld("Pickup29"),
         drop: Drop::Ore(150),
         locks: &[],
     },
     Check {
         location: "A01_StoneHeartCity/A01_CliffPath",
-        context: Context::Overworld("Pickup_29"),
+        context: Context::Overworld("Pickup34"),
         drop: Drop::Ore(100),
         locks: &[],
     },
