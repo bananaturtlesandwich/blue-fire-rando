@@ -523,7 +523,6 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
     std::process::Command::new("./pak.bat")
         .arg(app.pak.join("rando_p"))
         .output()?;
-    std::fs::remove_file("pak.bat")?;
     Ok(())
 }
 

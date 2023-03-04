@@ -43,101 +43,96 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
                 if locations.contains(loc) {
                     continue;
                 }
-                // is there any drops currently unlocking a location?
-                if let Some(locks) = LOCATIONS[loc].locks {
-                    // see if there's any requirements met and what they are
-                    if !locks.iter().all(|lock| match lock {
-                        Lock::Location(loc) => locations.contains(loc),
-                        Lock::Movement(movement) => {
-                            let mut current = Move::no_walljump(0, 0);
-                            for drop in possible[0..checks.len()]
-                                .iter()
-                                .chain(progression.iter().map(|check| &check.drop))
-                            {
-                                match drop {
-                                    Drop::Spirit(Spirits::PossesedBook)
-                                        if possible[0..checks.len()]
-                                            .contains(&Drop::Ability(Abilities::SpinAttack))
-                                            || progression.iter().any(|check| {
-                                                check.drop == Drop::Ability(Abilities::SpinAttack)
-                                            }) =>
-                                    {
-                                        current.extra_height += 1
-                                    }
-                                    Drop::Spirit(Spirits::HolyCentry)
-                                        if possible[0..checks.len()]
-                                            .contains(&Drop::Ability(Abilities::DoubleJump))
-                                            || progression.iter().any(|check| {
-                                                check.drop == Drop::Ability(Abilities::DoubleJump)
-                                            }) =>
-                                    {
-                                        current.extra_height += 1
-                                    }
-                                    // they are pretty much the exact same thing
-                                    Drop::Ability(Abilities::DoubleJump)
-                                    | Drop::Ability(Abilities::SpinAttack) => {
-                                        current.extra_height += 1;
-                                        current.horizontal += 1;
-                                    }
-                                    Drop::Ability(Abilities::Sprint)
-                                    | Drop::Ability(Abilities::Spell) => current.horizontal += 1,
-                                    Drop::Ability(Abilities::Dash) => current.horizontal += 2,
-                                    Drop::Ability(Abilities::WallRun) => current.walljump = true,
-                                    _ => (),
+                // see if there's any requirements met and what they are
+                if !LOCATIONS[loc].locks.iter().all(|lock| match lock {
+                    Lock::Location(loc) => locations.contains(loc),
+                    Lock::Movement(movement) => {
+                        let mut current = Move::no_walljump(0, 0);
+                        for drop in possible[0..checks.len()]
+                            .iter()
+                            .chain(progression.iter().map(|check| &check.drop))
+                        {
+                            match drop {
+                                Drop::Spirit(Spirits::PossesedBook)
+                                    if possible[0..checks.len()]
+                                        .contains(&Drop::Ability(Abilities::SpinAttack))
+                                        || progression.iter().any(|check| {
+                                            check.drop == Drop::Ability(Abilities::SpinAttack)
+                                        }) =>
+                                {
+                                    current.extra_height += 1
                                 }
+                                Drop::Spirit(Spirits::HolyCentry)
+                                    if possible[0..checks.len()]
+                                        .contains(&Drop::Ability(Abilities::DoubleJump))
+                                        || progression.iter().any(|check| {
+                                            check.drop == Drop::Ability(Abilities::DoubleJump)
+                                        }) =>
+                                {
+                                    current.extra_height += 1
+                                }
+                                // they are pretty much the exact same thing
+                                Drop::Ability(Abilities::DoubleJump)
+                                | Drop::Ability(Abilities::SpinAttack) => {
+                                    current.extra_height += 1;
+                                    current.horizontal += 1;
+                                }
+                                Drop::Ability(Abilities::Sprint)
+                                | Drop::Ability(Abilities::Spell) => current.horizontal += 1,
+                                Drop::Ability(Abilities::Dash) => current.horizontal += 2,
+                                Drop::Ability(Abilities::WallRun) => current.walljump = true,
+                                _ => (),
                             }
-                            movement.iter().any(|moves| &current >= moves)
                         }
+                        movement.iter().any(|moves| &current >= moves)
+                    }
+                    Lock::Item(item) => {
+                        let drop = Drop::Item(*item, 1);
+                        possible[0..checks.len()].contains(&drop)
+                            || item.is_key_item()
+                                && progression.iter().any(|check| &check.drop == &drop)
+                    }
+                    Lock::Emote(emote) => {
+                        let emote = Drop::Emote(*emote);
+                        possible[0..checks.len()].contains(&emote)
+                            || progression.iter().any(|check| &check.drop == &emote)
+                    }
+                }) {
+                    continue;
+                }
+                for lock in LOCATIONS[loc].locks.iter() {
+                    // freeze any progression items where they are
+                    while let Some(i) = match lock {
+                        Lock::Location(_) => None,
+                        Lock::Movement(_) => possible[0..checks.len()].iter().position(|drop| {
+                            matches!(
+                                drop,
+                                Drop::Spirit(Spirits::PossesedBook)
+                                    | Drop::Spirit(Spirits::HolyCentry)
+                                    | Drop::Ability(Abilities::DoubleJump)
+                                    | Drop::Ability(Abilities::SpinAttack)
+                                    | Drop::Ability(Abilities::Sprint)
+                                    | Drop::Ability(Abilities::Spell)
+                                    | Drop::Ability(Abilities::Dash)
+                                    | Drop::Ability(Abilities::WallRun)
+                            )
+                        }),
                         Lock::Item(item) => {
-                            let drop = Drop::Item(*item, 1);
-                            possible[0..checks.len()].contains(&drop)
-                                || item.is_key_item()
-                                    && progression.iter().any(|check| &check.drop == &drop)
+                            let item = Drop::Item(*item, 1);
+                            possible[0..checks.len()]
+                                .iter()
+                                .position(|drop| drop == &item)
                         }
                         Lock::Emote(emote) => {
                             let emote = Drop::Emote(*emote);
-                            possible[0..checks.len()].contains(&emote)
-                                || progression.iter().any(|check| &check.drop == &emote)
+                            possible[0..checks.len()]
+                                .iter()
+                                .position(|drop| drop == &emote)
                         }
-                    }) {
-                        continue;
-                    }
-                    for lock in locks.iter() {
-                        // freeze any progression items where they are
-                        while let Some(i) = match lock {
-                            Lock::Location(_) => None,
-                            Lock::Movement(_) => {
-                                possible[0..checks.len()].iter().position(|drop| {
-                                    matches!(
-                                        drop,
-                                        Drop::Spirit(Spirits::PossesedBook)
-                                            | Drop::Spirit(Spirits::HolyCentry)
-                                            | Drop::Ability(Abilities::DoubleJump)
-                                            | Drop::Ability(Abilities::SpinAttack)
-                                            | Drop::Ability(Abilities::Sprint)
-                                            | Drop::Ability(Abilities::Spell)
-                                            | Drop::Ability(Abilities::Dash)
-                                            | Drop::Ability(Abilities::WallRun)
-                                    )
-                                })
-                            }
-                            Lock::Item(item) => {
-                                let item = Drop::Item(*item, 1);
-                                possible[0..checks.len()]
-                                    .iter()
-                                    .position(|drop| drop == &item)
-                            }
-                            Lock::Emote(emote) => {
-                                let emote = Drop::Emote(*emote);
-                                possible[0..checks.len()]
-                                    .iter()
-                                    .position(|drop| drop == &emote)
-                            }
-                        } {
-                            let mut check = checks.remove(i);
-                            check.drop = possible.remove(i);
-                            progression.push(check);
-                        }
+                    } {
+                        let mut check = checks.remove(i);
+                        check.drop = possible.remove(i);
+                        progression.push(check);
                     }
                 }
                 locations.push(loc);
@@ -148,98 +143,97 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
             if !locations.contains(&pool[i].location) {
                 continue;
             }
-            if let Some(locks) = pool[i].locks {
-                // see if there's any requirements met and what they are
-                if !locks.iter().all(|lock| match lock {
-                    Lock::Location(loc) => locations.contains(loc),
-                    Lock::Movement(movement) => {
-                        let mut current = Move::no_walljump(0, 0);
-                        for drop in possible[0..checks.len()]
-                            .iter()
-                            .chain(progression.iter().map(|check| &check.drop))
-                        {
-                            match drop {
-                                Drop::Spirit(Spirits::PossesedBook)
-                                    if possible[0..checks.len()]
-                                        .contains(&Drop::Ability(Abilities::SpinAttack))
-                                        || progression.iter().any(|check| {
-                                            check.drop == Drop::Ability(Abilities::SpinAttack)
-                                        }) =>
-                                {
-                                    current.extra_height += 1
-                                }
-                                Drop::Spirit(Spirits::HolyCentry)
-                                    if possible[0..checks.len()]
-                                        .contains(&Drop::Ability(Abilities::DoubleJump))
-                                        || progression.iter().any(|check| {
-                                            check.drop == Drop::Ability(Abilities::DoubleJump)
-                                        }) =>
-                                {
-                                    current.extra_height += 1
-                                }
-                                // they are pretty much the exact same thing
-                                Drop::Ability(Abilities::DoubleJump)
-                                | Drop::Ability(Abilities::SpinAttack) => {
-                                    current.extra_height += 1;
-                                    current.horizontal += 1;
-                                }
-                                Drop::Ability(Abilities::Sprint)
-                                | Drop::Ability(Abilities::Spell) => current.horizontal += 1,
-                                Drop::Ability(Abilities::Dash) => current.horizontal += 2,
-                                Drop::Ability(Abilities::WallRun) => current.walljump = true,
-                                _ => (),
+            // see if there's any requirements met and what they are
+            if !pool[i].locks.iter().all(|lock| match lock {
+                Lock::Location(loc) => locations.contains(loc),
+                Lock::Movement(movement) => {
+                    let mut current = Move::no_walljump(0, 0);
+                    for drop in possible[0..checks.len()]
+                        .iter()
+                        .chain(progression.iter().map(|check| &check.drop))
+                    {
+                        match drop {
+                            Drop::Spirit(Spirits::PossesedBook)
+                                if possible[0..checks.len()]
+                                    .contains(&Drop::Ability(Abilities::SpinAttack))
+                                    || progression.iter().any(|check| {
+                                        check.drop == Drop::Ability(Abilities::SpinAttack)
+                                    }) =>
+                            {
+                                current.extra_height += 1
                             }
+                            Drop::Spirit(Spirits::HolyCentry)
+                                if possible[0..checks.len()]
+                                    .contains(&Drop::Ability(Abilities::DoubleJump))
+                                    || progression.iter().any(|check| {
+                                        check.drop == Drop::Ability(Abilities::DoubleJump)
+                                    }) =>
+                            {
+                                current.extra_height += 1
+                            }
+                            // they are pretty much the exact same thing
+                            Drop::Ability(Abilities::DoubleJump)
+                            | Drop::Ability(Abilities::SpinAttack) => {
+                                current.extra_height += 1;
+                                current.horizontal += 1;
+                            }
+                            Drop::Ability(Abilities::Sprint) | Drop::Ability(Abilities::Spell) => {
+                                current.horizontal += 1
+                            }
+                            Drop::Ability(Abilities::Dash) => current.horizontal += 2,
+                            Drop::Ability(Abilities::WallRun) => current.walljump = true,
+                            _ => (),
                         }
-                        movement.iter().any(|moves| &current >= moves)
                     }
+                    movement.iter().any(|moves| &current >= moves)
+                }
+                Lock::Item(item) => {
+                    let drop = Drop::Item(*item, 1);
+                    possible[0..checks.len()].contains(&drop)
+                        || item.is_key_item()
+                            && progression.iter().any(|check| &check.drop == &drop)
+                }
+                Lock::Emote(emote) => {
+                    let emote = Drop::Emote(*emote);
+                    possible[0..checks.len()].contains(&emote)
+                        || progression.iter().any(|check| &check.drop == &emote)
+                }
+            }) {
+                continue;
+            }
+            for lock in pool[i].locks.iter() {
+                // freeze any progression items where they are
+                while let Some(i) = match lock {
+                    Lock::Location(_) => None,
+                    Lock::Movement(_) => possible[0..checks.len()].iter().position(|drop| {
+                        matches!(
+                            drop,
+                            Drop::Spirit(Spirits::PossesedBook)
+                                | Drop::Spirit(Spirits::HolyCentry)
+                                | Drop::Ability(Abilities::DoubleJump)
+                                | Drop::Ability(Abilities::SpinAttack)
+                                | Drop::Ability(Abilities::Sprint)
+                                | Drop::Ability(Abilities::Spell)
+                                | Drop::Ability(Abilities::Dash)
+                                | Drop::Ability(Abilities::WallRun)
+                        )
+                    }),
                     Lock::Item(item) => {
-                        let drop = Drop::Item(*item, 1);
-                        possible[0..checks.len()].contains(&drop)
-                            || item.is_key_item()
-                                && progression.iter().any(|check| &check.drop == &drop)
+                        let item = Drop::Item(*item, 1);
+                        possible[0..checks.len()]
+                            .iter()
+                            .position(|drop| drop == &item)
                     }
                     Lock::Emote(emote) => {
                         let emote = Drop::Emote(*emote);
-                        possible[0..checks.len()].contains(&emote)
-                            || progression.iter().any(|check| &check.drop == &emote)
+                        possible[0..checks.len()]
+                            .iter()
+                            .position(|drop| drop == &emote)
                     }
-                }) {
-                    continue;
-                }
-                for lock in locks.iter() {
-                    // freeze any progression items where they are
-                    while let Some(i) = match lock {
-                        Lock::Location(_) => None,
-                        Lock::Movement(_) => possible[0..checks.len()].iter().position(|drop| {
-                            matches!(
-                                drop,
-                                Drop::Spirit(Spirits::PossesedBook)
-                                    | Drop::Spirit(Spirits::HolyCentry)
-                                    | Drop::Ability(Abilities::DoubleJump)
-                                    | Drop::Ability(Abilities::SpinAttack)
-                                    | Drop::Ability(Abilities::Sprint)
-                                    | Drop::Ability(Abilities::Spell)
-                                    | Drop::Ability(Abilities::Dash)
-                                    | Drop::Ability(Abilities::WallRun)
-                            )
-                        }),
-                        Lock::Item(item) => {
-                            let item = Drop::Item(*item, 1);
-                            possible[0..checks.len()]
-                                .iter()
-                                .position(|drop| drop == &item)
-                        }
-                        Lock::Emote(emote) => {
-                            let emote = Drop::Emote(*emote);
-                            possible[0..checks.len()]
-                                .iter()
-                                .position(|drop| drop == &emote)
-                        }
-                    } {
-                        let mut check = checks.remove(i);
-                        check.drop = possible.remove(i);
-                        progression.push(check);
-                    }
+                } {
+                    let mut check = checks.remove(i);
+                    check.drop = possible.remove(i);
+                    progression.push(check);
                 }
             }
             checks.push(pool.remove(i));
@@ -249,98 +243,97 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
             if locations.contains(&unrandomised[i].location) {
                 continue;
             }
-            if let Some(locks) = unrandomised[i].locks {
-                // see if there's any requirements met and what they are
-                if !locks.iter().all(|lock| match lock {
-                    Lock::Location(loc) => locations.contains(loc),
-                    Lock::Movement(movement) => {
-                        let mut current = Move::no_walljump(0, 0);
-                        for drop in possible[0..checks.len()]
-                            .iter()
-                            .chain(progression.iter().map(|check| &check.drop))
-                        {
-                            match drop {
-                                Drop::Spirit(Spirits::PossesedBook)
-                                    if possible[0..checks.len()]
-                                        .contains(&Drop::Ability(Abilities::SpinAttack))
-                                        || progression.iter().any(|check| {
-                                            check.drop == Drop::Ability(Abilities::SpinAttack)
-                                        }) =>
-                                {
-                                    current.extra_height += 1
-                                }
-                                Drop::Spirit(Spirits::HolyCentry)
-                                    if possible[0..checks.len()]
-                                        .contains(&Drop::Ability(Abilities::DoubleJump))
-                                        || progression.iter().any(|check| {
-                                            check.drop == Drop::Ability(Abilities::DoubleJump)
-                                        }) =>
-                                {
-                                    current.extra_height += 1
-                                }
-                                // they are pretty much the exact same thing
-                                Drop::Ability(Abilities::DoubleJump)
-                                | Drop::Ability(Abilities::SpinAttack) => {
-                                    current.extra_height += 1;
-                                    current.horizontal += 1;
-                                }
-                                Drop::Ability(Abilities::Sprint)
-                                | Drop::Ability(Abilities::Spell) => current.horizontal += 1,
-                                Drop::Ability(Abilities::Dash) => current.horizontal += 2,
-                                Drop::Ability(Abilities::WallRun) => current.walljump = true,
-                                _ => (),
+            // see if there's any requirements met and what they are
+            if !unrandomised[i].locks.iter().all(|lock| match lock {
+                Lock::Location(loc) => locations.contains(loc),
+                Lock::Movement(movement) => {
+                    let mut current = Move::no_walljump(0, 0);
+                    for drop in possible[0..checks.len()]
+                        .iter()
+                        .chain(progression.iter().map(|check| &check.drop))
+                    {
+                        match drop {
+                            Drop::Spirit(Spirits::PossesedBook)
+                                if possible[0..checks.len()]
+                                    .contains(&Drop::Ability(Abilities::SpinAttack))
+                                    || progression.iter().any(|check| {
+                                        check.drop == Drop::Ability(Abilities::SpinAttack)
+                                    }) =>
+                            {
+                                current.extra_height += 1
                             }
+                            Drop::Spirit(Spirits::HolyCentry)
+                                if possible[0..checks.len()]
+                                    .contains(&Drop::Ability(Abilities::DoubleJump))
+                                    || progression.iter().any(|check| {
+                                        check.drop == Drop::Ability(Abilities::DoubleJump)
+                                    }) =>
+                            {
+                                current.extra_height += 1
+                            }
+                            // they are pretty much the exact same thing
+                            Drop::Ability(Abilities::DoubleJump)
+                            | Drop::Ability(Abilities::SpinAttack) => {
+                                current.extra_height += 1;
+                                current.horizontal += 1;
+                            }
+                            Drop::Ability(Abilities::Sprint) | Drop::Ability(Abilities::Spell) => {
+                                current.horizontal += 1
+                            }
+                            Drop::Ability(Abilities::Dash) => current.horizontal += 2,
+                            Drop::Ability(Abilities::WallRun) => current.walljump = true,
+                            _ => (),
                         }
-                        movement.iter().any(|moves| &current >= moves)
                     }
+                    movement.iter().any(|moves| &current >= moves)
+                }
+                Lock::Item(item) => {
+                    let drop = Drop::Item(*item, 1);
+                    possible[0..checks.len()].contains(&drop)
+                        || item.is_key_item()
+                            && progression.iter().any(|check| &check.drop == &drop)
+                }
+                Lock::Emote(emote) => {
+                    let emote = Drop::Emote(*emote);
+                    possible[0..checks.len()].contains(&emote)
+                        || progression.iter().any(|check| &check.drop == &emote)
+                }
+            }) {
+                continue;
+            }
+            for lock in unrandomised[i].locks.iter() {
+                // freeze any progression items where they are
+                while let Some(i) = match lock {
+                    Lock::Location(_) => None,
+                    Lock::Movement(_) => possible[0..checks.len()].iter().position(|drop| {
+                        matches!(
+                            drop,
+                            Drop::Spirit(Spirits::PossesedBook)
+                                | Drop::Spirit(Spirits::HolyCentry)
+                                | Drop::Ability(Abilities::DoubleJump)
+                                | Drop::Ability(Abilities::SpinAttack)
+                                | Drop::Ability(Abilities::Sprint)
+                                | Drop::Ability(Abilities::Spell)
+                                | Drop::Ability(Abilities::Dash)
+                                | Drop::Ability(Abilities::WallRun)
+                        )
+                    }),
                     Lock::Item(item) => {
-                        let drop = Drop::Item(*item, 1);
-                        possible[0..checks.len()].contains(&drop)
-                            || item.is_key_item()
-                                && progression.iter().any(|check| &check.drop == &drop)
+                        let item = Drop::Item(*item, 1);
+                        possible[0..checks.len()]
+                            .iter()
+                            .position(|drop| drop == &item)
                     }
                     Lock::Emote(emote) => {
                         let emote = Drop::Emote(*emote);
-                        possible[0..checks.len()].contains(&emote)
-                            || progression.iter().any(|check| &check.drop == &emote)
+                        possible[0..checks.len()]
+                            .iter()
+                            .position(|drop| drop == &emote)
                     }
-                }) {
-                    continue;
-                }
-                for lock in locks.iter() {
-                    // freeze any progression items where they are
-                    while let Some(i) = match lock {
-                        Lock::Location(_) => None,
-                        Lock::Movement(_) => possible[0..checks.len()].iter().position(|drop| {
-                            matches!(
-                                drop,
-                                Drop::Spirit(Spirits::PossesedBook)
-                                    | Drop::Spirit(Spirits::HolyCentry)
-                                    | Drop::Ability(Abilities::DoubleJump)
-                                    | Drop::Ability(Abilities::SpinAttack)
-                                    | Drop::Ability(Abilities::Sprint)
-                                    | Drop::Ability(Abilities::Spell)
-                                    | Drop::Ability(Abilities::Dash)
-                                    | Drop::Ability(Abilities::WallRun)
-                            )
-                        }),
-                        Lock::Item(item) => {
-                            let item = Drop::Item(*item, 1);
-                            possible[0..checks.len()]
-                                .iter()
-                                .position(|drop| drop == &item)
-                        }
-                        Lock::Emote(emote) => {
-                            let emote = Drop::Emote(*emote);
-                            possible[0..checks.len()]
-                                .iter()
-                                .position(|drop| drop == &emote)
-                        }
-                    } {
-                        let mut check = checks.remove(i);
-                        check.drop = possible.remove(i);
-                        progression.push(check);
-                    }
+                } {
+                    let mut check = checks.remove(i);
+                    check.drop = possible.remove(i);
+                    progression.push(check);
                 }
             }
             progression.push(unrandomised.remove(i));
@@ -376,77 +369,77 @@ lazy_static::lazy_static! {
                 "A02_ArcaneTunnels/A02_GameIntro_KeepEast",
                 "A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom",
             ],
-            locks: None,
+            locks: &[],
         },
         "A02_ArcaneTunnels/A02_GameIntro_Exterior" => Location {
             unlocks: &["A02_ArcaneTunnels/A02_GameIntro"],
-            locks: None,
+            locks: &[],
         },
         "A02_ArcaneTunnels/A02_GameIntro" => Location {
             unlocks: &[],
-            locks: None,
+            locks: &[],
         },
         "A02_ArcaneTunnels/A02_GameIntro_KeepEast" => Location {
             unlocks: &["A02_ArcaneTunnels/A02_GameIntro_EastWing"],
-            locks: None,
+            locks: &[],
         },
         "A02_ArcaneTunnels/A02_GameIntro_EastWing" => Location {
             unlocks: &[],
-            locks: None,
+            locks: &[],
         },
         "A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom" => Location {
             unlocks: &["A02_ArcaneTunnels/A02_GameIntro_KeepWest"],
-            locks: Some(&[Lock::Item(Items::OldKey)]),
+            locks: &[Lock::Item(Items::OldKey)],
         },
         "A02_ArcaneTunnels/A02_GameIntro_KeepWest" => Location {
             unlocks: &["A02_ArcaneTunnels/A02_GameIntro_MemorialMain"],
-            locks: None,
+            locks: &[],
         },
         "A02_ArcaneTunnels/A02_GameIntro_MemorialMain" => Location {
             unlocks: &["A02_ArcaneTunnels/A02_NorthArcane"],
-            locks: None,
+            locks: &[],
         },
         "A02_ArcaneTunnels/A02_NorthArcane" => Location {
             unlocks: &["A02_ArcaneTunnels/A02_SouthArcane"],
-            locks: None,
+            locks: &[],
         },
         "A02_ArcaneTunnels/A02_SouthArcane" => Location {
             unlocks: &[
                 "A02_ArcaneTunnels/A02_EastArcane",
                 "A02_ArcaneTunnels/A02_CentralWaterWay_CenterAccess"
             ],
-            locks: None,
+            locks: &[],
         },
         "A02_ArcaneTunnels/A02_EastArcane" => Location {
             unlocks: &[
                 "A02_ArcaneTunnels/A02_Arcane",
                 "A01_StoneHeartCity/A01_CrossRoads"
             ],
-            locks: None,
+            locks: &[],
         },
         "A02_ArcaneTunnels/A02_Arcane" => Location {
             unlocks: &[],
-            locks: None,
+            locks: &[],
         },
         "A01_StoneHeartCity/A01_CrossRoads" => Location {
             unlocks: &["A01_StoneHeartCity/A01_Well","A01_StoneHeartCity/A01_CliffPath"],
-            locks: None,
+            locks: &[],
         },
         "A01_StoneHeartCity/A01_Well" => Location {
             unlocks: &[],
-            locks: Some(&[Lock::Movement(&[Move{
+            locks: &[Lock::Movement(&[Move{
                 extra_height: 0,
                 horizontal: 1,
                 walljump: false
-            }])]),
+            }])],
         },
         "A01_StoneHeartCity/A01_CliffPath" => Location {
             unlocks: &[],
-            locks: None,
+            locks: &[],
         },
         "A02_ArcaneTunnels/A02_CentralWaterWay_CenterAccess" => Location {
             unlocks: &[],
-            locks: None,
+            locks: &[],
         }
     ];
 }

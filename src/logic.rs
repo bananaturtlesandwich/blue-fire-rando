@@ -100,12 +100,12 @@ pub struct Check {
     location: &'static str,
     context: Context,
     drop: Drop,
-    locks: Option<&'static [Lock]>,
+    locks: &'static [Lock],
 }
 
 struct Location {
     unlocks: &'static [&'static str],
-    locks: Option<&'static [Lock]>,
+    locks: &'static [Lock],
 }
 
 #[derive(Debug)]
