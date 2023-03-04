@@ -1,6 +1,6 @@
 use super::*;
 
-pub const CHECKS: [Check; 62] = [
+pub const CHECKS: [Check; 103] = [
     // Fire Keep
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -403,4 +403,265 @@ pub const CHECKS: [Check; 62] = [
         locks: None,
     },
     // Stoneheart City
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Pickup_SandRelic"),
+        drop: Drop::Item(Items::SandRelic, 1),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Pickup51"),
+        drop: Drop::Ore(100),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Chest_A01_Stoneheart_Loot_02"),
+        drop: Drop::Item(Items::SapphireOre, 2),
+        locks: Some(&[Lock::Movement(&[
+            Move::walljump(2, 0),
+            Move::no_walljump(4, 0),
+        ])]),
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Pickup_A01_City_SRL3"),
+        drop: Drop::Ore(400),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Ari, 0),
+        drop: Drop::Tunic(Tunics::Orange),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Ari, 1),
+        drop: Drop::Tunic(Tunics::Aqua),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Ari, 2),
+        drop: Drop::Tunic(Tunics::LightBlue),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Ari, 3),
+        drop: Drop::Tunic(Tunics::Lila),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Ari, 4),
+        drop: Drop::Tunic(Tunics::Rainbow),
+        locks: Some(&[Lock::Item(Items::SmallPouch)]),
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Ari, 5),
+        drop: Drop::Tunic(Tunics::Empty),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Ari, 6),
+        drop: Drop::Tunic(Tunics::Violet),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Ari, 7),
+        drop: Drop::Tunic(Tunics::Grey),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Ari, 8),
+        drop: Drop::Tunic(Tunics::Green),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Ari, 9),
+        drop: Drop::Tunic(Tunics::Yellow),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Ari, 10),
+        drop: Drop::Tunic(Tunics::Red),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Pickup27"),
+        drop: Drop::Ore(200),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Pickup_A01_City_SRL2"),
+        drop: Drop::Ore(300),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Cutscene("/Game/BlueFire/NPC/Orip/BP_Orip_Saw/NPC_Orip_Stoneheart"),
+        drop: Drop::Item(Items::OddRock, 1),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Pickup_A01_City_SRL"),
+        drop: Drop::Ore(150),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Pickup_45"),
+        drop: Drop::Ore(150),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Chest_A01_Stoneheart_Loot_03"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Pickup_46"),
+        drop: Drop::Ore(100),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Pickup_54"),
+        drop: Drop::Ore(100),
+        locks: None,
+    },
+    // the cutest chest in existence
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Chest_A01_Stoneheart_Loot"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Mork, 0),
+        drop: Drop::Spirit(Spirits::PossesedBook),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Mork, 1),
+        drop: Drop::Spirit(Spirits::GoldenLust),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Mork, 2),
+        drop: Drop::Spirit(Spirits::LifeSteal),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Mork, 3),
+        drop: Drop::Item(Items::LargePouch, 1),
+        locks: Some(&[Lock::Item(Items::SmallPouch)]),
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Mork, 4),
+        drop: Drop::Item(Items::RareSnow, 1),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Pickup_Book3"),
+        drop: Drop::Item(Items::Book, 1),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Pickup_Book"),
+        drop: Drop::Item(Items::Book, 1),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Dance_Platform_Triceps_Chest"),
+        drop: Drop::Item(Items::IceCrystal, 1),
+        locks: Some(&[Lock::Emote(Emotes::Triceps)]),
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Spirit_A01_FarasGrace"),
+        drop: Drop::Spirit(Spirits::FarasGrace),
+        locks: Some(&[Lock::Item(Items::Necklace)]),
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Pickup_29"),
+        drop: Drop::Ore(150),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Pickup_29"),
+        drop: Drop::Ore(100),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Pickup_Book4"),
+        drop: Drop::Item(Items::Book, 1),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Pickup_Book5"),
+        drop: Drop::Item(Items::Book, 1),
+        locks: Some(&[Lock::Movement(&[
+            Move::walljump(0, 0),
+            Move::no_walljump(1, 0),
+        ])]),
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Chest_A01_Stoneheart_Loot_01"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: Some(&[Lock::Movement(&[
+            Move::walljump(0, 0),
+            Move::no_walljump(1, 0),
+        ])]),
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Pickup_Book2"),
+        drop: Drop::Item(Items::Book, 1),
+        locks: None,
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Cutscene("/Game/BlueFire/NPC/Merchant/NPC_Merchant"),
+        drop: Drop::Tunic(Tunics::MerchantsRobe),
+        locks: Some(&[Lock::Item(Items::Book)]),
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Cutscene(
+            "/Game/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Wolfgang",
+        ),
+        drop: Drop::Ore(500),
+        locks: Some(&[
+            Lock::Location("A06_RustCity"),
+            Lock::Item(Items::ComposerLetter),
+        ]),
+    },
 ];
