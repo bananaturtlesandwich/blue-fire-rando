@@ -85,23 +85,23 @@ pub struct Check {
     location: &'static str,
     context: Context,
     drop: Drop,
-    requirements: Option<&'static [Requirement]>,
+    locks: Option<&'static [Lock]>,
 }
 
 struct Location {
     unlocks: &'static [&'static str],
-    requirements: Option<&'static [Requirement]>,
+    locks: Option<&'static [Lock]>,
 }
 
 #[derive(Debug)]
-enum Requirement {
+enum Lock {
     Location(&'static str),
     Movement(&'static [Move]),
     Item(Items),
     Emote(Emotes),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, PartialOrd)]
 struct Move {
     extra_height: u8,
     horizontal: u8,
@@ -109,7 +109,7 @@ struct Move {
 }
 
 impl Move {
-    const fn with_walljump(extra_height: u8, horizontal: u8) -> Self {
+    const fn walljump(extra_height: u8, horizontal: u8) -> Self {
         Self {
             extra_height,
             horizontal,
