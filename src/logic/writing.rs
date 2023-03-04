@@ -108,7 +108,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
     } in checks
     {
         match context {
-            Context::Shop(shopkeep, index) => {
+            Context::Shop(shopkeep, index, price) => {
                 let (mut savegame, loc) = get_savegame(app, &pak, &pak_path)?;
                 let Some(Property::ArrayProperty(shop)) = savegame.exports[1]
                     .get_normal_export_mut()
@@ -124,7 +124,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         property_guid: None,
                         duplication_index: 0,
                         serialize_none: true,
-                        value: drop.as_shop_entry(),
+                        value: drop.as_shop_entry(price),
                     },
                 );
                 save(&mut savegame, loc)?;
@@ -280,27 +280,6 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     Ok(())
                 };
                 match &drop {
-                    Drop::Item(item, amount) if class == "Pickup_C" => {
-                        let Some(pickup) = map.exports[i].get_normal_export_mut() else {
-                            return Err(Error::Assumption)
-                        };
-                        set_byte("Type", "PickUpList", "1", pickup)?;
-                        set_byte("Item", "Items", item.as_ref(), pickup)?;
-                        match pickup.properties.iter_mut().find_map(|prop| {
-                            cast!(Property, IntProperty, prop)
-                                .filter(|amount| amount.name.content == "Souls/LifeAmount")
-                        }) {
-                            Some(num) => num.value = *amount,
-                            None => pickup.properties.push(Property::IntProperty(
-                                int_property::IntProperty {
-                                    name: FName::from_slice("Souls/LifeAmount"),
-                                    property_guid: None,
-                                    duplication_index: 0,
-                                    value: *amount,
-                                },
-                            )),
-                        }
-                    }
                     Drop::Item(item, amount) => {
                         if !is_chest() {
                             replace(36)?;
@@ -445,7 +424,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                                 property_guid: None,
                                 duplication_index: 0,
                                 serialize_none: true,
-                                value: drop.as_shop_entry(),
+                                value: drop.as_shop_entry(0),
                             },
                         ));
                     Ok(())
@@ -527,7 +506,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
 }
 
 impl Drop {
-    pub fn as_shop_entry(&self) -> Vec<unreal_asset::properties::Property> {
+    pub fn as_shop_entry(&self, price: i32) -> Vec<unreal_asset::properties::Property> {
         use int_property::*;
         [
             byte_property(
@@ -547,6 +526,7 @@ impl Drop {
                 value: match self {
                     Drop::Item(_, amount) => *amount,
                     Drop::Ore(_) => -1,
+                    Drop::Emote(_) => 0,
                     _ => 1,
                 },
             }),
@@ -605,7 +585,7 @@ impl Drop {
                 value: if let Drop::Ore(amount) = self {
                     *amount
                 } else {
-                    500
+                    price
                 },
             }),
             byte_property(

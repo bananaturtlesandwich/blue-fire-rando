@@ -26,7 +26,7 @@ pub enum Shop {
 
 #[derive(Debug)]
 pub enum Context {
-    Shop(Shop, usize),
+    Shop(Shop, usize, i32),
     Cutscene(&'static str),
     Overworld(&'static str),
     Starting,
