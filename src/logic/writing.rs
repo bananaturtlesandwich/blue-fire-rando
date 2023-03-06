@@ -23,7 +23,6 @@ const PREFIX: &str = "/Game/BlueFire/Maps/World/";
 fn get_savegame(
     app: &crate::Rando,
     pak: &unpak::Pak,
-    pak_path: &std::path::PathBuf,
 ) -> Result<(Asset<std::fs::File>, std::path::PathBuf), Error> {
     let loc = app
         .pak
@@ -32,12 +31,8 @@ fn get_savegame(
     Ok((
         if !loc.exists() {
             std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-            pak.read_from_path_to_file(&format!("{SAVEGAME}.uasset"), pak_path, &loc)?;
-            pak.read_from_path_to_file(
-                &format!("{SAVEGAME}.uexp"),
-                pak_path,
-                loc.with_extension("uexp"),
-            )?;
+            pak.read_to_file(&format!("{SAVEGAME}.uasset"), &loc)?;
+            pak.read_to_file(&format!("{SAVEGAME}.uexp"), loc.with_extension("uexp"))?;
             let mut savegame = open(&loc)?;
             let Some(default) = savegame.exports[1].get_normal_export_mut() else {
                 return Err(Error::Assumption)
@@ -98,8 +93,10 @@ fn set_byte(
 }
 
 pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
-    let pak_path = app.pak.join("Blue Fire-WindowsNoEditor.pak");
-    let pak = unpak::Pak::new_from_path(&pak_path, unpak::Version::FrozenIndex, None)?;
+    let pak = unpak::Pak::new(
+        app.pak.join("Blue Fire-WindowsNoEditor.pak"),
+        unpak::Version::FrozenIndex,
+    )?;
     for Check {
         location,
         context,
@@ -109,7 +106,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
     {
         match context {
             Context::Shop(shopkeep, index, price) => {
-                let (mut savegame, loc) = get_savegame(app, &pak, &pak_path)?;
+                let (mut savegame, loc) = get_savegame(app, &pak)?;
                 let Some(Property::ArrayProperty(shop)) = savegame.exports[1]
                     .get_normal_export_mut()
                     .map(|norm| &mut norm.properties[shopkeep as usize])
@@ -198,12 +195,8 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     .join(cutscene.replacen("/Game", MOD, 1))
                     .with_extension("uasset");
                 std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-                pak.read_from_path_to_file(&format!("{cutscene}.uasset"), &pak_path, &loc)?;
-                pak.read_from_path_to_file(
-                    &format!("{cutscene}.uexp"),
-                    &pak_path,
-                    loc.with_extension("uexp"),
-                )?;
+                pak.read_to_file(&format!("{cutscene}.uasset"), &loc)?;
+                pak.read_to_file(&format!("{cutscene}.uexp"), loc.with_extension("uexp"))?;
                 let mut cutscene = open(&loc)?;
                 let universal_refs: Vec<usize> = cutscene
                     .get_name_map_index_list()
@@ -224,14 +217,9 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     .with_extension("umap");
                 if !loc.exists() {
                     std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-                    pak.read_from_path_to_file(
-                        &format!("{PREFIX}{location}.umap"),
-                        &pak_path,
-                        &loc,
-                    )?;
-                    pak.read_from_path_to_file(
+                    pak.read_to_file(&format!("{PREFIX}{location}.umap"), &loc)?;
+                    pak.read_to_file(
                         &format!("{PREFIX}{location}.uexp"),
-                        &pak_path,
                         loc.with_extension("uexp"),
                     )?;
                 }
@@ -430,7 +418,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         ));
                     Ok(())
                 }
-                let (mut savegame, loc) = get_savegame(app, &pak, &pak_path)?;
+                let (mut savegame, loc) = get_savegame(app, &pak)?;
                 match &drop {
                     Drop::Ability(ability) => {
                         add_item(&mut savegame, Drop::Item(ability.as_item(), 1))?;

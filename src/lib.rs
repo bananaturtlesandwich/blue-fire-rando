@@ -32,10 +32,10 @@ impl Rando {
         };
         Self {
             notifs: egui_modal::Modal::new(&ctx.egui_ctx, "dialog"),
-            pak: match ctx.storage.and_then(|storage| storage.get_string("pak")){
+            pak: match ctx.storage.and_then(|storage| storage.get_string("pak")) {
                 Some(path) => path.into(),
                 None => loop {
-                    let Some(path) = rfd::FileDialog::new().set_title("Please select where you have Blue Fire installed").pick_folder() else {
+                    let Some(path) = rfd::FileDialog::new().set_title("Select where you have Blue Fire installed").pick_folder() else {
                         continue
                     };
                     if !path.ends_with("Blue Fire") || path.ends_with("Blue Fire/Blue Fire"){
@@ -102,47 +102,52 @@ impl eframe::App for Rando {
                 ui[1].checkbox(&mut self.dash, "Dash -=====(    - _ o)");
                 ui[1].checkbox(&mut self.ore, "Ore  (>    $ o $)>");
                 ui[1].checkbox(&mut self.ducks, "Ducks <(⭕ ◑ ө ◑ ⭕)>");
-                let size = ui[1].fonts(|fonts| fonts.glyph_width(&egui::TextStyle::Body.resolve(ui[1].style()), ' '));
-                ui[1].horizontal(|ui|{
+                let size = ui[1].fonts(|fonts| {
+                    fonts.glyph_width(&egui::TextStyle::Body.resolve(ui[1].style()), ' ')
+                });
+                ui[1].horizontal(|ui| {
                     ui.spacing_mut().item_spacing.x = size;
                     ui.label("chat about the rando on");
                     ui.hyperlink_to("discord", "https://discord.gg/bluefire");
                 });
-                ui[1].horizontal(|ui|{
+                ui[1].horizontal(|ui| {
                     ui.spacing_mut().item_spacing.x = size;
                     ui.label("share");
                     if ui.link("rando_p.pak").clicked() {
                         notify!(
                             self,
                             std::process::Command::new(
-                                #[cfg(target_os="windows")]
+                                #[cfg(target_os = "windows")]
                                 "explorer",
-                                #[cfg(target_os="macos")]
+                                #[cfg(target_os = "macos")]
                                 "open",
-                                #[cfg(target_os="linux")]
+                                #[cfg(target_os = "linux")]
                                 "xdg-open",
-                            ).arg(&self.pak)
+                            )
+                            .arg(&self.pak)
                             .spawn(),
-                            "share it and tell people to put it in the same folder you found it in - if you don't see rando_p.pak click 'start rando' to generate one"
+                            "share and put it in the same folder"
                         )
                     }
                     ui.label("to race!")
                 });
             });
-            ui.vertical_centered_justified(|ui|{
-                if ui.button("remove rando").clicked() {
+            ui.vertical_centered_justified(|ui| {
+                if ui.button("uninstall seed").clicked() {
                     notify!(
                         self,
                         std::fs::remove_file(self.pak.join("rando_p.pak")),
-                        "the randomness has successfully been removed from the game - hope to see you again!"
+                        "randomness has been removed from the game"
                     )
                 }
                 if ui.button("launch blue fire").clicked() {
                     notify!(
                         self,
                         std::process::Command::new(
-                            self.pak.join("../../Binaries/Win64/PROA34-Win64-Shipping.exe")
-                        ).spawn(),
+                            self.pak
+                                .join("../../Binaries/Win64/PROA34-Win64-Shipping.exe")
+                        )
+                        .spawn(),
                         "game found and launched successfully"
                     )
                 }
@@ -158,7 +163,7 @@ impl eframe::App for Rando {
                     notify!(
                         self,
                         logic::randomise(self),
-                        "seed has been generated, written and installed!"
+                        "seed has been generated, written and installed"
                     );
                     std::fs::remove_dir_all(self.pak.join("rando_p")).unwrap_or_default();
                 }
