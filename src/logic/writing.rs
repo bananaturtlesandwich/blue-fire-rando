@@ -97,6 +97,26 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
         app.pak.join("Blue Fire-WindowsNoEditor.pak"),
         unpak::Version::FrozenIndex,
     )?;
+    let path = app
+        .pak
+        .join(MOD)
+        .join("BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap");
+    std::fs::create_dir_all(path.parent().unwrap())?;
+    // sort out the dumb duped pickup names in spirit hunter
+    pak.read_to_file(
+        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap",
+        &path,
+    )?;
+    pak.read_to_file(
+        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.uexp",
+        path.with_extension("uexp"),
+    )?;
+    let mut bullshit = open(&path)?;
+    bullshit.exports[440]
+        .get_base_export_mut()
+        .object_name
+        .content = "Pickup_A02_SRF2".to_string();
+    save(&mut bullshit, &path)?;
     for Check {
         location,
         context,

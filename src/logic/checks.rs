@@ -219,14 +219,13 @@ pub const CHECKS: [Check; 105] = [
     Check {
         location: "A02_ArcaneTunnels/A02_EastArcane",
         context: Context::Overworld("Pickup_A02_SRF"),
-        drop: Drop::Ore(200),
+        drop: Drop::Ore(300),
         locks: &[],
     },
-    // noooo why and how are they named the same? also uassetgui fails to open this map
     Check {
         location: "A02_ArcaneTunnels/A02_EastArcane",
-        context: Context::Overworld("Pickup_A02_SRF"),
-        drop: Drop::Ore(300),
+        context: Context::Overworld("Pickup_A02_SRF2"),
+        drop: Drop::Ore(200),
         locks: &[],
     },
     Check {

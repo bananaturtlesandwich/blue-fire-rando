@@ -8,18 +8,19 @@ pub fn delete<C: std::io::Read + std::io::Seek>(index: usize, map: &mut Asset<C>
         .iter_mut()
         .find_map(|ex| cast!(Export, LevelExport, ex))
     {
-        level
-            .actors
-            .remove(level.actors.iter().position(|i| i == &val).unwrap());
-        let pos = level
+        if let Some(i) = level.actors.iter().position(|i| i == &val) {
+            level.actors.remove(i);
+        }
+        if let Some(i) = level
             .get_base_export()
             .create_before_serialization_dependencies
             .iter()
             .position(|i| i == &val)
-            .unwrap();
-        level
-            .get_base_export_mut()
-            .create_before_serialization_dependencies
-            .remove(pos);
+        {
+            level
+                .get_base_export_mut()
+                .create_before_serialization_dependencies
+                .remove(i);
+        }
     }
 }
