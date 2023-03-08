@@ -34,22 +34,20 @@ fn get_savegame(
             pak.read_to_file(&format!("{SAVEGAME}.uasset"), &loc)?;
             pak.read_to_file(&format!("{SAVEGAME}.uexp"), loc.with_extension("uexp"))?;
             let mut savegame = open(&loc)?;
-            let Some(default) = savegame.exports[1].get_normal_export_mut() else {
-                return Err(Error::Assumption)
-            };
+            let default = savegame.exports[1]
+                .get_normal_export_mut()
+                .ok_or(Error::Assumption)?;
             if app.dash {
-                let Some(dash) = cast!(Property, StructProperty, &mut default.properties[2])
-                    .and_then(|inventory| cast!(Property, BoolProperty, &mut inventory.value[1])) else
-                {
-                    return Err(Error::Assumption)
-                };
-                dash.value = false;
+                cast!(Property, StructProperty, &mut default.properties[2])
+                    .and_then(|inventory| cast!(Property, BoolProperty, &mut inventory.value[1]))
+                    .ok_or(Error::Assumption)?
+                    .value = false;
             }
             if app.emotes {
-                let Some(emotes) = cast!(Property, ArrayProperty, &mut default.properties[15]) else {
-                    return Err(Error::Assumption)
-                };
-                emotes.value.clear()
+                cast!(Property, ArrayProperty, &mut default.properties[15])
+                    .ok_or(Error::Assumption)?
+                    .value
+                    .clear()
             }
             savegame
         } else {
@@ -82,10 +80,10 @@ fn set_byte(
         cast!(Property, ByteProperty, prop).filter(|byte| byte.name.content == name)
     }) {
         Some(byte) => {
-            let int_property::BytePropertyValue::FName(name) = &mut byte.value else {
-                return Err(Error::Assumption)
-            };
-            name.content = format!("{}::NewEnumerator{}", enum_type, val)
+            use int_property::BytePropertyValue;
+            cast!(BytePropertyValue, FName, &mut byte.value)
+                .ok_or(Error::Assumption)?
+                .content = format!("{}::NewEnumerator{}", enum_type, val)
         }
         None => export.properties.push(byte_property(name, enum_type, val)),
     }
@@ -127,13 +125,17 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
         match context {
             Context::Shop(shopkeep, index, price) => {
                 let (mut savegame, loc) = get_savegame(app, &pak)?;
-                let Some(Property::ArrayProperty(shop)) = savegame.exports[1]
+                savegame.exports[1]
                     .get_normal_export_mut()
-                    .map(|norm| &mut norm.properties[shopkeep as usize])
-                else {
-                    return Err(Error::Assumption)
-                };
-                shop.value[index] = Property::StructProperty(
+                    .and_then(|norm| {
+                        cast!(
+                            Property,
+                            ArrayProperty,
+                            &mut norm.properties[shopkeep as usize]
+                        )
+                    })
+                    .ok_or(Error::Assumption)?
+                    .value[index] = Property::StructProperty(
                     unreal_asset::properties::struct_property::StructProperty {
                         name: FName::from_slice(shopkeep.as_ref()),
                         struct_type: Some(FName::from_slice("Inventory")),
@@ -244,9 +246,11 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     )?;
                 }
                 let mut map = open(&loc)?;
-                let Some(mut i) = map.exports.iter().position(|ex| ex.get_base_export().object_name.content == name) else {
-                    return Err(Error::Assumption)
-                };
+                let mut i = map
+                    .exports
+                    .iter()
+                    .position(|ex| ex.get_base_export().object_name.content == name)
+                    .ok_or(Error::Assumption)?;
                 let class = map
                     .get_import(map.exports[i].get_base_export().class_index)
                     .map(|import| import.object_name.content.to_owned())
@@ -268,9 +272,9 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     transplant(actor, &mut map, &donor);
                     let loc = get_location(i, &map);
                     set_location(insert, &mut map, loc);
-                    let Some(norm) = &mut map.exports[insert].get_normal_export_mut() else {
-                        return Err(Error::Assumption)
-                    };
+                    let norm = &mut map.exports[insert]
+                        .get_normal_export_mut()
+                        .ok_or(Error::Assumption)?;
                     match norm.properties.iter_mut().find_map(|prop| {
                         cast!(Property, StrProperty, prop).filter(|id| id.name.content == "ID")
                     }) {
@@ -293,9 +297,9 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         if !is_chest() {
                             replace(36)?;
                         }
-                        let Some(chest) = map.exports[i].get_normal_export_mut() else {
-                            return Err(Error::Assumption)
-                        };
+                        let chest = map.exports[i]
+                            .get_normal_export_mut()
+                            .ok_or(Error::Assumption)?;
                         set_byte("Type", "InventoryItemType", drop.as_ref(), chest)?;
                         set_byte("Item", "Items", item.as_ref(), chest)?;
                         match chest.properties.iter_mut().find_map(|prop| {
@@ -332,9 +336,9 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         if !is_chest() {
                             replace(36)?;
                         }
-                        let Some(chest) = map.exports[i].get_normal_export_mut() else {
-                            return Err(Error::Assumption)
-                        };
+                        let chest = map.exports[i]
+                            .get_normal_export_mut()
+                            .ok_or(Error::Assumption)?;
                         set_byte("Type", "InventoryItemType", drop.as_ref(), chest)?;
                         set_byte("Weapon", "Weapons", weapon.as_ref(), chest)?;
                     }
@@ -342,16 +346,16 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         if !is_chest() {
                             replace(36)?;
                         }
-                        let Some(chest) = map.exports[i].get_normal_export_mut() else {
-                            return Err(Error::Assumption)
-                        };
+                        let chest = map.exports[i]
+                            .get_normal_export_mut()
+                            .ok_or(Error::Assumption)?;
                         set_byte("Type", "InventoryItemType", drop.as_ref(), chest)?;
                         set_byte("Tunic", "Tunics", tunic.as_ref(), chest)?;
                     }
                     Drop::Spirit(spirit) if is_chest() => {
-                        let Some(chest) = map.exports[i].get_normal_export_mut() else {
-                            return Err(Error::Assumption)
-                        };
+                        let chest = map.exports[i]
+                            .get_normal_export_mut()
+                            .ok_or(Error::Assumption)?;
                         set_byte("Type", "InventoryItemType", drop.as_ref(), chest)?;
                         set_byte("Amulet", "Spirits", spirit.as_ref(), chest)?;
                     }
@@ -359,18 +363,18 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         if class != "Spirit_C" {
                             replace(26)?;
                         }
-                        let Some(spirit_bp) = map.exports[i].get_normal_export_mut() else {
-                            return Err(Error::Assumption)
-                        };
+                        let spirit_bp = map.exports[i]
+                            .get_normal_export_mut()
+                            .ok_or(Error::Assumption)?;
                         set_byte("Spirit", "Spirits", spirit.as_ref(), spirit_bp)?;
                     }
                     Drop::Ability(ability) => {
                         if !is_chest() {
                             replace(36)?;
                         }
-                        let Some(chest) = map.exports[i].get_normal_export_mut() else {
-                            return Err(Error::Assumption)
-                        };
+                        let chest = map.exports[i]
+                            .get_normal_export_mut()
+                            .ok_or(Error::Assumption)?;
                         set_byte("Type", "InventoryItemType", drop.as_ref(), chest)?;
                         set_byte("Ability", "Abilities", ability.as_ref(), chest)?;
                     }
@@ -378,18 +382,18 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         if class != "EmoteStatue_BP_C" {
                             replace(20)?;
                         }
-                        let Some(statue) = map.exports[i].get_normal_export_mut() else {
-                            return Err(Error::Assumption)
-                        };
+                        let statue = map.exports[i]
+                            .get_normal_export_mut()
+                            .ok_or(Error::Assumption)?;
                         set_byte("Emote", "E_Emotes", emote.as_ref(), statue)?;
                     }
                     Drop::Ore(amount) => {
                         if class != "Pickup_C" {
                             replace(5)?;
                         }
-                        let Some(pickup) = map.exports[i].get_normal_export_mut() else {
-                            return Err(Error::Assumption)
-                        };
+                        let pickup = map.exports[i]
+                            .get_normal_export_mut()
+                            .ok_or(Error::Assumption)?;
                         set_byte("Type", "PickUpList", "5", pickup)?;
                         match pickup.properties.iter_mut().find_map(|prop| {
                             cast!(Property, IntProperty, prop)
@@ -412,16 +416,13 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
             }
             Context::Starting => {
                 fn add_item(savegame: &mut Asset<std::fs::File>, drop: Drop) -> Result<(), Error> {
-                    let Some(inventory) = savegame.exports[1]
+                    savegame.exports[1]
                         .get_normal_export_mut()
                         .and_then(|default| {
                             cast!(Property, StructProperty, &mut default.properties[3])
                         })
                         .and_then(|stats| cast!(Property, ArrayProperty, &mut stats.value[6]))
-                    else {
-                        return Err(Error::Assumption)
-                    };
-                    inventory
+                        .ok_or(Error::Assumption)?
                         .value
                         .push(unreal_asset::properties::Property::StructProperty(
                             unreal_asset::properties::struct_property::StructProperty {
@@ -442,7 +443,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                 match &drop {
                     Drop::Ability(ability) => {
                         add_item(&mut savegame, Drop::Item(ability.as_item(), 1))?;
-                        let Some(flag) = savegame.exports[1]
+                        savegame.exports[1]
                             .get_normal_export_mut()
                             .and_then(|default| {
                                 cast!(Property, StructProperty, &mut default.properties[2])
@@ -454,20 +455,16 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                                     &mut abilities.value[ability.savegame_index()]
                                 )
                             })
-                        else {
-                            return Err(Error::Assumption)
-                        };
-                        flag.value = true;
+                            .ok_or(Error::Assumption)?
+                            .value = true;
                     }
                     Drop::Emote(emote) => {
-                        let Some(emotes) =
-                            savegame.exports[1]
-                                .get_normal_export_mut()
-                                .and_then(|default| {
-                                    cast!(Property, ArrayProperty, &mut default.properties[15])
-                                }) else {
-                                    return Err(Error::Assumption)
-                                };
+                        let emotes = savegame.exports[1]
+                            .get_normal_export_mut()
+                            .and_then(|default| {
+                                cast!(Property, ArrayProperty, &mut default.properties[15])
+                            })
+                            .ok_or(Error::Assumption)?;
                         emotes.value.push(byte_property(
                             &emotes.value.len().to_string(),
                             "E_Emotes",
@@ -475,16 +472,14 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         ))
                     }
                     Drop::Ore(amount) => {
-                        let Some(currency) = savegame.exports[1]
+                        savegame.exports[1]
                             .get_normal_export_mut()
                             .and_then(|default| {
                                 cast!(Property, StructProperty, &mut default.properties[3])
                             })
-                            .and_then(|stats| cast!(Property, IntProperty, &mut stats.value[0])) else
-                        {
-                            return Err(Error::Assumption)
-                        };
-                        currency.value += *amount;
+                            .and_then(|stats| cast!(Property, IntProperty, &mut stats.value[0]))
+                            .ok_or(Error::Assumption)?
+                            .value += *amount;
                     }
                     Drop::Duck => add_item(&mut savegame, Drop::Item(Items::Duck, 1))?,
                     _ => add_item(&mut savegame, drop)?,

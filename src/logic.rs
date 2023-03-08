@@ -24,6 +24,20 @@ pub enum Shop {
     Nilo = 19,
 }
 
+impl Shop {
+    fn location(&self) -> unreal_asset::types::vector::Vector<f32> {
+        use unreal_asset::types::vector::Vector;
+        match self {
+            Shop::Mork => Vector::new(52459.4, -17121.4, -35.13),
+            Shop::SpiritHunter => Vector::new(38096.7, -4988.86, -38178.1),
+            Shop::Ari => Vector::new(28906.2, -6509.37, 5948.82),
+            Shop::Poti => Vector::new(-94159.0, -6261.17, -28737.0),
+            Shop::Poi => Vector::new(21144.0, -39103.5, 5637.0),
+            Shop::Nilo => Vector::new(-5109.97, -5600.25, -37960.1),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum Context {
     Shop(Shop, usize, i32),
