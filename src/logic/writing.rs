@@ -115,6 +115,19 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
         .object_name
         .content = "Pickup_A02_SRF2".to_string();
     save(&mut bullshit, &path)?;
+    let mut shop_emotes: Vec<_> = checks
+        .iter()
+        .filter_map(|check| {
+            if let Drop::Emote(_) = check.drop {
+                if let Context::Shop(keep, i, _) = check.context {
+                    return Some((keep, i));
+                }
+            }
+            None
+        })
+        .collect();
+    // sort descending
+    shop_emotes.sort_unstable_by_key(|(_, i)| std::cmp::Reverse(*i));
     for Check {
         location,
         context,
@@ -146,6 +159,52 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         value: drop.as_shop_entry(price),
                     },
                 );
+                if let Drop::Emote(emote) = drop {
+                    let loc = app
+                        .pak
+                        .join(format!("{PREFIX}{location}").replace("/Game", MOD))
+                        .with_extension("umap");
+                    std::fs::create_dir_all(loc.parent().unwrap())?;
+                    if !loc.exists() {
+                        pak.read_to_file(&format!("{PREFIX}{location}.umap"), &loc)?;
+                        pak.read_to_file(
+                            &format!("{PREFIX}{location}.uexp"),
+                            &loc.with_extension("uexp"),
+                        )?;
+                    }
+                    let mut map = open(&loc)?;
+                    let insert = map.exports.len();
+                    transplant(
+                        20,
+                        &mut map,
+                        &open_from_bytes(
+                            include_bytes!("../blueprints/collectibles.umap").as_slice(),
+                            include_bytes!("../blueprints/collectibles.uexp").as_slice(),
+                        )?,
+                    );
+                    let mut pos = shopkeep.location();
+                    let (x, y) = (9.0 * index as f32).to_radians().sin_cos();
+                    pos.x -= 1000.0 * x;
+                    pos.y -= 1000.0 * y;
+                    set_location(insert, &mut map, pos);
+                    let norm = map.exports[insert]
+                        .get_normal_export_mut()
+                        .ok_or(Error::Assumption)?;
+                    use int_property::BytePropertyValue;
+                    cast!(
+                        BytePropertyValue,
+                        FName,
+                        &mut cast!(Property, ByteProperty, &mut norm.properties[2])
+                            .ok_or(Error::Assumption)?
+                            .value
+                    )
+                    .ok_or(Error::Assumption)?
+                    .content = format!("E_Emotes::NewEnumerator{}", emote.as_ref());
+                    cast!(Property, StrProperty, &mut norm.properties[6])
+                        .ok_or(Error::Assumption)?
+                        .value = Some(format!("{}{index}", shopkeep.as_ref()));
+                    save(&mut map, loc)?;
+                }
                 save(&mut savegame, loc)?;
             }
             Context::Cutscene(cutscene) => {
@@ -488,6 +547,24 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
             }
         }
     }
+    // clear out emote shop items
+    {
+        let (mut savegame, loc) = get_savegame(&app, &pak)?;
+        let default = savegame.exports[1]
+            .get_normal_export_mut()
+            .ok_or(Error::Assumption)?;
+        for (shopkeep, i) in shop_emotes {
+            cast!(
+                Property,
+                ArrayProperty,
+                &mut default.properties[shopkeep as usize]
+            )
+            .ok_or(Error::Assumption)?
+            .value
+            .remove(i);
+        }
+        save(&mut savegame, loc)?;
+    }
     // change the logo so people know it worked
     let logo_path = app
         .pak
@@ -529,7 +606,6 @@ impl Drop {
                 duplication_index: 0,
                 value: match self {
                     Drop::Item(_, amount) => *amount,
-                    Drop::Ore(_) => -1,
                     Drop::Emote(_) => 0,
                     _ => 1,
                 },
@@ -546,7 +622,6 @@ impl Drop {
                 duplication_index: 0,
                 value: match self {
                     Drop::Item(_, amount) => *amount,
-                    Drop::Ore(_) => 0,
                     _ => 1,
                 },
             }),
@@ -587,7 +662,7 @@ impl Drop {
                 property_guid: None,
                 duplication_index: 0,
                 value: if let Drop::Ore(amount) = self {
-                    *amount
+                    -*amount
                 } else {
                     price
                 },
