@@ -24,7 +24,6 @@ fn update(
             let mut current = Move::no_walljump(0, 0);
             for drop in both() {
                 match drop {
-                    // they are pretty much the exact same thing
                     Drop::Ability(Abilities::DoubleJump) | Drop::Ability(Abilities::SpinAttack) => {
                         current.extra_height += 1;
                         current.horizontal += 1;
@@ -51,7 +50,9 @@ fn update(
                     Drop::Ability(Abilities::Sprint) | Drop::Ability(Abilities::Spell) => {
                         current.horizontal += 1
                     }
-                    Drop::Ability(Abilities::Dash) => current.horizontal += 2,
+                    Drop::Spirit(Spirits::FlyingOnop) | Drop::Ability(Abilities::Dash) => {
+                        current.horizontal += 2
+                    }
                     Drop::Spirit(Spirits::StormCentry)
                         if both().any(|drop| drop == &Drop::Ability(Abilities::Dash)) =>
                     {
@@ -66,7 +67,7 @@ fn update(
         Lock::Item(item) => {
             let drop = Drop::Item(*item, 1);
             possible[0..checks.len()].contains(&drop)
-                || item.is_consumable() && progression.iter().any(|check| &check.drop == &drop)
+                || !item.is_consumable() && progression.iter().any(|check| &check.drop == &drop)
         }
         Lock::Emote(emote) => {
             let emote = Drop::Emote(*emote);
@@ -286,8 +287,39 @@ lazy_static::lazy_static! {
             }])],
         },
         "A01_StoneHeartCity/A01_CliffPath" => Location {
-            unlocks: &[],
+            unlocks: &["A01_StoneHeartCity/A01_AbilityShrine_WaterLevels"],
             locks: &[],
+        },
+        "A01_StoneHeartCity/A01_AbilityShrine_WaterLevels" => Location {
+            unlocks: &["A01_StoneHeartCity/A01_AbilityShrine_AmbushZone", "A01_StoneHeartCity/A01_AbilityShrine_CenterTree"],
+            locks: &[]
+        },
+        "A01_StoneHeartCity/A01_AbilityShrine_AmbushZone" => Location {
+            unlocks: &[],
+            locks: &[Lock::Item(Items::OldKey)]
+        },
+        "A01_StoneHeartCity/A01_AbilityShrine_CenterTree" => Location {
+            unlocks: &["A01_StoneHeartCity/A01_AbilityShrine", "A01_StoneHeartCity/A01_AbilityShrine_BossRoom"],
+            locks: &[Lock::Movement(&[
+                Move {
+                    extra_height: 0,
+                    horizontal: 1,
+                    walljump: true
+                },
+                Move {
+                    extra_height: 2,
+                    horizontal: 0,
+                    walljump: false
+                }
+            ])]
+        },
+        "A01_StoneHeartCity/A01_AbilityShrine" => Location {
+            unlocks: &[],
+            locks: &[]
+        },
+        "A01_StoneHeartCity/A01_AbilityShrine_BossRoom" => Location {
+            unlocks: &[],
+            locks: &[Lock::Item(Items::KeyHolyMaster)]
         },
         "A02_ArcaneTunnels/A02_CentralWaterWay_CenterAccess" => Location {
             unlocks: &[],

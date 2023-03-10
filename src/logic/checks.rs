@@ -1,6 +1,6 @@
 use super::*;
 
-pub const CHECKS: [Check; 105] = [
+pub const CHECKS: [Check; 124] = [
     // Fire Keep
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -35,7 +35,7 @@ pub const CHECKS: [Check; 105] = [
         location: "A02_ArcaneTunnels/A02_GameIntro",
         context: Context::Overworld("Duck"),
         drop: Drop::Duck,
-        locks: &[Lock::Movement(&[Move::no_walljump(5, 0)])],
+        locks: &[Lock::Movement(&[Move::no_walljump(4, 0)])],
     },
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepEast",
@@ -79,8 +79,8 @@ pub const CHECKS: [Check; 105] = [
         drop: Drop::Spirit(Spirits::RiverSpirit),
         locks: &[Lock::Movement(&[
             Move::no_walljump(0, 2),
-            Move::no_walljump(5, 0),
-            Move::walljump(3, 0),
+            Move::no_walljump(2, 0),
+            Move::walljump(0, 0),
         ])],
     },
     Check {
@@ -190,13 +190,19 @@ pub const CHECKS: [Check; 105] = [
         location: "A02_ArcaneTunnels/A02_NorthArcane",
         context: Context::Overworld("Pickup4"),
         drop: Drop::Ore(250),
-        locks: &[Lock::Movement(&[Move::walljump(0, 4)])],
+        locks: &[Lock::Movement(&[
+            Move::walljump(0, 4),
+            Move::no_walljump(0, 8),
+        ])],
     },
     Check {
         location: "A02_ArcaneTunnels/A02_NorthArcane",
         context: Context::Overworld("Chest_A02_NorthArcane_Loot_04"),
         drop: Drop::Item(Items::SapphireOre, 1),
-        locks: &[Lock::Movement(&[Move::walljump(0, 4)])],
+        locks: &[Lock::Movement(&[
+            Move::walljump(0, 4),
+            Move::no_walljump(0, 8),
+        ])],
     },
     Check {
         location: "A02_ArcaneTunnels/A02_EastArcane",
@@ -336,20 +342,15 @@ pub const CHECKS: [Check; 105] = [
         location: "A01_StoneHeartCity/A01_Well",
         context: Context::Overworld("Pickup60"),
         drop: Drop::Ore(500),
-        locks: &[
-            Lock::Movement(&[Move::no_walljump(1, 0)]),
-            Lock::Movement(&[Move::no_walljump(0, 2)]),
-            Lock::Movement(&[Move::walljump(0, 0)]),
-        ],
+        locks: &[Lock::Movement(&[Move::no_walljump(0, 2)])],
     },
     Check {
         location: "A01_StoneHeartCity/A01_Well",
         context: Context::Overworld("Pickup5"),
         drop: Drop::Ore(500),
         locks: &[
-            Lock::Movement(&[Move::no_walljump(1, 0)]),
-            Lock::Movement(&[Move::no_walljump(0, 2)]),
-            Lock::Movement(&[Move::walljump(0, 0)]),
+            Lock::Movement(&[Move::no_walljump(2, 2)]),
+            Lock::Movement(&[Move::walljump(1, 2)]),
         ],
     },
     Check {
@@ -702,5 +703,145 @@ pub const CHECKS: [Check; 105] = [
             Lock::Location("A06_RustCity"),
             Lock::Item(Items::ComposerLetter),
         ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine_WaterLevels",
+        context: Context::Overworld("Chest_A01_Nuos_Loot_05"),
+        drop: Drop::Item(Items::RubyOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine_WaterLevels",
+        context: Context::Overworld("Chest_A01_Nuos_Loot_02"),
+        drop: Drop::Item(Items::RubyOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine_WaterLevels",
+        context: Context::Overworld("Chest_A01_Nuos_Key"),
+        drop: Drop::Item(Items::OldKey, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine_AmbushZone",
+        context: Context::Overworld("Chest_A01_Nuos_Loot_01"),
+        drop: Drop::Item(Items::RubyOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine_AmbushZone",
+        context: Context::Overworld("Chest_A01_Nuos_Key_01"),
+        drop: Drop::Item(Items::OldKey, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine_AmbushZone",
+        context: Context::Overworld("Chest_A01_Nuos_Key_03"),
+        drop: Drop::Item(Items::KeyHolyMaster, 1),
+        locks: &[Lock::Item(Items::OldKey)],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine_AmbushZone",
+        context: Context::Overworld("Chest_A01_Nuos_Ability_WallRun"),
+        drop: Drop::Ability(Abilities::WallRun),
+        locks: &[Lock::Item(Items::KeyHolyMaster)],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine_WaterLevels",
+        context: Context::Overworld("Spirit_A01_ForestGuardian"),
+        drop: Drop::Spirit(Spirits::ForestGuardian),
+        locks: &[Lock::Movement(&[
+            Move::walljump(0, 0),
+            Move::no_walljump(5, 0),
+        ])],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine_AmbushZone",
+        context: Context::Overworld("Chest_A01_Nuos_Ability_WallRun"),
+        drop: Drop::Item(Items::RubyOre, 1),
+        locks: &[Lock::Movement(&[
+            Move::walljump(0, 1),
+            Move::no_walljump(2, 0),
+        ])],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine_WaterLevels",
+        context: Context::Overworld("Chest_A01_Nuos_Loot"),
+        drop: Drop::Item(Items::EmeraldOre, 3),
+        locks: &[Lock::Movement(&[
+            Move::walljump(0, 4),
+            Move::no_walljump(2, 10),
+        ])],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine_CenterTree",
+        context: Context::Overworld("Chest_A01_Nuos_Loot_06"),
+        drop: Drop::Item(Items::RubyOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine_CenterTree",
+        context: Context::Overworld("Chest_A01_TempleGardens_Sword_SilverBlades"),
+        drop: Drop::Weapon(Weapons::SilverBlades),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine_CenterTree",
+        context: Context::Overworld("A01_Nuos_EmoteStatue_Wave"),
+        drop: Drop::Emote(Emotes::Wave),
+        locks: &[Lock::Movement(&[
+            Move::no_walljump(2, 1),
+            Move::walljump(0, 1),
+        ])],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine_CenterTree",
+        context: Context::Overworld("Chest_A01_Nuos_Loot_04"),
+        drop: Drop::Item(Items::RubyOre, 1),
+        locks: &[Lock::Movement(&[
+            Move::no_walljump(2, 1),
+            Move::walljump(0, 1),
+        ])],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine_CenterTree",
+        context: Context::Overworld("Chest_A01_Nuos_Key_02"),
+        drop: Drop::Item(Items::OldKey, 1),
+        locks: &[Lock::Movement(&[
+            Move::no_walljump(2, 1),
+            Move::walljump(0, 1),
+        ])],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine",
+        context: Context::Overworld("Dance_Platform_Hello2_Chest"),
+        drop: Drop::Item(Items::Apple, 1),
+        locks: &[Lock::Movement(&[
+            Move::no_walljump(2, 1),
+            Move::walljump(0, 1),
+        ])],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine",
+        context: Context::Overworld("Duck"),
+        drop: Drop::Duck,
+        locks: &[Lock::Movement(&[
+            Move::no_walljump(2, 1),
+            Move::walljump(0, 1),
+        ])],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine",
+        context: Context::Overworld("Chest_A01_Nuos_MasterKey"),
+        drop: Drop::Item(Items::KeyHolyMaster, 1),
+        locks: &[Lock::Item(Items::OldKey)],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_AbilityShrine_BossRoom",
+        context: Context::Cutscene(
+            "/Game/BlueFire/Cinematics/NuosTempleEnd/Nuos_Temple_End_Controller",
+        ),
+        drop: Drop::Item(Items::KeyUthasTemple, 1),
+        locks: &[],
     },
 ];
