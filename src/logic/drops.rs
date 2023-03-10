@@ -183,6 +183,24 @@ impl Items {
         )
     }
 
+    pub fn is_consumable(&self) -> bool {
+        matches!(self, |Items::OldKey| Items::HouseKey
+            | Items::BremurPicture
+            | Items::Rose
+            | Items::Necklace
+            | Items::Book
+            | Items::ComposerLetter
+            | Items::OddRock
+            | Items::RareSnow
+            | Items::HouseContract
+            | Items::KeyGraveyardKey
+            | Items::KeyUthasTemple
+            | Items::KeyHolyMaster
+            | Items::KeyGodMaster
+            | Items::KeySteam
+            | Items::KeyFireMaster)
+    }
+
     pub fn is_key_item(&self) -> bool {
         matches!(
             self,

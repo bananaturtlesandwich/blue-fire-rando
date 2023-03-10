@@ -480,14 +480,26 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         .and_then(|default| {
                             cast!(Property, StructProperty, &mut default.properties[3])
                         })
-                        .and_then(|stats| cast!(Property, ArrayProperty, &mut stats.value[6]))
+                        .and_then(|stats| {
+                            cast!(
+                                Property,
+                                ArrayProperty,
+                                &mut stats.value[match drop {
+                                    Drop::Item(item, _) if item.is_key_item() => 7,
+                                    _ => 6,
+                                }]
+                            )
+                        })
                         .ok_or(Error::Assumption)?
                         .value
                         .push(unreal_asset::properties::Property::StructProperty(
                             unreal_asset::properties::struct_property::StructProperty {
-                                name: FName::from_slice(
-                                    "Inventory_23_288399C5416269F828550FB7376E7942",
-                                ),
+                                name: FName::from_slice(match drop {
+                                    Drop::Item(item, _) if item.is_key_item() => {
+                                        "PassiveInventory_48_636C916F4A37F051CF9B14A1402B4C94"
+                                    }
+                                    _ => "Inventory_23_288399C5416269F828550FB7376E7942",
+                                }),
                                 struct_type: Some(FName::from_slice("Inventory")),
                                 struct_guid: None,
                                 property_guid: None,
