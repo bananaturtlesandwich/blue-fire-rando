@@ -16,45 +16,56 @@ pub enum Error {
 
 pub const MOD: &str = "rando_p/Blue Fire/Content";
 
-const SAVEGAME: &str = "/Game/BlueFire/Player/Logic/FrameWork/BlueFireSaveGame";
+const SAVEGAME: &str = "/Game/BlueFire/Player/Logic/FrameWork/BlueFireSaveGame.uasset";
 
 const PREFIX: &str = "/Game/BlueFire/Maps/World/";
+
+fn extract(
+    app: &crate::Rando,
+    pak: &unpak::Pak,
+    path: &str,
+) -> Result<(Asset<std::fs::File>, std::path::PathBuf), Error> {
+    let loc = app.pak.join(path.replacen("/Game", MOD, 1));
+    Ok((
+        {
+            if !loc.exists() {
+                std::fs::create_dir_all(loc.parent().expect("is a file"))?;
+                pak.read_to_file(path, &loc)?;
+                pak.read_to_file(
+                    &path.replace(".uasset", ".uexp").replace(".umap", ".uexp"),
+                    loc.with_extension("uexp"),
+                )?;
+            }
+            open(&loc)?
+        },
+        loc,
+    ))
+}
 
 fn get_savegame(
     app: &crate::Rando,
     pak: &unpak::Pak,
 ) -> Result<(Asset<std::fs::File>, std::path::PathBuf), Error> {
-    let loc = app
-        .pak
-        .join(SAVEGAME.replacen("/Game", MOD, 1))
-        .with_extension("uasset");
-    Ok((
-        if !loc.exists() {
-            std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-            pak.read_to_file(&format!("{SAVEGAME}.uasset"), &loc)?;
-            pak.read_to_file(&format!("{SAVEGAME}.uexp"), loc.with_extension("uexp"))?;
-            let mut savegame = open(&loc)?;
-            let default = savegame.exports[1]
-                .get_normal_export_mut()
-                .ok_or(Error::Assumption)?;
-            if app.dash {
-                cast!(Property, StructProperty, &mut default.properties[2])
-                    .and_then(|inventory| cast!(Property, BoolProperty, &mut inventory.value[1]))
-                    .ok_or(Error::Assumption)?
-                    .value = false;
-            }
-            if app.emotes {
-                cast!(Property, ArrayProperty, &mut default.properties[15])
-                    .ok_or(Error::Assumption)?
-                    .value
-                    .clear()
-            }
-            savegame
-        } else {
-            open(&loc)?
-        },
-        loc,
-    ))
+    let initialised = app.pak.join(SAVEGAME.replacen("/Game", MOD, 1)).exists();
+    let (mut savegame, loc) = extract(app, pak, SAVEGAME)?;
+    if !initialised {
+        let default = savegame.exports[1]
+            .get_normal_export_mut()
+            .ok_or(Error::Assumption)?;
+        if app.dash {
+            cast!(Property, StructProperty, &mut default.properties[2])
+                .and_then(|inventory| cast!(Property, BoolProperty, &mut inventory.value[1]))
+                .ok_or(Error::Assumption)?
+                .value = false;
+        }
+        if app.emotes {
+            cast!(Property, ArrayProperty, &mut default.properties[15])
+                .ok_or(Error::Assumption)?
+                .value
+                .clear()
+        }
+    }
+    Ok((savegame, loc))
 }
 
 fn byte_property(name: &str, enum_type: &str, val: &str) -> Property {
@@ -165,14 +176,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         .join(format!("{PREFIX}{location}").replace("/Game", MOD))
                         .with_extension("umap");
                     std::fs::create_dir_all(loc.parent().unwrap())?;
-                    if !loc.exists() {
-                        pak.read_to_file(&format!("{PREFIX}{location}.umap"), &loc)?;
-                        pak.read_to_file(
-                            &format!("{PREFIX}{location}.uexp"),
-                            &loc.with_extension("uexp"),
-                        )?;
-                    }
-                    let mut map = open(&loc)?;
+                    let (mut map, loc) = extract(&app, &pak, &format!("{PREFIX}{location}.umap"))?;
                     let insert = map.exports.len();
                     transplant(
                         20,
@@ -292,19 +296,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                 save(&mut cutscene, &loc)?;
             }
             Context::Overworld(name) => {
-                let loc = app
-                    .pak
-                    .join(format!("{PREFIX}{location}").replacen("/Game", MOD, 1))
-                    .with_extension("umap");
-                if !loc.exists() {
-                    std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-                    pak.read_to_file(&format!("{PREFIX}{location}.umap"), &loc)?;
-                    pak.read_to_file(
-                        &format!("{PREFIX}{location}.uexp"),
-                        loc.with_extension("uexp"),
-                    )?;
-                }
-                let mut map = open(&loc)?;
+                let (mut map, loc) = extract(&app, &pak, &format!("{PREFIX}{location}.umap"))?;
                 let mut i = map
                     .exports
                     .iter()
