@@ -67,7 +67,7 @@ fn update(
         Lock::Item(item) => {
             let drop = Drop::Item(*item, 1);
             possible[0..checks.len()].contains(&drop)
-                || !item.is_consumable() && progression.iter().any(|check| &check.drop == &drop)
+                || item.is_key_item() && progression.iter().any(|check| &check.drop == &drop)
         }
         Lock::Emote(emote) => {
             let emote = Drop::Emote(*emote);

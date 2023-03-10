@@ -1,6 +1,6 @@
 use super::*;
 
-pub const CHECKS: [Check; 124] = [
+pub const CHECKS: [Check; 123] = [
     // Fire Keep
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -753,15 +753,6 @@ pub const CHECKS: [Check; 124] = [
         locks: &[Lock::Movement(&[
             Move::walljump(0, 0),
             Move::no_walljump(5, 0),
-        ])],
-    },
-    Check {
-        location: "A01_StoneHeartCity/A01_AbilityShrine_AmbushZone",
-        context: Context::Overworld("Chest_A01_Nuos_Ability_WallRun"),
-        drop: Drop::Item(Items::RubyOre, 1),
-        locks: &[Lock::Movement(&[
-            Move::walljump(0, 1),
-            Move::no_walljump(2, 0),
         ])],
     },
     Check {

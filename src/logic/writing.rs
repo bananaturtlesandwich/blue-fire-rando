@@ -106,26 +106,16 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
         app.pak.join("Blue Fire-WindowsNoEditor.pak"),
         unpak::Version::FrozenIndex,
     )?;
-    let path = app
-        .pak
-        .join(MOD)
-        .join("BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap");
-    std::fs::create_dir_all(path.parent().unwrap())?;
-    // sort out the dumb duped pickup names in spirit hunter
-    pak.read_to_file(
+    let (mut bullshit, loc) = extract(
+        &app,
+        &pak,
         "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap",
-        &path,
     )?;
-    pak.read_to_file(
-        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.uexp",
-        path.with_extension("uexp"),
-    )?;
-    let mut bullshit = open(&path)?;
     bullshit.exports[440]
         .get_base_export_mut()
         .object_name
         .content = "Pickup_A02_SRF2".to_string();
-    save(&mut bullshit, &path)?;
+    save(&mut bullshit, &loc)?;
     let mut shop_emotes: Vec<_> = checks
         .iter()
         .filter_map(|check| {
@@ -146,7 +136,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
         ..
     } in checks
     {
-        match context {
+        match dbg!(context) {
             Context::Shop(shopkeep, index, price) => {
                 let (mut savegame, loc) = get_savegame(app, &pak)?;
                 savegame.exports[1]
@@ -417,7 +407,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         let spirit_bp = map.exports[i]
                             .get_normal_export_mut()
                             .ok_or(Error::Assumption)?;
-                        set_byte("Spirit", "Spirits", spirit.as_ref(), spirit_bp)?;
+                        set_byte("Amulet", "Spirits", spirit.as_ref(), spirit_bp)?;
                     }
                     Drop::Ability(ability) => {
                         if !is_chest() {
