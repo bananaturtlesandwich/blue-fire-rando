@@ -67,7 +67,7 @@ fn update(
         Lock::Item(item) => {
             let drop = Drop::Item(*item, 1);
             possible[0..checks.len()].contains(&drop)
-                || item.is_key_item() && progression.iter().any(|check| &check.drop == &drop)
+                || item.is_key_item() && progression.iter().any(|check| check.drop == drop)
         }
         Lock::Emote(emote) => {
             let emote = Drop::Emote(*emote);
@@ -149,26 +149,26 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
         possible.shuffle(&mut rng);
         checks.shuffle(&mut rng);
         // update accessible locations
-        for i in 0..locations.len() {
-            for loc in LOCATIONS[locations[i]].unlocks {
-                if !locations.contains(loc)
-                    && update(
-                        &LOCATIONS[loc].locks,
+        for loc in LOCATIONS.iter() {
+            if !locations.contains(&loc.map)
+                && loc.locks.iter().any(|locks| {
+                    update(
+                        locks,
                         &locations,
                         &mut possible,
                         &mut checks,
                         &mut progression,
                     )
-                {
-                    locations.push(loc);
-                }
+                })
+            {
+                locations.push(loc.map);
             }
         }
         // update accessible editable checks
         for i in (0..pool.len()).rev() {
             if locations.contains(&pool[i].location)
                 && update(
-                    &pool[i].locks,
+                    pool[i].locks,
                     &locations,
                     &mut possible,
                     &mut checks,
@@ -182,7 +182,7 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
         for i in (0..unrandomised.len()).rev() {
             if locations.contains(&unrandomised[i].location)
                 && update(
-                    &unrandomised[i].locks,
+                    unrandomised[i].locks,
                     &locations,
                     &mut possible,
                     &mut checks,
@@ -203,128 +203,4 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
     }
     std::fs::write("spoiler_log.txt", format!("{progression:#?}")).unwrap_or_default();
     write(progression, app).map_err(|e| e.to_string())
-}
-
-macro_rules! hashmap {
-    [$($key:literal => $value:expr), *] => ({
-        let mut map = hashbrown::HashMap::new();
-        $(
-            map.insert($key, $value);
-        )*
-        map
-    });
-}
-
-lazy_static::lazy_static! {
-    static ref LOCATIONS: hashbrown::HashMap<&'static str, Location> = hashmap![
-        "A02_ArcaneTunnels/A02_GameIntro_KeepSouth" => Location {
-            unlocks: &[
-                "A02_ArcaneTunnels/A02_GameIntro_Exterior",
-                "A02_ArcaneTunnels/A02_GameIntro_KeepEast",
-                "A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom",
-            ],
-            locks: &[],
-        },
-        "A02_ArcaneTunnels/A02_GameIntro_Exterior" => Location {
-            unlocks: &["A02_ArcaneTunnels/A02_GameIntro"],
-            locks: &[],
-        },
-        "A02_ArcaneTunnels/A02_GameIntro" => Location {
-            unlocks: &[],
-            locks: &[],
-        },
-        "A02_ArcaneTunnels/A02_GameIntro_KeepEast" => Location {
-            unlocks: &["A02_ArcaneTunnels/A02_GameIntro_EastWing"],
-            locks: &[],
-        },
-        "A02_ArcaneTunnels/A02_GameIntro_EastWing" => Location {
-            unlocks: &[],
-            locks: &[],
-        },
-        "A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom" => Location {
-            unlocks: &["A02_ArcaneTunnels/A02_GameIntro_KeepWest"],
-            locks: &[Lock::Item(Items::OldKey)],
-        },
-        "A02_ArcaneTunnels/A02_GameIntro_KeepWest" => Location {
-            unlocks: &["A02_ArcaneTunnels/A02_GameIntro_MemorialMain"],
-            locks: &[],
-        },
-        "A02_ArcaneTunnels/A02_GameIntro_MemorialMain" => Location {
-            unlocks: &["A02_ArcaneTunnels/A02_NorthArcane"],
-            locks: &[],
-        },
-        "A02_ArcaneTunnels/A02_NorthArcane" => Location {
-            unlocks: &["A02_ArcaneTunnels/A02_SouthArcane"],
-            locks: &[],
-        },
-        "A02_ArcaneTunnels/A02_SouthArcane" => Location {
-            unlocks: &[
-                "A02_ArcaneTunnels/A02_EastArcane",
-                "A02_ArcaneTunnels/A02_CentralWaterWay_CenterAccess"
-            ],
-            locks: &[],
-        },
-        "A02_ArcaneTunnels/A02_EastArcane" => Location {
-            unlocks: &[
-                "A02_ArcaneTunnels/A02_Arcane",
-                "A01_StoneHeartCity/A01_CrossRoads"
-            ],
-            locks: &[],
-        },
-        "A02_ArcaneTunnels/A02_Arcane" => Location {
-            unlocks: &[],
-            locks: &[],
-        },
-        "A01_StoneHeartCity/A01_CrossRoads" => Location {
-            unlocks: &["A01_StoneHeartCity/A01_Well","A01_StoneHeartCity/A01_CliffPath"],
-            locks: &[],
-        },
-        "A01_StoneHeartCity/A01_Well" => Location {
-            unlocks: &[],
-            locks: &[Lock::Movement(&[Move{
-                extra_height: 0,
-                horizontal: 1,
-                walljump: false
-            }])],
-        },
-        "A01_StoneHeartCity/A01_CliffPath" => Location {
-            unlocks: &["A01_StoneHeartCity/A01_AbilityShrine_WaterLevels"],
-            locks: &[],
-        },
-        "A01_StoneHeartCity/A01_AbilityShrine_WaterLevels" => Location {
-            unlocks: &["A01_StoneHeartCity/A01_AbilityShrine_AmbushZone", "A01_StoneHeartCity/A01_AbilityShrine_CenterTree"],
-            locks: &[]
-        },
-        "A01_StoneHeartCity/A01_AbilityShrine_AmbushZone" => Location {
-            unlocks: &[],
-            locks: &[Lock::Item(Items::OldKey)]
-        },
-        "A01_StoneHeartCity/A01_AbilityShrine_CenterTree" => Location {
-            unlocks: &["A01_StoneHeartCity/A01_AbilityShrine", "A01_StoneHeartCity/A01_AbilityShrine_BossRoom"],
-            locks: &[Lock::Movement(&[
-                Move {
-                    extra_height: 0,
-                    horizontal: 1,
-                    walljump: true
-                },
-                Move {
-                    extra_height: 2,
-                    horizontal: 0,
-                    walljump: false
-                }
-            ])]
-        },
-        "A01_StoneHeartCity/A01_AbilityShrine" => Location {
-            unlocks: &[],
-            locks: &[]
-        },
-        "A01_StoneHeartCity/A01_AbilityShrine_BossRoom" => Location {
-            unlocks: &[],
-            locks: &[Lock::Item(Items::KeyHolyMaster)]
-        },
-        "A02_ArcaneTunnels/A02_CentralWaterWay_CenterAccess" => Location {
-            unlocks: &[],
-            locks: &[],
-        }
-    ];
 }

@@ -12,8 +12,6 @@ unreal_asset = { git = "https://github.com/astrotechies/unrealmodding", package 
 unpak = { version = "*", default-features = false }
 strum = { version = "*", features = ["derive"] }
 rand = "*"
-hashbrown = "*"
-lazy_static = "*"
 egui-modal = "*"
 rfd = "*"
 thiserror = "*"

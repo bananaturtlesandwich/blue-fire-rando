@@ -107,7 +107,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
         unpak::Version::FrozenIndex,
     )?;
     let (mut bullshit, loc) = extract(
-        &app,
+        app,
         &pak,
         "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap",
     )?;
@@ -166,7 +166,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         .join(format!("{PREFIX}{location}").replace("/Game", MOD))
                         .with_extension("umap");
                     std::fs::create_dir_all(loc.parent().unwrap())?;
-                    let (mut map, loc) = extract(&app, &pak, &format!("{PREFIX}{location}.umap"))?;
+                    let (mut map, loc) = extract(app, &pak, &format!("{PREFIX}{location}.umap"))?;
                     let insert = map.exports.len();
                     transplant(
                         20,
@@ -286,7 +286,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                 save(&mut cutscene, &loc)?;
             }
             Context::Overworld(name) => {
-                let (mut map, loc) = extract(&app, &pak, &format!("{PREFIX}{location}.umap"))?;
+                let (mut map, loc) = extract(app, &pak, &format!("{PREFIX}{location}.umap"))?;
                 let mut i = map
                     .exports
                     .iter()
@@ -542,23 +542,21 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
         }
     }
     // clear out emote shop items
-    {
-        let (mut savegame, loc) = get_savegame(&app, &pak)?;
-        let default = savegame.exports[1]
-            .get_normal_export_mut()
-            .ok_or(Error::Assumption)?;
-        for (shopkeep, i) in shop_emotes {
-            cast!(
-                Property,
-                ArrayProperty,
-                &mut default.properties[shopkeep as usize]
-            )
-            .ok_or(Error::Assumption)?
-            .value
-            .remove(i);
-        }
-        save(&mut savegame, loc)?;
+    let (mut savegame, loc) = get_savegame(app, &pak)?;
+    let default = savegame.exports[1]
+        .get_normal_export_mut()
+        .ok_or(Error::Assumption)?;
+    for (shopkeep, i) in shop_emotes {
+        cast!(
+            Property,
+            ArrayProperty,
+            &mut default.properties[shopkeep as usize]
+        )
+        .ok_or(Error::Assumption)?
+        .value
+        .remove(i);
     }
+    save(&mut savegame, loc)?;
     // change the logo so people know it worked
     let logo_path = app
         .pak

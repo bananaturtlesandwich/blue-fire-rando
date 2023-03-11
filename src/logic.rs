@@ -7,6 +7,8 @@ mod writing;
 pub use writing::write;
 mod checks;
 pub use checks::CHECKS;
+mod locations;
+pub use locations::LOCATIONS;
 
 #[derive(Debug, Clone, Copy, strum::EnumIter, strum::AsRefStr)]
 pub enum Shop {
@@ -117,9 +119,9 @@ pub struct Check {
     locks: &'static [Lock],
 }
 
-struct Location {
-    unlocks: &'static [&'static str],
-    locks: &'static [Lock],
+pub struct Location {
+    map: &'static str,
+    locks: &'static [&'static [Lock]],
 }
 
 #[derive(Debug)]

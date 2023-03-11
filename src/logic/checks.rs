@@ -866,7 +866,7 @@ pub const CHECKS: [Check; 130] = [
     },
     Check {
         location: "A01_StoneHeartCity/A01_CliffPath",
-        context: Context::Overworld("Chest_Master_A01_StoneheartCity_Tunic_MerchantsRobe"),
+        context: Context::Overworld("Chest_A01_Stoneheart_Tunic_MerchantsRobe"),
         drop: Drop::Item(Items::RubyOre, 1),
         locks: &[
             Lock::Location("A01_StoneHeartCity/A01_AbilityShrine_BossRoom"),
