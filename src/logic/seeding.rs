@@ -147,6 +147,7 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
         // shuffle the possible drops
         use rand::seq::SliceRandom;
         possible.shuffle(&mut rng);
+        checks.shuffle(&mut rng);
         // update accessible locations
         for i in 0..locations.len() {
             for loc in LOCATIONS[locations[i]].unlocks {

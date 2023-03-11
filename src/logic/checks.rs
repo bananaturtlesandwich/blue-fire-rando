@@ -1,6 +1,6 @@
 use super::*;
 
-pub const CHECKS: [Check; 123] = [
+pub const CHECKS: [Check; 130] = [
     // Fire Keep
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -704,6 +704,7 @@ pub const CHECKS: [Check; 123] = [
             Lock::Item(Items::ComposerLetter),
         ],
     },
+    // Forest Temple
     Check {
         location: "A01_StoneHeartCity/A01_AbilityShrine_WaterLevels",
         context: Context::Overworld("Chest_A01_Nuos_Loot_05"),
@@ -834,5 +835,69 @@ pub const CHECKS: [Check; 123] = [
         ),
         drop: Drop::Item(Items::KeyUthasTemple, 1),
         locks: &[],
+    },
+    // Tavern
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Cutscene("/Game/BlueFire/NPC/Bremur/NPC_Bremur"),
+        drop: Drop::Item(Items::KeyGraveyardKey, 1),
+        locks: &[
+            Lock::Location("A01_StoneHeartCity/A01_AbilityShrine_BossRoom"),
+            Lock::Movement(&[Move::walljump(0, 0), Move::no_walljump(1, 0)]),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Chest_Master_A01_StoneheartCity_GraveyardKey"),
+        drop: Drop::Item(Items::DeadRat, 1),
+        locks: &[
+            Lock::Location("A01_StoneHeartCity/A01_AbilityShrine_BossRoom"),
+            Lock::Movement(&[Move::walljump(0, 0), Move::no_walljump(1, 0)]),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Chest_Master_A01_StoneheartCity_GraveyardKey2"),
+        drop: Drop::Item(Items::EmeraldOre, 1),
+        locks: &[
+            Lock::Location("A01_StoneHeartCity/A01_AbilityShrine_BossRoom"),
+            Lock::Movement(&[Move::walljump(0, 0), Move::no_walljump(1, 0)]),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Overworld("Chest_Master_A01_StoneheartCity_Tunic_MerchantsRobe"),
+        drop: Drop::Item(Items::RubyOre, 1),
+        locks: &[
+            Lock::Location("A01_StoneHeartCity/A01_AbilityShrine_BossRoom"),
+            Lock::Movement(&[Move::walljump(0, 0), Move::no_walljump(1, 0)]),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Cutscene("/Game/BlueFire/NPC/Onops/Onop_Thief/NPC_Onop_Thief"),
+        drop: Drop::Item(Items::SmallPouch, 1),
+        locks: &[
+            Lock::Location("A01_StoneHeartCity/A01_AbilityShrine_BossRoom"),
+            Lock::Movement(&[Move::walljump(0, 0), Move::no_walljump(1, 0)]),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Poi, 0, 150),
+        drop: Drop::Item(Items::FireEssence, 1),
+        locks: &[
+            Lock::Location("A01_StoneHeartCity/A01_AbilityShrine_BossRoom"),
+            Lock::Movement(&[Move::walljump(0, 0), Move::no_walljump(1, 0)]),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_CliffPath",
+        context: Context::Shop(Shop::Poi, 1, 1500),
+        drop: Drop::Item(Items::FireEssence, 2),
+        locks: &[
+            Lock::Location("A01_StoneHeartCity/A01_AbilityShrine_BossRoom"),
+            Lock::Movement(&[Move::walljump(0, 0), Move::no_walljump(1, 0)]),
+        ],
     },
 ];
