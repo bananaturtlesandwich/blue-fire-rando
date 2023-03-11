@@ -1,6 +1,6 @@
 use super::*;
 
-pub const CHECKS: [Check; 130] = [
+pub const CHECKS: [Check; 149] = [
     // Fire Keep
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -485,7 +485,7 @@ pub const CHECKS: [Check; 130] = [
     Check {
         location: "A01_StoneHeartCity/A01_CliffPath",
         context: Context::Shop(Shop::Ari, 2, 1000),
-        drop: Drop::Tunic(Tunics::OnopCoat),
+        drop: Drop::Tunic(Tunics::Royal),
         locks: &[],
     },
     Check {
@@ -899,5 +899,127 @@ pub const CHECKS: [Check; 130] = [
             Lock::Location("A01_StoneHeartCity/A01_AbilityShrine_BossRoom"),
             Lock::Movement(&[Move::walljump(0, 0), Move::no_walljump(1, 0)]),
         ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Overworld("Pickup2"),
+        drop: Drop::Ore(100),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Cutscene(
+            "/Game/BlueFire/InteractiveObjects/Collectibles/BloodStone/BloodStone_BP",
+        ),
+        drop: Drop::Item(Items::FireEssenceSlot, 2),
+        locks: &[Lock::TempleGardensAngel],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Overworld("Chest_A01_TempleGardens_Loot_01"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Overworld("Chest_A01_TempleGardens_Loot_02"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Overworld("Chest_A01_TempleGardens_Loot_03"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Overworld("Chest_A01_TempleGardens_Loot_04"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Overworld("Chest_A01_TempleGardens_Loot_06"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Overworld("Chest_A01_TempleGardens_Loot_07"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Overworld("Chest_A01_TempleGardens_Loot_08"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Overworld("Chest_A01_TempleGardens_RareSnow"),
+        drop: Drop::Item(Items::DeadRat, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Cutscene("/Game/BlueFire/NPC/Nilo/NPC_Nilo"),
+        drop: Drop::Tunic(Tunics::ForestTunic),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Shop(Shop::Nilo, 0, 1500),
+        drop: Drop::Item(Items::EmeraldOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Shop(Shop::Nilo, 1, 800),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Shop(Shop::Nilo, 2, 500),
+        drop: Drop::Item(Items::RubyOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Overworld("Dance_Platform_Wave_Chest"),
+        drop: Drop::Item(Items::RottenApple, 1),
+        locks: &[
+            Lock::Movement(&[Move::no_walljump(0, 4)]),
+            Lock::Emote(Emotes::Wave),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Overworld("Chest_A01_TempleGardens_Sword_Shanks"),
+        drop: Drop::Weapon(Weapons::SteelShanks),
+        locks: &[Lock::Movement(&[Move::walljump(2, 1)])],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Overworld("Dance_Platform_Applause_Tunic_BananaKing"),
+        drop: Drop::Tunic(Tunics::BananaKing),
+        locks: &[
+            Lock::Movement(&[Move::walljump(2, 1)]),
+            Lock::Emote(Emotes::Applause),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Overworld("Spirit_A01_HolyCentry"),
+        drop: Drop::Spirit(Spirits::HolyCentry),
+        locks: &[Lock::Movement(&[Move::walljump(2, 2)])],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_TempleGardens",
+        context: Context::Overworld("Chest_A01_TempleGardens_Loot_05"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[Lock::Movement(&[Move::walljump(2, 2)])],
     },
 ];

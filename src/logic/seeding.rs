@@ -73,6 +73,9 @@ fn update(
             let emote = Drop::Emote(*emote);
             both().any(|drop| drop == &emote)
         }
+        Lock::TempleGardensAngel => {
+            both().any(|drop| drop == &Drop::Tunic(Tunics::SteamWorkerTunic))
+        }
     }) {
         return false;
     }
@@ -106,6 +109,9 @@ fn update(
                     .iter()
                     .position(|drop| drop == &emote)
             }
+            Lock::TempleGardensAngel => possible[0..checks.len()]
+                .iter()
+                .position(|drop| drop == &Drop::Tunic(Tunics::SteamWorkerTunic)),
         } {
             let mut check = checks.remove(i);
             check.drop = possible.remove(i);
@@ -143,6 +149,7 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
     let mut locations = Vec::with_capacity(LOCATIONS.len());
     locations.push(BEGINNING);
     let mut rng = rand::thread_rng();
+    // use !pool.is_empty when everything is documented so everything is accessible
     while locations.len() != LOCATIONS.len() {
         // shuffle the possible drops
         use rand::seq::SliceRandom;

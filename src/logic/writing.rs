@@ -201,6 +201,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                 }
                 save(&mut savegame, loc)?;
             }
+            // sapphire ore turns to house keys?????
             Context::Cutscene(cutscene) => {
                 let loc = app.pak.join(MOD).join("BlueFire/Libraries");
                 std::fs::create_dir_all(&loc)?;

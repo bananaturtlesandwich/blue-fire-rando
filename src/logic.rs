@@ -35,7 +35,7 @@ impl Shop {
             Shop::Ari => Vector::new(28906.2, -6509.37, 5948.82),
             Shop::Poti => Vector::new(-94159.0, -6261.17, -28737.0),
             Shop::Poi => Vector::new(21144.0, -39103.5, 5637.0),
-            Shop::Nilo => Vector::new(-5109.97, -5600.25, -37960.1),
+            Shop::Nilo => Vector::new(-176.74, 36323.6, 8701.8),
         }
     }
 }
@@ -130,6 +130,7 @@ enum Lock {
     Movement(&'static [Move]),
     Item(Items),
     Emote(Emotes),
+    TempleGardensAngel,
 }
 
 #[derive(Debug, PartialEq, PartialOrd)]

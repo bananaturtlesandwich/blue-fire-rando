@@ -1,6 +1,6 @@
 use super::*;
 
-pub const LOCATIONS: [Location; 21] = [
+pub const LOCATIONS: [Location; 22] = [
     // Fire Keep
     Location {
         map: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -105,6 +105,14 @@ pub const LOCATIONS: [Location; 21] = [
         locks: &[&[
             Lock::Location("A01_StoneHeartCity/A01_AbilityShrine_CenterTree"),
             Lock::Item(Items::KeyHolyMaster),
+        ]],
+    },
+    // Temple Gardens
+    Location {
+        map: "A01_StoneHeartCity/A01_TempleGardens",
+        locks: &[&[
+            Lock::Location("A01_StoneHeartCity/A01_CliffPath"),
+            Lock::Movement(&[Move::no_walljump(1, 0)]),
         ]],
     },
     // Waterways
