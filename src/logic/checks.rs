@@ -1177,9 +1177,7 @@ pub const CHECKS: [Check; 170] = [
     },
     Check {
         location: "A10_PenumbraTemple/A10_Entrance",
-        context: Context::Cutscene(
-            "/Game/BlueFire/Cinematics/InsideTemple/InsideTemple_Controller",
-        ),
+        context: Context::Cutscene("/Game/BlueFire/NPC/Von/Von_Cinematics_02"),
         drop: Drop::Item(Items::SanctuaryStone, 1),
         locks: &[],
     },

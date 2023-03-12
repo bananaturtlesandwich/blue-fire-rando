@@ -119,8 +119,8 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
     let mut shop_emotes: Vec<_> = checks
         .iter()
         .filter_map(|check| {
-            if let Drop::Emote(_) = check.drop {
-                if let Context::Shop(keep, i, _) = check.context {
+            if let Context::Shop(keep, i, _) = check.context {
+                if matches!(check.drop, Drop::Emote(_) | Drop::Ability(_)) {
                     return Some((keep, i));
                 }
             }
@@ -160,16 +160,15 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         value: drop.as_shop_entry(price),
                     },
                 );
-                if let Drop::Emote(emote) = drop {
-                    let loc = app
-                        .pak
-                        .join(format!("{PREFIX}{location}").replace("/Game", MOD))
-                        .with_extension("umap");
-                    std::fs::create_dir_all(loc.parent().unwrap())?;
+                if matches!(drop, Drop::Emote(_) | Drop::Ability(_)) {
                     let (mut map, loc) = extract(app, &pak, &format!("{PREFIX}{location}.umap"))?;
                     let insert = map.exports.len();
                     transplant(
-                        20,
+                        match drop {
+                            Drop::Ability(_) => 36,
+                            Drop::Emote(_) => 20,
+                            _ => unimplemented!(),
+                        },
                         &mut map,
                         &open_from_bytes(
                             include_bytes!("../blueprints/collectibles.umap").as_slice(),
@@ -184,19 +183,33 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     let norm = map.exports[insert]
                         .get_normal_export_mut()
                         .ok_or(Error::Assumption)?;
-                    use int_property::BytePropertyValue;
+                    if let Drop::Emote(emote) = drop {
+                        use int_property::BytePropertyValue;
+                        cast!(
+                            BytePropertyValue,
+                            FName,
+                            &mut cast!(Property, ByteProperty, &mut norm.properties[2])
+                                .ok_or(Error::Assumption)?
+                                .value
+                        )
+                        .ok_or(Error::Assumption)?
+                        .content = format!("E_Emotes::NewEnumerator{}", emote.as_ref());
+                    }
+                    if let Drop::Ability(ability) = drop {
+                        set_byte("Ability", "Abilities", ability.as_ref(), norm)?;
+                        set_byte("Type", "InventoryItemType", drop.as_ref(), norm)?;
+                    }
                     cast!(
-                        BytePropertyValue,
-                        FName,
-                        &mut cast!(Property, ByteProperty, &mut norm.properties[2])
-                            .ok_or(Error::Assumption)?
-                            .value
+                        Property,
+                        StrProperty,
+                        &mut norm.properties[match drop {
+                            Drop::Ability(_) => 11,
+                            Drop::Emote(_) => 6,
+                            _ => unimplemented!(),
+                        }]
                     )
                     .ok_or(Error::Assumption)?
-                    .content = format!("E_Emotes::NewEnumerator{}", emote.as_ref());
-                    cast!(Property, StrProperty, &mut norm.properties[6])
-                        .ok_or(Error::Assumption)?
-                        .value = Some(format!("{}{index}", shopkeep.as_ref()));
+                    .value = Some(format!("{}{index}", shopkeep.as_ref()));
                     save(&mut map, loc)?;
                 }
                 save(&mut savegame, loc)?;

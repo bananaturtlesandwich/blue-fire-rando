@@ -6,32 +6,46 @@ pub enum Items {
     SmallPouch,
     #[strum(serialize = "6")]
     OldKey,
-    #[strum(serialize = "7")]
-    Book,
-    #[strum(serialize = "9")]
-    Rose,
     #[strum(serialize = "12")]
     Null,
-    #[strum(serialize = "14")]
-    Boot,
     #[strum(serialize = "15")]
     KinbankDebitCard,
-    #[strum(serialize = "17")]
-    IceCrystal,
     #[strum(serialize = "18")]
     SanctuaryStone,
     #[strum(serialize = "19")]
     RareKey,
+    #[strum(serialize = "32")]
+    ShadowFragment,
     #[strum(serialize = "22")]
     PureShadowCatcher,
+    #[strum(serialize = "33")]
+    BlackFire,
+    #[strum(serialize = "35")]
+    Coin,
+    #[strum(serialize = "36")]
+    VoidShards,
+    #[strum(serialize = "41")]
+    HolyBlessing,
+    #[strum(serialize = "49")]
+    SpiritCatcher,
+    #[strum(serialize = "50")]
+    HouseKey,
     #[strum(serialize = "23")]
     Null2,
+    #[strum(serialize = "39")]
+    FireEssence,
+    #[strum(serialize = "7")]
+    Book,
+    #[strum(serialize = "14")]
+    Boot,
+    #[strum(serialize = "17")]
+    IceCrystal,
     #[strum(serialize = "24")]
     RubyOre,
     #[strum(serialize = "25")]
     SapphireOre,
-    #[strum(serialize = "26")]
-    DeadRat,
+    #[strum(serialize = "31")]
+    EmeraldOre,
     #[strum(serialize = "27")]
     BremurPicture,
     #[strum(serialize = "28")]
@@ -40,38 +54,22 @@ pub enum Items {
     Souls,
     #[strum(serialize = "30")]
     SandRelic,
-    #[strum(serialize = "31")]
-    EmeraldOre,
-    #[strum(serialize = "32")]
-    ShadowFragment,
-    #[strum(serialize = "33")]
-    BlackFire,
+    #[strum(serialize = "9")]
+    Rose,
     #[strum(serialize = "34")]
     AbyssPotion,
-    #[strum(serialize = "35")]
-    Coin,
-    #[strum(serialize = "36")]
-    VoidShards,
-    #[strum(serialize = "39")]
-    FireEssence,
     #[strum(serialize = "40")]
     ShadowPotion,
-    #[strum(serialize = "41")]
-    HolyBlessing,
-    #[strum(serialize = "42")]
-    Rice,
     #[strum(serialize = "44")]
     CarrotPotion,
+    #[strum(serialize = "42")]
+    Rice,
     #[strum(serialize = "45")]
     Apple,
     #[strum(serialize = "46")]
     RottenApple,
     #[strum(serialize = "47")]
     Medicine,
-    #[strum(serialize = "49")]
-    SpiritCatcher,
-    #[strum(serialize = "50")]
-    HouseKey,
     #[strum(serialize = "51")]
     LifeElixir,
     #[strum(serialize = "52")]
@@ -88,6 +86,8 @@ pub enum Items {
     ShardCluster,
     #[strum(serialize = "58")]
     ForestBug,
+    #[strum(serialize = "26")]
+    DeadRat,
     #[strum(serialize = "59")]
     PoisonedPlant,
     #[strum(serialize = "60")]
@@ -369,8 +369,6 @@ pub enum Spirits {
     PossesedBook,
     #[strum(serialize = "13")]
     ForestGuardian,
-    #[strum(serialize = "14")]
-    OnopSiblings,
     #[strum(serialize = "15")]
     MoiTheDreadful,
     #[strum(serialize = "16")]
@@ -379,6 +377,8 @@ pub enum Spirits {
     GoldenLust,
     #[strum(serialize = "18")]
     SpringWarrior,
+    #[strum(serialize = "14")]
+    OnopSiblings,
     #[strum(serialize = "19")]
     CandleOnop,
     #[strum(serialize = "20")]
@@ -405,22 +405,22 @@ pub enum Spirits {
 
 #[derive(PartialEq, Clone, Copy, Debug, strum::AsRefStr)]
 pub enum Abilities {
-    #[strum(serialize = "1")]
-    DoubleJump,
-    #[strum(serialize = "2")]
-    Dash,
     #[strum(serialize = "3")]
     Attack,
-    #[strum(serialize = "4")]
-    DownSmash,
+    #[strum(serialize = "2")]
+    Dash,
+    #[strum(serialize = "1")]
+    DoubleJump,
     #[strum(serialize = "9")]
     WallRun,
-    #[strum(serialize = "10")]
-    Grind,
     #[strum(serialize = "11")]
     Sprint,
+    #[strum(serialize = "4")]
+    DownSmash,
     #[strum(serialize = "13")]
     Spell,
+    #[strum(serialize = "10")]
+    Grind,
     #[strum(serialize = "14")]
     Block,
     #[strum(serialize = "15")]
