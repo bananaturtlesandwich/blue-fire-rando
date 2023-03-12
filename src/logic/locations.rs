@@ -1,6 +1,6 @@
 use super::*;
 
-pub const LOCATIONS: [Location; 22] = [
+pub const LOCATIONS: [Location; 30] = [
     // Fire Keep
     Location {
         map: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -113,6 +113,73 @@ pub const LOCATIONS: [Location; 22] = [
         locks: &[&[
             Lock::Location("A01_StoneHeartCity/A01_CliffPath"),
             Lock::Movement(&[Move::no_walljump(1, 0)]),
+        ]],
+    },
+    // Abandoned Path
+    Location {
+        map: "A01_StoneHeartCity/A01_Graveyard",
+        locks: &[&[
+            Lock::Location("A01_StoneHeartCity/A01_CliffPath"),
+            Lock::Item(Items::KeyGraveyardKey),
+            Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(0, 3)]),
+        ]],
+    },
+    // Uthas Temple
+    Location {
+        map: "A02_ArcaneTunnels/A01_SmallShrine_Intro",
+        locks: &[&[
+            Lock::Location("A01_StoneHeartCity/A01_Graveyard"),
+            Lock::Movement(&[Move::no_walljump(0, 2)]),
+            Lock::Item(Items::KeyUthasTemple),
+        ]],
+    },
+    Location {
+        map: "A02_ArcaneTunnels/A01_SmallShrine_Main",
+        locks: &[&[
+            Lock::Location("A02_ArcaneTunnels/A01_SmallShrine_Intro"),
+            Lock::Item(Items::OldKey),
+        ]],
+    },
+    Location {
+        map: "A02_ArcaneTunnels/A01_SmallShrine_SouthEast",
+        locks: &[&[Lock::Location("A02_ArcaneTunnels/A01_SmallShrine_Main")]],
+    },
+    Location {
+        map: "A02_ArcaneTunnels/A01_SmallShrine_SouthWest",
+        locks: &[&[
+            Lock::Location("A02_ArcaneTunnels/A01_SmallShrine_Main"),
+            Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(0, 3)]),
+            Lock::Item(Items::OldKey),
+        ]],
+    },
+    Location {
+        map: "A02_ArcaneTunnels/A01_SmallShrine_BottomPassage",
+        locks: &[&[
+            Lock::Location("A02_ArcaneTunnels/A01_SmallShrine_Main"),
+            Lock::Movement(&[Move::no_walljump(1, 4), Move::walljump(1, 3)]),
+            Lock::Item(Items::OldKey),
+        ]],
+    },
+    Location {
+        map: "A02_ArcaneTunnels/A01_SmallShrine_EndPath",
+        locks: &[
+            &[
+                Lock::Location("A02_ArcaneTunnels/A01_SmallShrine_Main"),
+                Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(0, 3)]),
+                Lock::Item(Items::OldKey),
+            ],
+            &[
+                Lock::Location("A02_ArcaneTunnels/A01_SmallShrine_Main"),
+                Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(4, 3)]),
+            ],
+        ],
+    },
+    // Temple of Gods
+    Location {
+        map: "A10_PenumbraTemple/A10_Entrance",
+        locks: &[&[
+            Lock::Location("A01_StoneHeartCity/A01_TempleGardens"),
+            Lock::Item(Items::KeyGodMaster),
         ]],
     },
     // Waterways

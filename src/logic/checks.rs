@@ -1,6 +1,6 @@
 use super::*;
 
-pub const CHECKS: [Check; 149] = [
+pub const CHECKS: [Check; 170] = [
     // Fire Keep
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -900,6 +900,7 @@ pub const CHECKS: [Check; 149] = [
             Lock::Movement(&[Move::walljump(0, 0), Move::no_walljump(1, 0)]),
         ],
     },
+    // Temple Gardens
     Check {
         location: "A01_StoneHeartCity/A01_TempleGardens",
         context: Context::Overworld("Pickup2"),
@@ -1021,5 +1022,165 @@ pub const CHECKS: [Check; 149] = [
         context: Context::Overworld("Chest_A01_TempleGardens_Loot_05"),
         drop: Drop::Item(Items::SapphireOre, 1),
         locks: &[Lock::Movement(&[Move::walljump(2, 2)])],
+    },
+    // Abandoned Path
+    Check {
+        location: "A01_StoneHeartCity/A01_Graveyard",
+        context: Context::Overworld("Chest_A01_Graveyard_Loot_03"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[Lock::Movement(&[Move::no_walljump(0, 3)])],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_Graveyard",
+        context: Context::Overworld("A01_Graveyard_EmoteStatue_Aggressive"),
+        drop: Drop::Emote(Emotes::Aggressive),
+        locks: &[Lock::Movement(&[Move::no_walljump(0, 2)])],
+    },
+    // Uthas Temple
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_Intro",
+        context: Context::Overworld("Spirit_A01_LoveFlower"),
+        drop: Drop::Spirit(Spirits::LoveFlower),
+        locks: &[Lock::Movement(&[Move::walljump(1, 0)])],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_Intro",
+        context: Context::Overworld("Chest_A01_Uthas_Loot_03"),
+        drop: Drop::Item(Items::EmeraldOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_Intro",
+        context: Context::Overworld("Chest_A01_Uthas_Key_04"),
+        drop: Drop::Item(Items::OldKey, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_Intro",
+        context: Context::Overworld("Chest_A01_Uthas_Loot_02"),
+        drop: Drop::Item(Items::RubyOre, 1),
+        locks: &[Lock::Location("A02_ArcaneTunnels/A01_SmallShrine_Main")],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_Main",
+        context: Context::Overworld("Chest_A01_Uthas_Key_02"),
+        drop: Drop::Item(Items::OldKey, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_SouthEast",
+        context: Context::Overworld("Chest_A01_Uthas_Key_01"),
+        drop: Drop::Item(Items::OldKey, 1),
+        locks: &[Lock::Movement(&[
+            Move::no_walljump(1, 0),
+            Move::walljump(0, 1),
+            Move::no_walljump(0, 3),
+        ])],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_Main",
+        context: Context::Overworld("Chest_A01_Uthas_Loot_04"),
+        drop: Drop::Item(Items::EmeraldOre, 1),
+        locks: &[Lock::Movement(&[
+            Move::walljump(0, 1),
+            Move::no_walljump(0, 3),
+        ])],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_Main",
+        context: Context::Overworld("Chest_A01_Uthas_Loot"),
+        drop: Drop::Weapon(Weapons::PeaceKeepers),
+        locks: &[Lock::Movement(&[
+            Move::walljump(0, 1),
+            Move::no_walljump(0, 3),
+        ])],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_Main",
+        context: Context::Overworld("A01_Uthas_EmoteStatue_Photo"),
+        drop: Drop::Emote(Emotes::Photo),
+        locks: &[Lock::Movement(&[
+            Move::walljump(0, 1),
+            Move::no_walljump(0, 3),
+        ])],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_Main",
+        context: Context::Overworld("Chest_A01_Uthas_Loot_01"),
+        drop: Drop::Ability(Abilities::DoubleJump),
+        locks: &[
+            Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(0, 3)]),
+            Lock::Item(Items::KeyHolyMaster),
+        ],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_SouthWest",
+        context: Context::Overworld("Chest_A01_Uthas_MasterKey"),
+        drop: Drop::Item(Items::KeyHolyMaster, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_Main",
+        context: Context::Overworld("A01_Uthas_EmoteStatue_Party"),
+        drop: Drop::Emote(Emotes::Party),
+        locks: &[Lock::Movement(&[Move::no_walljump(1, 1)])],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_Main",
+        context: Context::Overworld("Chest_A01_Uthas_Loot_05"),
+        drop: Drop::Item(Items::EmeraldOre, 1),
+        locks: &[Lock::Movement(&[Move::no_walljump(1, 1)])],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_BottomPassage",
+        context: Context::Overworld("Chest_A01_Uthas_Key_03"),
+        drop: Drop::Item(Items::OldKey, 1),
+        locks: &[Lock::Movement(&[
+            Move::no_walljump(1, 4),
+            Move::walljump(1, 2),
+        ])],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_Main",
+        context: Context::Overworld("Chest_A01_Uthas_Loot_06"),
+        drop: Drop::Item(Items::EmeraldOre, 1),
+        locks: &[Lock::Movement(&[
+            Move::walljump(0, 1),
+            Move::no_walljump(0, 3),
+        ])],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_Main",
+        context: Context::Overworld("Chest_A01_Uthas_MasterKey2"),
+        drop: Drop::Item(Items::KeyHolyMaster, 1),
+        locks: &[
+            Lock::Location("A02_ArcaneTunnels/A01_SmallShrine_EndPath"),
+            Lock::Movement(&[Move::no_walljump(0, 2)]),
+        ],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_EndPath",
+        context: Context::Overworld("Chest_A01_Uthas_Key_05"),
+        drop: Drop::Item(Items::OldKey, 1),
+        locks: &[Lock::Movement(&[
+            Move::no_walljump(1, 3),
+            Move::walljump(1, 0),
+        ])],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A01_SmallShrine_EndPath",
+        context: Context::Cutscene(
+            "/Game/BlueFire/Cinematics/UthasTempleEnd/Uthas_Temple_End_Controller",
+        ),
+        drop: Drop::Item(Items::KeyGodMaster, 1),
+        locks: &[Lock::Item(Items::OldKey), Lock::Item(Items::KeyHolyMaster)],
+    },
+    Check {
+        location: "A10_PenumbraTemple/A10_Entrance",
+        context: Context::Cutscene(
+            "/Game/BlueFire/Cinematics/InsideTemple/InsideTemple_Controller",
+        ),
+        drop: Drop::Item(Items::SanctuaryStone, 1),
+        locks: &[],
     },
 ];
