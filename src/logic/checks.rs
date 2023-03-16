@@ -1,6 +1,6 @@
 use super::*;
 
-pub const CHECKS: [Check; 170] = [
+pub const CHECKS: [Check; 182] = [
     // Fire Keep
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -27,7 +27,7 @@ pub const CHECKS: [Check; 170] = [
         ),
         drop: Drop::Ore(500),
         locks: &[
-            Lock::Location("A06_RustCity"),
+            Lock::Location("A06_IronCaves/A06_RustCity"),
             Lock::Item(Items::ComposerLetter),
         ],
     },
@@ -691,7 +691,13 @@ pub const CHECKS: [Check; 170] = [
         location: "A01_StoneHeartCity/A01_CliffPath",
         context: Context::Cutscene("/Game/BlueFire/NPC/Merchant/NPC_Merchant"),
         drop: Drop::Tunic(Tunics::MerchantsRobe),
-        locks: &[Lock::Item(Items::Book)],
+        locks: &[
+            Lock::Item(Items::Book),
+            Lock::Item(Items::Book),
+            Lock::Item(Items::Book),
+            Lock::Item(Items::Book),
+            Lock::Item(Items::Book),
+        ],
     },
     Check {
         location: "A01_StoneHeartCity/A01_CliffPath",
@@ -1036,6 +1042,12 @@ pub const CHECKS: [Check; 170] = [
         drop: Drop::Emote(Emotes::Aggressive),
         locks: &[Lock::Movement(&[Move::no_walljump(0, 2)])],
     },
+    Check {
+        location: "A01_StoneHeartCity/A01_Graveyard",
+        context: Context::Overworld("Pickup_Necklace"),
+        drop: Drop::Item(Items::Necklace, 1),
+        locks: &[Lock::Movement(&[Move::no_walljump(0, 2)])],
+    },
     // Uthas Temple
     Check {
         location: "A02_ArcaneTunnels/A01_SmallShrine_Intro",
@@ -1177,8 +1189,111 @@ pub const CHECKS: [Check; 170] = [
     },
     Check {
         location: "A10_PenumbraTemple/A10_Entrance",
-        context: Context::Cutscene("/Game/BlueFire/NPC/Von/Von_Cinematics_02"),
+        context: Context::Cutscene(
+            "/Game/BlueFire/Cinematics/InsideTemple/InsideTemple_Controller",
+        ),
         drop: Drop::Item(Items::SanctuaryStone, 1),
         locks: &[],
+    },
+    // Tower
+    // interestingly for most of these it's more efficient to climb the tower and drop down
+    Check {
+        location: "A01_StoneHeartCity/A01_Graveyard",
+        context: Context::Overworld("A01_Graveyard_EmoteStatue_No"),
+        drop: Drop::Emote(Emotes::No),
+        locks: &[Lock::Location("A10_PenumbraTemple/A10_Entrance")],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_Graveyard",
+        context: Context::Overworld("Pickup_Rose2"),
+        drop: Drop::Item(Items::Rose, 1),
+        locks: &[
+            Lock::Location("A10_PenumbraTemple/A10_Entrance"),
+            Lock::Movement(&[Move::walljump(0, 2), Move::no_walljump(0, 3)]),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_Graveyard",
+        context: Context::Overworld("Pickup_BremurPicture"),
+        drop: Drop::Item(Items::BremurPicture, 1),
+        locks: &[
+            Lock::Location("A10_PenumbraTemple/A10_Entrance"),
+            Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(0, 2)]),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_Graveyard",
+        context: Context::Overworld("Chest_A01_Graveyard_IceDestroyers"),
+        drop: Drop::Weapon(Weapons::IceDestroyers),
+        locks: &[
+            Lock::Location("A10_PenumbraTemple/A10_Entrance"),
+            Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_Graveyard",
+        context: Context::Overworld("Chest_A02_Tunic_HolyAttire"),
+        drop: Drop::Tunic(Tunics::OnopCoat),
+        locks: &[
+            Lock::Location("A10_PenumbraTemple/A10_Entrance"),
+            Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_Graveyard",
+        context: Context::Overworld("Pickup_Rose"),
+        drop: Drop::Item(Items::Rose, 1),
+        locks: &[
+            Lock::Location("A10_PenumbraTemple/A10_Entrance"),
+            Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_Graveyard",
+        context: Context::Overworld("Chest_A01_Graveyard_Loot_01"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[
+            Lock::Location("A10_PenumbraTemple/A10_Entrance"),
+            Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_Graveyard",
+        context: Context::Overworld("Chest_A01_Graveyard_Loot_02"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[
+            Lock::Location("A10_PenumbraTemple/A10_Entrance"),
+            Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_Graveyard",
+        context: Context::Overworld("Dance_Platform_Levitation_Chest"),
+        drop: Drop::Item(Items::SeagulSoup, 1),
+        locks: &[
+            Lock::Location("A10_PenumbraTemple/A10_Entrance"),
+            Lock::Emote(Emotes::Levitation),
+            Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_Graveyard",
+        context: Context::Cutscene(
+            "/Game/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Bech",
+        ),
+        drop: Drop::Ore(500),
+        locks: &[
+            Lock::Location("A06_IronCaves/A06_RustCity"),
+            Lock::Item(Items::ComposerLetter),
+        ],
+    },
+    Check {
+        location: "A01_StoneHeartCity/A01_Graveyard",
+        context: Context::Cutscene("/Game/BlueFire/Cinematics/VesselVon/VesselVon_Controller"),
+        drop: Drop::Item(Items::BeiraVessel, 1),
+        locks: &[
+            Lock::Location("A10_PenumbraTemple/A10_Entrance"),
+            Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
+        ],
     },
 ];
