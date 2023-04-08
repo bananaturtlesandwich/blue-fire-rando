@@ -1,6 +1,6 @@
 use super::*;
 
-pub const LOCATIONS: [Location; 30] = [
+pub const LOCATIONS: [Location; 33] = [
     // Fire Keep
     Location {
         map: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -180,6 +180,25 @@ pub const LOCATIONS: [Location; 30] = [
         locks: &[&[
             Lock::Location("A01_StoneHeartCity/A01_TempleGardens"),
             Lock::Item(Items::KeyGodMaster),
+        ]],
+    },
+    // Firefall River
+    Location {
+        map: "A06_IronCaves/A06_Firefall_A",
+        locks: &[&[Lock::Location("A10_PenumbraTemple/A10_Entrance")]],
+    },
+    Location {
+        map: "A06_IronCaves/A06_Firefall_B",
+        locks: &[&[
+            Lock::Location("A06_IronCaves/A06_Firefall_A"),
+            Lock::Movement(&[Move::no_walljump(0, 3)]),
+        ]],
+    },
+    Location {
+        map: "A06_IronCaves/A06_LakeMolva",
+        locks: &[&[
+            Lock::Location("A06_IronCaves/A06_Firefall_B"),
+            Lock::Movement(&[Move::no_walljump(0, 1)]),
         ]],
     },
     // Waterways

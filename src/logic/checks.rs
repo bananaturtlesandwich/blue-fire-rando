@@ -1,6 +1,6 @@
 use super::*;
 
-pub const CHECKS: [Check; 182] = [
+pub const CHECKS: [Check; 208] = [
     // Fire Keep
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -1295,5 +1295,190 @@ pub const CHECKS: [Check; 182] = [
             Lock::Location("A10_PenumbraTemple/A10_Entrance"),
             Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
         ],
+    },
+    // Firefall River
+    Check {
+        location: "A06_IronCaves/A06_FireFall_A",
+        context: Context::Overworld("Dance_Platform_HatKid_Chest"),
+        drop: Drop::Weapon(Weapons::EmberTwins),
+        locks: &[
+            Lock::Emote(Emotes::HatKid),
+            Lock::Movement(&[Move::no_walljump(1, 4)]),
+        ],
+    },
+    Check {
+        location: "A06_IronCaves/A06_FireFall_A",
+        context: Context::Overworld("Pickup_A06_SRL4"),
+        drop: Drop::Ore(250),
+        locks: &[Lock::Movement(&[Move::no_walljump(1, 4)])],
+    },
+    Check {
+        location: "A06_IronCaves/A06_FireFall_A",
+        context: Context::Overworld("Pickup_A06_SRL5"),
+        drop: Drop::Ore(200),
+        locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+    },
+    Check {
+        location: "A06_IronCaves/A06_FireFall_A",
+        context: Context::Overworld("Chest_A06_River_Loot_01"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[Lock::Movement(&[
+            Move::walljump(0, 0),
+            Move::no_walljump(0, 1),
+        ])],
+    },
+    Check {
+        location: "A06_IronCaves/A06_FireFall_A",
+        context: Context::Overworld("Chest_A06_River_Loot_03"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[Lock::Movement(&[Move::no_walljump(0, 3)])],
+    },
+    Check {
+        location: "A06_IronCaves/A06_FireFall_A",
+        context: Context::Overworld("Pickup_A06_SRL2"),
+        drop: Drop::Ore(200),
+        locks: &[Lock::Movement(&[Move::no_walljump(1, 3)])],
+    },
+    Check {
+        location: "A06_IronCaves/A06_FireFall_A",
+        context: Context::Overworld("Pickup_A06_SRL"),
+        drop: Drop::Ore(300),
+        locks: &[Lock::Movement(&[Move::no_walljump(0, 3)])],
+    },
+    Check {
+        location: "A06_IronCaves/A06_FireFall_A",
+        context: Context::Overworld("Pickup_A06_SRL3"),
+        drop: Drop::Ore(300),
+        locks: &[Lock::Movement(&[Move::no_walljump(0, 3)])],
+    },
+    Check {
+        location: "A06_IronCaves/A06_FireFall_A",
+        context: Context::Overworld("Pickup8"),
+        drop: Drop::Ore(200),
+        locks: &[Lock::Movement(&[Move::no_walljump(0, 3)])],
+    },
+    // i can't find pickups 11, 12 and 6
+    Check {
+        location: "A06_IronCaves/A06_FireFall_B",
+        context: Context::Cutscene(
+            "Blue Fire/Content/BlueFire/NPC/Onops/Onop_Speedo/NPC_Onop_Speedo",
+        ),
+        drop: Drop::Ability(Abilities::Sprint),
+        locks: &[],
+    },
+    Check {
+        location: "A06_IronCaves/A06_FireFall_B",
+        context: Context::Overworld("Pickup9"),
+        drop: Drop::Ore(150),
+        locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+    },
+    Check {
+        location: "A06_IronCaves/A06_FireFall_B",
+        context: Context::Overworld("Dance_Platform_Windmill_Chest"),
+        drop: Drop::Item(Items::RareCheese, 1),
+        locks: &[
+            Lock::Emote(Emotes::Windmill),
+            Lock::Movement(&[Move::no_walljump(1, 4)]),
+        ],
+    },
+    Check {
+        location: "A06_IronCaves/A06_FireFall_B",
+        context: Context::Cutscene(
+            "Blue Fire/Content/BlueFire/NPC/Onops/Onop_Onari/NPC_Master_Onari",
+        ),
+        drop: Drop::Tunic(Tunics::BunnySuit),
+        locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+    },
+    Check {
+        location: "A06_IronCaves/A06_FireFall_B",
+        context: Context::Overworld("Chest_A06_River_Loot_02"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+    },
+    Check {
+        location: "A06_IronCaves/A06_FireFall_B",
+        context: Context::Overworld("Pickup10"),
+        drop: Drop::Ore(150),
+        locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+    },
+    Check {
+        location: "A06_IronCaves/A06_FireFall_B",
+        context: Context::Overworld("A06_Firefall_EmoteStatue_KungFu"),
+        drop: Drop::Emote(Emotes::KungFu),
+        locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+    },
+    Check {
+        location: "A06_IronCaves/A06_LakeMolva",
+        context: Context::Overworld("Pickup58"),
+        drop: Drop::Ore(150),
+        locks: &[],
+    },
+    Check {
+        location: "A06_IronCaves/A06_LakeMolva",
+        context: Context::Overworld("Dance_Platform_Party_Chest_Spirit_HammerKing"),
+        drop: Drop::Spirit(Spirits::HammerKing),
+        locks: &[
+            Lock::Emote(Emotes::Party),
+            Lock::Movement(&[Move::no_walljump(1, 0)]),
+        ],
+    },
+    Check {
+        location: "A06_IronCaves/A06_LakeMolva",
+        context: Context::Overworld("Spirit_A06_FlyingOnop"),
+        drop: Drop::Spirit(Spirits::FlyingOnop),
+        locks: &[Lock::Location("A06_IronCaves/A06_RustCity")],
+    },
+    Check {
+        location: "A06_IronCaves/A06_LakeMolva",
+        context: Context::Overworld("Pickup2"),
+        drop: Drop::Ore(250),
+        locks: &[],
+    },
+    // myurder
+    Check {
+        location: "A06_IronCaves/A06_LakeMolva",
+        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Onops/Onop_Codi/NPC_Onop_Codi"),
+        drop: Drop::Item(Items::HouseKey, 1),
+        locks: &[Lock::Location("A06_IronCaves/A06_RustCity")],
+    },
+    Check {
+        location: "A06_IronCaves/A06_LakeMolva",
+        context: Context::Cutscene(
+            "Blue Fire/Content/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Viveldi",
+        ),
+        drop: Drop::Ore(500),
+        locks: &[
+            Lock::Location("A06_IronCaves/A06_RustCity"),
+            Lock::Item(Items::ComposerLetter),
+        ],
+    },
+    Check {
+        location: "A06_IronCaves/A06_LakeMolva",
+        context: Context::Overworld("Chest_A06_Lake_Loot_01"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A06_IronCaves/A06_LakeMolva",
+        context: Context::Overworld("A06_Firefall_EmoteStatue_Triceps"),
+        drop: Drop::Emote(Emotes::Triceps),
+        locks: &[],
+    },
+    Check {
+        location: "A06_IronCaves/A06_LakeMolva",
+        context: Context::Overworld("Chest_A06_Lake_Loot_03"),
+        drop: Drop::Item(Items::SapphireOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A06_IronCaves/A06_LakeMolva",
+        context: Context::Cutscene(
+            "Blue Fire/Content/BlueFire/NPC/Onops/NPC_Onop_SectMember_Tunic",
+        ),
+        drop: Drop::Tunic(Tunics::SectMember),
+        locks: &[Lock::Movement(&[
+            Move::walljump(0, 1),
+            Move::no_walljump(2, 0),
+        ])],
     },
 ];
