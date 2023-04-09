@@ -1,6 +1,6 @@
 use super::*;
 
-pub const CHECKS: [Check; 211] = [
+pub const CHECKS: [Check; 224] = [
     // Fire Keep
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -1289,6 +1289,7 @@ pub const CHECKS: [Check; 211] = [
         locks: &[
             Lock::Location("A06_IronCaves/A06_RustCity"),
             Lock::Item(Items::ComposerLetter),
+            Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
         ],
     },
     Check {
@@ -1503,6 +1504,96 @@ pub const CHECKS: [Check; 211] = [
         location: "A06_IronCaves/A06_SteamHouse_Corridor",
         context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Mira_Mia/NPC_Mia"),
         drop: Drop::Weapon(Weapons::IronJustice),
+        locks: &[],
+    },
+    Check {
+        location: "A06_IronCaves/A06_RustCity",
+        context: Context::Cutscene(
+            "Blue Fire/Content/BlueFire/Cinematics/RustCity_Von/RustCityVon_Controller",
+        ),
+        drop: Drop::Item(Items::KeyFireMaster, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A06_IronCaves/A06_RustCity",
+        context: Context::Overworld("Pickup21"),
+        drop: Drop::Ore(400),
+        locks: &[],
+    },
+    Check {
+        location: "A06_IronCaves/A06_RustCity",
+        context: Context::Overworld("A06_RustCity_EmoteStatue_Applause"),
+        drop: Drop::Emote(Emotes::Applause),
+        locks: &[],
+    },
+    Check {
+        location: "A06_IronCaves/A06_RustCity",
+        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Onops/Onop_Mon/NPC_Onop_Mon"),
+        drop: Drop::Item(Items::HouseContract, 1),
+        locks: &[Lock::Item(Items::HouseKey)],
+    },
+    Check {
+        location: "A06_IronCaves/A06_RustCity",
+        context: Context::Overworld("Dance_Platform_No_Chest"),
+        drop: Drop::Tunic(Tunics::Pumpkin),
+        locks: &[Lock::Emote(Emotes::No)],
+    },
+    Check {
+        location: "A06_IronCaves/A06_RustCity",
+        context: Context::Cutscene(
+            "Blue Fire/Content/BlueFire/NPC/Onops/MUSIC_Onops/NPC_Onop_Compositor",
+        ),
+        drop: Drop::Item(Items::ComposerLetter, 4),
+        locks: &[],
+    },
+    Check {
+        location: "A06_IronCaves/A06_RustCity",
+        context: Context::Cutscene(
+            "Blue Fire/Content/BlueFire/NPC/Onops/MUSIC_Onops/NPC_Onop_Compositor_Ready",
+        ),
+        drop: Drop::Tunic(Tunics::PerformerCostume),
+        // just Bech's requirements since everyone else is accessible
+        locks: &[Lock::Movement(&[
+            Move::walljump(1, 1),
+            Move::no_walljump(4, 0),
+        ])],
+    },
+    Check {
+        location: "A06_IronCaves/A06_RustCity",
+        context: Context::Cutscene(
+            "Blue Fire/Content/BlueFire/NPC/Onops/Onop_Barri/NPC_Master_BarriStage2",
+        ),
+        drop: Drop::Weapon(Weapons::KinaDefenders),
+        locks: &[Lock::Item(Items::Rose)],
+    },
+    Check {
+        location: "A06_IronCaves/A06_RustCity",
+        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Onops/Onop_Nuno/NPC_Onop_Nuno"),
+        drop: Drop::Ore(3000),
+        locks: &[Lock::Item(Items::RareSnow)],
+    },
+    Check {
+        location: "A06_IronCaves/A06_RustCity",
+        context: Context::Shop(Shop::Poti, 0, 3000),
+        drop: Drop::Spirit(Spirits::OnopSiblings),
+        locks: &[],
+    },
+    Check {
+        location: "A06_IronCaves/A06_RustCity",
+        context: Context::Shop(Shop::Poti, 1, 2200),
+        drop: Drop::Spirit(Spirits::MoiTheDreadful),
+        locks: &[],
+    },
+    Check {
+        location: "A06_IronCaves/A06_RustCity",
+        context: Context::Shop(Shop::Poti, 2, 12500),
+        drop: Drop::Weapon(Weapons::ShadowCasters),
+        locks: &[],
+    },
+    Check {
+        location: "A06_IronCaves/A06_RustCity",
+        context: Context::Shop(Shop::Poti, 3, 8000),
+        drop: Drop::Item(Items::ExtraLargePouch, 1),
         locks: &[],
     },
 ];
