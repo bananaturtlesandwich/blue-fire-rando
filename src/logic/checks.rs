@@ -23,7 +23,7 @@ pub const CHECKS: [Check; 208] = [
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_Exterior",
         context: Context::Cutscene(
-            "/Game/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Bitoven",
+            "Blue Fire/Content/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Bitoven",
         ),
         drop: Drop::Ore(500),
         locks: &[
@@ -550,7 +550,9 @@ pub const CHECKS: [Check; 208] = [
     },
     Check {
         location: "A01_StoneHeartCity/A01_CliffPath",
-        context: Context::Cutscene("/Game/BlueFire/NPC/Orip/BP_Orip_Saw/NPC_Orip_Stoneheart"),
+        context: Context::Cutscene(
+            "Blue Fire/Content/BlueFire/NPC/Orip/BP_Orip_Saw/NPC_Orip_Stoneheart",
+        ),
         drop: Drop::Item(Items::OddRock, 1),
         locks: &[],
     },
@@ -689,7 +691,7 @@ pub const CHECKS: [Check; 208] = [
     },
     Check {
         location: "A01_StoneHeartCity/A01_CliffPath",
-        context: Context::Cutscene("/Game/BlueFire/NPC/Merchant/NPC_Merchant"),
+        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Merchant/NPC_Merchant"),
         drop: Drop::Tunic(Tunics::MerchantsRobe),
         locks: &[
             Lock::Item(Items::Book),
@@ -702,7 +704,7 @@ pub const CHECKS: [Check; 208] = [
     Check {
         location: "A01_StoneHeartCity/A01_CliffPath",
         context: Context::Cutscene(
-            "/Game/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Wolfgang",
+            "Blue Fire/Content/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Wolfgang",
         ),
         drop: Drop::Ore(500),
         locks: &[
@@ -837,7 +839,7 @@ pub const CHECKS: [Check; 208] = [
     Check {
         location: "A01_StoneHeartCity/A01_AbilityShrine_BossRoom",
         context: Context::Cutscene(
-            "/Game/BlueFire/Cinematics/NuosTempleEnd/Nuos_Temple_End_Controller",
+            "Blue Fire/Content/BlueFire/Cinematics/NuosTempleEnd/Nuos_Temple_End_Controller",
         ),
         drop: Drop::Item(Items::KeyUthasTemple, 1),
         locks: &[],
@@ -845,7 +847,7 @@ pub const CHECKS: [Check; 208] = [
     // Tavern
     Check {
         location: "A01_StoneHeartCity/A01_CliffPath",
-        context: Context::Cutscene("/Game/BlueFire/NPC/Bremur/NPC_Bremur"),
+        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Bremur/NPC_Bremur"),
         drop: Drop::Item(Items::KeyGraveyardKey, 1),
         locks: &[
             Lock::Location("A01_StoneHeartCity/A01_AbilityShrine_BossRoom"),
@@ -881,7 +883,9 @@ pub const CHECKS: [Check; 208] = [
     },
     Check {
         location: "A01_StoneHeartCity/A01_CliffPath",
-        context: Context::Cutscene("/Game/BlueFire/NPC/Onops/Onop_Thief/NPC_Onop_Thief"),
+        context: Context::Cutscene(
+            "Blue Fire/Content/BlueFire/NPC/Onops/Onop_Thief/NPC_Onop_Thief",
+        ),
         drop: Drop::Item(Items::SmallPouch, 1),
         locks: &[
             Lock::Location("A01_StoneHeartCity/A01_AbilityShrine_BossRoom"),
@@ -916,7 +920,7 @@ pub const CHECKS: [Check; 208] = [
     Check {
         location: "A01_StoneHeartCity/A01_TempleGardens",
         context: Context::Cutscene(
-            "/Game/BlueFire/InteractiveObjects/Collectibles/BloodStone/BloodStone_BP",
+            "Blue Fire/Content/BlueFire/InteractiveObjects/Collectibles/BloodStone/BloodStone_BP",
         ),
         drop: Drop::Item(Items::FireEssenceSlot, 2),
         locks: &[Lock::TempleGardensAngel],
@@ -971,7 +975,7 @@ pub const CHECKS: [Check; 208] = [
     },
     Check {
         location: "A01_StoneHeartCity/A01_TempleGardens",
-        context: Context::Cutscene("/Game/BlueFire/NPC/Nilo/NPC_Nilo"),
+        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Nilo/NPC_Nilo"),
         drop: Drop::Tunic(Tunics::ForestTunic),
         locks: &[],
     },
@@ -1182,7 +1186,7 @@ pub const CHECKS: [Check; 208] = [
     Check {
         location: "A02_ArcaneTunnels/A01_SmallShrine_EndPath",
         context: Context::Cutscene(
-            "/Game/BlueFire/Cinematics/UthasTempleEnd/Uthas_Temple_End_Controller",
+            "Blue Fire/Content/BlueFire/Cinematics/UthasTempleEnd/Uthas_Temple_End_Controller",
         ),
         drop: Drop::Item(Items::KeyGodMaster, 1),
         locks: &[Lock::Item(Items::OldKey), Lock::Item(Items::KeyHolyMaster)],
@@ -1190,7 +1194,7 @@ pub const CHECKS: [Check; 208] = [
     Check {
         location: "A10_PenumbraTemple/A10_Entrance",
         context: Context::Cutscene(
-            "/Game/BlueFire/Cinematics/InsideTemple/InsideTemple_Controller",
+            "Blue Fire/Content/BlueFire/Cinematics/InsideTemple/InsideTemple_Controller",
         ),
         drop: Drop::Item(Items::SanctuaryStone, 1),
         locks: &[],
@@ -1279,7 +1283,7 @@ pub const CHECKS: [Check; 208] = [
     Check {
         location: "A01_StoneHeartCity/A01_Graveyard",
         context: Context::Cutscene(
-            "/Game/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Bech",
+            "Blue Fire/Content/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Bech",
         ),
         drop: Drop::Ore(500),
         locks: &[
@@ -1289,7 +1293,9 @@ pub const CHECKS: [Check; 208] = [
     },
     Check {
         location: "A01_StoneHeartCity/A01_Graveyard",
-        context: Context::Cutscene("/Game/BlueFire/Cinematics/VesselVon/VesselVon_Controller"),
+        context: Context::Cutscene(
+            "Blue Fire/Content/BlueFire/Cinematics/VesselVon/VesselVon_Controller",
+        ),
         drop: Drop::Item(Items::BeiraVessel, 1),
         locks: &[
             Lock::Location("A10_PenumbraTemple/A10_Entrance"),

@@ -16,9 +16,9 @@ pub enum Error {
 
 pub const MOD: &str = "rando_p/Blue Fire/Content";
 
-const SAVEGAME: &str = "/Game/BlueFire/Player/Logic/FrameWork/BlueFireSaveGame.uasset";
+const SAVEGAME: &str = "Blue Fire/Content/BlueFire/Player/Logic/FrameWork/BlueFireSaveGame.uasset";
 
-const PREFIX: &str = "/Game/BlueFire/Maps/World/";
+const PREFIX: &str = "Blue Fire/Content/BlueFire/Maps/World/";
 
 fn extract(
     app: &crate::Rando,
@@ -109,7 +109,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
     let (mut bullshit, loc) = extract(
         app,
         &pak,
-        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap",
+        "Blue Fire/Content/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap",
     )?;
     bullshit.exports[440]
         .get_base_export_mut()
