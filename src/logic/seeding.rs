@@ -73,9 +73,8 @@ fn update(
             let emote = Drop::Emote(*emote);
             both().any(|drop| drop == &emote)
         }
-        Lock::TempleGardensAngel => {
-            both().any(|drop| drop == &Drop::Tunic(Tunics::SteamWorkerTunic))
-        }
+        Lock::EvolairTunic => both().any(|drop| drop == &Drop::Tunic(Tunics::SteamWorkerTunic)),
+        Lock::IronJustice => both().any(|drop| drop == &Drop::Weapon(Weapons::IronJustice)),
     }) {
         return false;
     }
@@ -109,9 +108,12 @@ fn update(
                     .iter()
                     .position(|drop| drop == &emote)
             }
-            Lock::TempleGardensAngel => possible[0..checks.len()]
+            Lock::EvolairTunic => possible[0..checks.len()]
                 .iter()
                 .position(|drop| drop == &Drop::Tunic(Tunics::SteamWorkerTunic)),
+            Lock::IronJustice => possible[0..checks.len()]
+                .iter()
+                .position(|drop| drop == &Drop::Weapon(Weapons::IronJustice)),
         } {
             let mut check = checks.remove(i);
             check.drop = possible.remove(i);

@@ -1,6 +1,6 @@
 use super::*;
 
-pub const LOCATIONS: [Location; 33] = [
+pub const LOCATIONS: [Location; 36] = [
     // Fire Keep
     Location {
         map: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -199,6 +199,33 @@ pub const LOCATIONS: [Location; 33] = [
         locks: &[&[
             Lock::Location("A06_IronCaves/A06_Firefall_B"),
             Lock::Movement(&[Move::no_walljump(0, 1)]),
+        ]],
+    },
+    // Steam House
+    Location {
+        map: "A06_IronCaves/A06_SteamHouse_Core",
+        locks: &[&[
+            Lock::Location("A06_IronCaves/A06_LakeMolva"),
+            Lock::Movement(&[Move::no_walljump(1, 2)]),
+        ]],
+    },
+    // really it's the requirements for the boiler and mia
+    Location {
+        map: "A06_IronCaves/A06_SteamHouse_Corridor",
+        locks: &[&[
+            Lock::Location("A06_IronCaves/A06_SteamHouse_Core"),
+            Lock::Item(Items::KeySteam),
+            Lock::Movement(&[Move::no_walljump(1, 4), Move::walljump(1, 3)]),
+        ]],
+    },
+    // Rust Village
+    Location {
+        map: "A06_IronCave/A06_RustCity",
+        locks: &[&[
+            Lock::Location("A06_IronCaves/A06_SteamHouse_Core"),
+            Lock::Location("A06_IronCaves/A06_SteamHouse_Corridor"),
+            Lock::Movement(&[Move::no_walljump(1, 2)]),
+            Lock::IronJustice,
         ]],
     },
     // Waterways

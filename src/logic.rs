@@ -130,7 +130,8 @@ enum Lock {
     Movement(&'static [Move]),
     Item(Items),
     Emote(Emotes),
-    TempleGardensAngel,
+    EvolairTunic,
+    IronJustice,
 }
 
 #[derive(Debug, PartialEq, PartialOrd)]

@@ -1,6 +1,6 @@
 use super::*;
 
-pub const CHECKS: [Check; 208] = [
+pub const CHECKS: [Check; 211] = [
     // Fire Keep
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -923,7 +923,7 @@ pub const CHECKS: [Check; 208] = [
             "Blue Fire/Content/BlueFire/InteractiveObjects/Collectibles/BloodStone/BloodStone_BP",
         ),
         drop: Drop::Item(Items::FireEssenceSlot, 2),
-        locks: &[Lock::TempleGardensAngel],
+        locks: &[Lock::EvolairTunic],
     },
     Check {
         location: "A01_StoneHeartCity/A01_TempleGardens",
@@ -1486,5 +1486,23 @@ pub const CHECKS: [Check; 208] = [
             Move::walljump(0, 1),
             Move::no_walljump(2, 0),
         ])],
+    },
+    Check {
+        location: "A06_IronCaves/A06_SteamHouse_Core",
+        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Mira_Mia/NPC_Mira"),
+        drop: Drop::Item(Items::KeySteam, 1),
+        locks: &[],
+    },
+    Check {
+        location: "A06_IronCaves/A06_SteamHouse_Core",
+        context: Context::Overworld("Chest_A06_SteamHouse_Tunic_SteamSuit"),
+        drop: Drop::Tunic(Tunics::SteamWorkerTunic),
+        locks: &[Lock::Movement(&[Move::no_walljump(1, 1)])],
+    },
+    Check {
+        location: "A06_IronCaves/A06_SteamHouse_Corridor",
+        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Mira_Mia/NPC_Mia"),
+        drop: Drop::Weapon(Weapons::IronJustice),
+        locks: &[],
     },
 ];
