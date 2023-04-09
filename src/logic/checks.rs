@@ -1,6 +1,6 @@
 use super::*;
 
-pub const CHECKS: [Check; 224] = [
+pub const CHECKS: [Check; 227] = [
     // Fire Keep
     Check {
         location: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -149,6 +149,19 @@ pub const CHECKS: [Check; 224] = [
         context: Context::Overworld("A02_Arcane_EmoteStatue_HatKid"),
         drop: Drop::Emote(Emotes::HatKid),
         locks: &[],
+    },
+    // to hit the lever you can just drop down
+    Check {
+        location: "A02_ArcaneTunnels/A02_CentralWaterWay_CenterAccess",
+        context: Context::Overworld("Pickup"),
+        drop: Drop::Ore(400),
+        locks: &[Lock::Location("A06_IronCaves/A06_LakeMolva")],
+    },
+    Check {
+        location: "A02_ArcaneTunnels/A02_CentralWaterWay_CenterAccess",
+        context: Context::Overworld("Chest_A02_Tunic_PureShadow"),
+        drop: Drop::Tunic(Tunics::PureShadow),
+        locks: &[Lock::Location("A02_ArcaneTunnels/A02_BossRoom")],
     },
     Check {
         location: "A02_ArcaneTunnels/A02_SouthArcane",
@@ -1200,7 +1213,8 @@ pub const CHECKS: [Check; 224] = [
         locks: &[],
     },
     // Tower
-    // interestingly for most of these it's more efficient to climb the tower and drop down
+    // for most of these you can climb the tower and drop down
+    // i can tell if you don't have a lot of movement this'll be tedious...
     Check {
         location: "A01_StoneHeartCity/A01_Graveyard",
         context: Context::Overworld("A01_Graveyard_EmoteStatue_No"),
@@ -1413,6 +1427,12 @@ pub const CHECKS: [Check; 224] = [
         context: Context::Overworld("A06_Firefall_EmoteStatue_KungFu"),
         drop: Drop::Emote(Emotes::KungFu),
         locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+    },
+    Check {
+        location: "A06_IronCaves/A06_FireFall_B",
+        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Mira_Mia/NPC_Mia_Firefall"),
+        drop: Drop::Ore(5000),
+        locks: &[Lock::Location("A06_IronCaves/A06_RustCity")],
     },
     Check {
         location: "A06_IronCaves/A06_LakeMolva",

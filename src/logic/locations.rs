@@ -1,6 +1,6 @@
 use super::*;
 
-pub const LOCATIONS: [Location; 36] = [
+pub const LOCATIONS: [Location; 40] = [
     // Fire Keep
     Location {
         map: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
@@ -124,6 +124,19 @@ pub const LOCATIONS: [Location; 36] = [
             Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(0, 3)]),
         ]],
     },
+    Location {
+        map: "A01_StoneHeartCity/A01_GraveyardShrine",
+        locks: &[&[
+            Lock::Location("A01_StoneHeartCity/A01_Graveyard"),
+            Lock::Location("A06_IronCaves/A06_LakeMolva"),
+            Lock::Location("A01_StoneHeartCity/A01_TempleGardens"),
+            Lock::Location("A10_PenumbraTemple/A10_Entrance"),
+            Lock::Item(Items::BeiraVessel),
+            // needs walljump for temple gardens blocked stairway soul
+            // also requires climbing tower
+            Lock::Movement(&[Move::walljump(3, 3)]),
+        ]],
+    },
     // Uthas Temple
     Location {
         map: "A02_ArcaneTunnels/A01_SmallShrine_Intro",
@@ -182,6 +195,14 @@ pub const LOCATIONS: [Location; 36] = [
             Lock::Item(Items::KeyGodMaster),
         ]],
     },
+    Location {
+        map: "A10_PenumbraTemple/A10_GodessChamber",
+        locks: &[&[
+            Lock::Location("A10_PenumbraTemple/A10_Entrance"),
+            Lock::Location("A02_ArcaneTunnels/A02_BossRoom"),
+            Lock::Location("A06_IronCaves/A06_Sirion"),
+        ]],
+    },
     // Firefall River
     Location {
         map: "A06_IronCaves/A06_Firefall_A",
@@ -218,6 +239,15 @@ pub const LOCATIONS: [Location; 36] = [
             Lock::Movement(&[Move::no_walljump(1, 4), Move::walljump(1, 3)]),
         ]],
     },
+    Location {
+        map: "A06_IronCaves/A06_Sirion",
+        locks: &[&[
+            Lock::Location("A06_IronCaves/A06_SteamHouse_Core"),
+            Lock::Item(Items::KeyFireMaster),
+            Lock::Movement(&[Move::walljump(0, 4), Move::no_walljump(0, 5)]),
+            Lock::Item(Items::SanctuaryStone),
+        ]],
+    },
     // Rust Village
     Location {
         map: "A06_IronCave/A06_RustCity",
@@ -232,5 +262,17 @@ pub const LOCATIONS: [Location; 36] = [
     Location {
         map: "A02_ArcaneTunnels/A02_CentralWaterWay_CenterAccess",
         locks: &[&[Lock::Location("A02_ArcaneTunnels/A02_SouthArcane")]],
+    },
+    Location {
+        map: "A02_ArcaneTunnels/A02_BossRoom",
+        locks: &[&[
+            Lock::Location("A02_ArcaneTunnels/A02_SouthArcane"),
+            // for the tower elevator
+            Lock::Location("A10_PenumbraTemple/A10_GodessChamber"),
+            Lock::Location("A06_IronCaves/A06_LakeMolva"),
+            // movement requirements for oliver's diary area
+            Lock::Movement(&[Move::walljump(0, 4), Move::no_walljump(0, 8)]),
+            Lock::Item(Items::SanctuaryStone),
+        ]],
     },
 ];
