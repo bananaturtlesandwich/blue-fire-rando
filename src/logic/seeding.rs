@@ -1,4 +1,5 @@
 use super::*;
+use strum::{EnumCount, IntoEnumIterator};
 
 const BEGINNING: &str = "A02_ArcaneTunnels/A02_GameIntro_KeepSouth";
 
@@ -7,7 +8,7 @@ const NOTENOUGH: &str =
 
 fn update(
     locks: &[Lock],
-    locations: &[&str],
+    locations: &[Locations],
     possible: &mut Vec<Drop>,
     checks: &mut Vec<Check>,
     progression: &mut Vec<Check>,
@@ -78,7 +79,7 @@ fn update(
     }) {
         return false;
     }
-    for lock in locks.iter() {
+    for lock in locks {
         // freeze any progression items where they are
         while let Some(i) = match lock {
             Lock::Location(_) => None,
@@ -148,19 +149,18 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
     let mut possible: Vec<Drop> = pool.iter().map(|check| check.drop).collect();
     let mut checks: Vec<Check> = Vec::with_capacity(pool.len());
     let mut progression: Vec<Check> = Vec::with_capacity(pool.len());
-    let mut locations = Vec::with_capacity(LOCATIONS.len());
-    locations.push(BEGINNING);
+    let mut locations = Vec::with_capacity(Locations::COUNT);
     let mut rng = rand::thread_rng();
     // use !pool.is_empty when everything is documented so everything is accessible
-    while locations.len() != LOCATIONS.len() {
+    while locations.len() != Locations::COUNT {
         // shuffle the possible drops
         use rand::seq::SliceRandom;
         possible.shuffle(&mut rng);
         checks.shuffle(&mut rng);
         // update accessible locations
-        for loc in LOCATIONS.iter() {
-            if !locations.contains(&loc.map)
-                && loc.locks.iter().any(|locks| {
+        for loc in Locations::iter() {
+            if !locations.contains(&loc)
+                && loc.locks().iter().any(|locks| {
                     update(
                         locks,
                         &locations,
@@ -170,7 +170,7 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
                     )
                 })
             {
-                locations.push(loc.map);
+                locations.push(loc);
             }
         }
         // update accessible editable checks

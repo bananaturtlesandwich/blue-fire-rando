@@ -14,7 +14,7 @@ pub enum Error {
     Assumption,
 }
 
-pub const MOD: &str = "rando_p/Blue Fire/Content";
+pub const MOD: &str = "rando_p";
 
 const SAVEGAME: &str = "Blue Fire/Content/BlueFire/Player/Logic/FrameWork/BlueFireSaveGame.uasset";
 
@@ -25,7 +25,7 @@ fn extract(
     pak: &unpak::Pak,
     path: &str,
 ) -> Result<(Asset<std::fs::File>, std::path::PathBuf), Error> {
-    let loc = app.pak.join(path.replacen("/Game", MOD, 1));
+    let loc = app.pak.join(MOD).join(path);
     Ok((
         {
             if !loc.exists() {
@@ -46,7 +46,7 @@ fn get_savegame(
     app: &crate::Rando,
     pak: &unpak::Pak,
 ) -> Result<(Asset<std::fs::File>, std::path::PathBuf), Error> {
-    let initialised = app.pak.join(SAVEGAME.replacen("/Game", MOD, 1)).exists();
+    let initialised = app.pak.join(MOD).join(SAVEGAME).exists();
     let (mut savegame, loc) = extract(app, pak, SAVEGAME)?;
     if !initialised {
         let default = savegame.exports[1]
@@ -216,7 +216,10 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
             }
             // sapphire ore turns to house keys?????
             Context::Cutscene(cutscene) => {
-                let loc = app.pak.join(MOD).join("BlueFire/Libraries");
+                let loc = app
+                    .pak
+                    .join(MOD)
+                    .join("Blue Fire/Content/BlueFire/Libraries");
                 std::fs::create_dir_all(&loc)?;
                 let mut hook = open_from_bytes(
                     include_bytes!("../blueprints/hook.uasset").as_slice(),
@@ -279,10 +282,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     *name = name.replace("hook", &new_name);
                 }
                 save(&mut hook, loc.join(&new_name).with_extension("uasset"))?;
-                let loc = app
-                    .pak
-                    .join(cutscene.replacen("/Game", MOD, 1))
-                    .with_extension("uasset");
+                let loc = app.pak.join(MOD).join(cutscene).with_extension("uasset");
                 std::fs::create_dir_all(loc.parent().expect("is a file"))?;
                 pak.read_to_file(&format!("{cutscene}.uasset"), &loc)?;
                 pak.read_to_file(&format!("{cutscene}.uexp"), loc.with_extension("uexp"))?;
@@ -575,7 +575,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
     let logo_path = app
         .pak
         .join(MOD)
-        .join("BlueFire/HUD/Menu/Blue-Fire-Logo.uasset");
+        .join("Blue Fire/Content/BlueFire/HUD/Menu/Blue-Fire-Logo.uasset");
     std::fs::create_dir_all(logo_path.parent().expect("is a file"))?;
     std::fs::write(&logo_path, include_bytes!("../blueprints/logo.uasset"))?;
     std::fs::write(

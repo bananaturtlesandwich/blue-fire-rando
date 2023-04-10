@@ -1,278 +1,241 @@
 use super::*;
 
-pub const LOCATIONS: [Location; 40] = [
+#[derive(Debug, PartialEq, strum::AsRefStr, strum::Display, strum::EnumIter, strum::EnumCount)]
+pub enum Locations {
     // Fire Keep
-    Location {
-        map: "A02_ArcaneTunnels/A02_GameIntro_KeepSouth",
-        locks: &[&[]],
-    },
-    Location {
-        map: "A02_ArcaneTunnels/A02_GameIntro_Exterior",
-        locks: &[&[Lock::Location("A02_ArcaneTunnels/A02_GameIntro_KeepSouth")]],
-    },
-    Location {
-        map: "A02_ArcaneTunnels/A02_GameIntro",
-        locks: &[&[Lock::Location("A02_ArcaneTunnels/A02_GameIntro_Exterior")]],
-    },
-    Location {
-        map: "A02_ArcaneTunnels/A02_GameIntro_KeepEast",
-        locks: &[&[Lock::Location("A02_ArcaneTunnels/A02_GameIntro_KeepSouth")]],
-    },
-    Location {
-        map: "A02_ArcaneTunnels/A02_GameIntro_EastWing",
-        locks: &[&[Lock::Location("A02_ArcaneTunnels/A02_GameIntro_KeepEast")]],
-    },
-    Location {
-        map: "A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom",
-        locks: &[&[
-            Lock::Location("A02_ArcaneTunnels/A02_GameIntro_KeepSouth"),
-            Lock::Item(Items::OldKey),
-        ]],
-    },
-    Location {
-        map: "A02_ArcaneTunnels/A02_GameIntro_KeepWest",
-        locks: &[&[Lock::Location(
-            "A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom",
-        )]],
-    },
-    Location {
-        map: "A02_ArcaneTunnels/A02_GameIntro_MemorialMain",
-        locks: &[&[Lock::Location("A02_ArcaneTunnels/A02_GameIntro_KeepWest")]],
-    },
+    #[strum(serialize = "A02_ArcaneTunnels/A02_GameIntro_KeepSouth")]
+    Lab,
+    #[strum(serialize = "A02_ArcaneTunnels/A02_GameIntro_Exterior")]
+    Bitoven,
+    #[strum(serialize = "A02_ArcaneTunnels/A02_GameIntro")]
+    KeepDucks,
+    #[strum(serialize = "A02_ArcaneTunnels/A02_GameIntro_KeepEast")]
+    KeepVessel,
+    #[strum(serialize = "A02_ArcaneTunnels/A02_GameIntro_EastWing")]
+    Shield,
+    #[strum(serialize = "A02_ArcaneTunnels/A02_GameIntro_FirstVoidRoom")]
+    FirstVoid,
+    #[strum(serialize = "A02_ArcaneTunnels/A02_GameIntro_KeepWest")]
+    Crates,
+    #[strum(serialize = "A02_ArcaneTunnels/A02_GameIntro_MemorialMain")]
+    Memorial,
     // Arcane Tunnels
-    Location {
-        map: "A02_ArcaneTunnels/A02_NorthArcane",
-        locks: &[&[Lock::Location(
-            "A02_ArcaneTunnels/A02_GameIntro_MemorialMain",
-        )]],
-    },
-    Location {
-        map: "A02_ArcaneTunnels/A02_SouthArcane",
-        locks: &[&[Lock::Location("A02_ArcaneTunnels/A02_NorthArcane")]],
-    },
-    Location {
-        map: "A02_ArcaneTunnels/A02_EastArcane",
-        locks: &[&[Lock::Location("A02_ArcaneTunnels/A02_SouthArcane")]],
-    },
-    Location {
-        map: "A02_ArcaneTunnels/A02_Arcane",
-        locks: &[&[Lock::Location("A02_ArcaneTunnels/A02_EastArcane")]],
-    },
+    #[strum(serialize = "A02_ArcaneTunnels/A02_NorthArcane")]
+    ArcaneNorth,
+    #[strum(serialize = "A02_ArcaneTunnels/A02_SouthArcane")]
+    ArcaneSouth,
+    #[strum(serialize = "A02_ArcaneTunnels/A02_EastArcane")]
+    ArcaneSpiritHunter,
+    #[strum(serialize = "A02_ArcaneTunnels/A02_Arcane")]
+    ArcaneDucks,
     // Crossroads
-    Location {
-        map: "A01_StoneHeartCity/A01_CrossRoads",
-        locks: &[&[Lock::Location("A02_ArcaneTunnels/A02_EastArcane")]],
-    },
-    Location {
-        map: "A01_StoneHeartCity/A01_Well",
-        locks: &[&[
-            Lock::Location("A01_StoneHeartCity/A01_CrossRoads"),
-            Lock::Movement(&[Move::no_walljump(0, 1)]),
-        ]],
-    },
+    #[strum(serialize = "A01_StoneHeartCity/A01_CrossRoads")]
+    Crossroads,
+    #[strum(serialize = "A01_StoneHeartCity/A01_Well")]
+    Well,
     // Stoneheart City
-    Location {
-        map: "A01_StoneHeartCity/A01_CliffPath",
-        locks: &[&[Lock::Location("A02_ArcaneTunnels/A02_EastArcane")]],
-    },
+    #[strum(serialize = "A01_StoneHeartCity/A01_CliffPath")]
+    Stoneheart,
     // Forest Temple
-    Location {
-        map: "A01_StoneHeartCity/A01_AbilityShrine_WaterLevels",
-        locks: &[&[Lock::Location("A01_StoneHeartCity/A01_CliffPath")]],
-    },
-    Location {
-        map: "A01_StoneHeartCity/A01_AbilityShrine_AmbushZone",
-        locks: &[&[
-            Lock::Location("A01_StoneHeartCity/A01_AbilityShrine_WaterLevels"),
-            Lock::Item(Items::OldKey),
-        ]],
-    },
-    Location {
-        map: "A01_StoneHeartCity/A01_AbilityShrine_CenterTree",
-        locks: &[&[
-            Lock::Location("A01_StoneHeartCity/A01_AbilityShrine_WaterLevels"),
-            Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(2, 0)]),
-        ]],
-    },
-    Location {
-        map: "A01_StoneHeartCity/A01_AbilityShrine",
-        locks: &[&[Lock::Location(
-            "A01_StoneHeartCity/A01_AbilityShrine_CenterTree",
-        )]],
-    },
-    Location {
-        map: "A01_StoneHeartCity/A01_AbilityShrine_BossRoom",
-        locks: &[&[
-            Lock::Location("A01_StoneHeartCity/A01_AbilityShrine_CenterTree"),
-            Lock::Item(Items::KeyHolyMaster),
-        ]],
-    },
+    #[strum(serialize = "A01_StoneHeartCity/A01_AbilityShrine_WaterLevels")]
+    WaterLevels,
+    #[strum(serialize = "A01_StoneHeartCity/A01_AbilityShrine_AmbushZone")]
+    NuosClaw,
+    #[strum(serialize = "A01_StoneHeartCity/A01_AbilityShrine_CenterTree")]
+    Tree,
+    #[strum(serialize = "A01_StoneHeartCity/A01_AbilityShrine")]
+    ForestDucks,
+    #[strum(serialize = "A01_StoneHeartCity/A01_AbilityShrine_BossRoom")]
+    Gruh,
     // Temple Gardens
-    Location {
-        map: "A01_StoneHeartCity/A01_TempleGardens",
-        locks: &[&[
-            Lock::Location("A01_StoneHeartCity/A01_CliffPath"),
-            Lock::Movement(&[Move::no_walljump(1, 0)]),
-        ]],
-    },
+    #[strum(serialize = "A01_StoneHeartCity/A01_TempleGardens")]
+    TempleGardens,
     // Abandoned Path
-    Location {
-        map: "A01_StoneHeartCity/A01_Graveyard",
-        locks: &[&[
-            Lock::Location("A01_StoneHeartCity/A01_CliffPath"),
-            Lock::Item(Items::KeyGraveyardKey),
-            Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(0, 3)]),
-        ]],
-    },
-    Location {
-        map: "A01_StoneHeartCity/A01_GraveyardShrine",
-        locks: &[&[
-            Lock::Location("A01_StoneHeartCity/A01_Graveyard"),
-            Lock::Location("A06_IronCaves/A06_LakeMolva"),
-            Lock::Location("A01_StoneHeartCity/A01_TempleGardens"),
-            Lock::Location("A10_PenumbraTemple/A10_Entrance"),
-            Lock::Item(Items::BeiraVessel),
-            // needs walljump for temple gardens blocked stairway soul
-            // also requires climbing tower
-            Lock::Movement(&[Move::walljump(3, 3)]),
-        ]],
-    },
+    #[strum(serialize = "A01_StoneHeartCity/A01_Graveyard")]
+    AbandonedPath,
+    #[strum(serialize = "A01_StoneHeartCity/A01_GraveyardShrine")]
+    Beira,
     // Uthas Temple
-    Location {
-        map: "A02_ArcaneTunnels/A01_SmallShrine_Intro",
-        locks: &[&[
-            Lock::Location("A01_StoneHeartCity/A01_Graveyard"),
-            Lock::Movement(&[Move::no_walljump(0, 2)]),
-            Lock::Item(Items::KeyUthasTemple),
-        ]],
-    },
-    Location {
-        map: "A02_ArcaneTunnels/A01_SmallShrine_Main",
-        locks: &[&[
-            Lock::Location("A02_ArcaneTunnels/A01_SmallShrine_Intro"),
-            Lock::Item(Items::OldKey),
-        ]],
-    },
-    Location {
-        map: "A02_ArcaneTunnels/A01_SmallShrine_SouthEast",
-        locks: &[&[Lock::Location("A02_ArcaneTunnels/A01_SmallShrine_Main")]],
-    },
-    Location {
-        map: "A02_ArcaneTunnels/A01_SmallShrine_SouthWest",
-        locks: &[&[
-            Lock::Location("A02_ArcaneTunnels/A01_SmallShrine_Main"),
-            Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(0, 3)]),
-            Lock::Item(Items::OldKey),
-        ]],
-    },
-    Location {
-        map: "A02_ArcaneTunnels/A01_SmallShrine_BottomPassage",
-        locks: &[&[
-            Lock::Location("A02_ArcaneTunnels/A01_SmallShrine_Main"),
-            Lock::Movement(&[Move::no_walljump(1, 4), Move::walljump(1, 3)]),
-            Lock::Item(Items::OldKey),
-        ]],
-    },
-    Location {
-        map: "A02_ArcaneTunnels/A01_SmallShrine_EndPath",
-        locks: &[
-            &[
-                Lock::Location("A02_ArcaneTunnels/A01_SmallShrine_Main"),
-                Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(0, 3)]),
-                Lock::Item(Items::OldKey),
-            ],
-            &[
-                Lock::Location("A02_ArcaneTunnels/A01_SmallShrine_Main"),
-                Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(4, 3)]),
-            ],
-        ],
-    },
-    // Temple of Gods
-    Location {
-        map: "A10_PenumbraTemple/A10_Entrance",
-        locks: &[&[
-            Lock::Location("A01_StoneHeartCity/A01_TempleGardens"),
-            Lock::Item(Items::KeyGodMaster),
-        ]],
-    },
-    Location {
-        map: "A10_PenumbraTemple/A10_GodessChamber",
-        locks: &[&[
-            Lock::Location("A10_PenumbraTemple/A10_Entrance"),
-            Lock::Location("A02_ArcaneTunnels/A02_BossRoom"),
-            Lock::Location("A06_IronCaves/A06_Sirion"),
-        ]],
-    },
+    #[strum(serialize = "A02_ArcaneTunnels/A01_SmallShrine_Intro")]
+    UthasStart,
+    #[strum(serialize = "A02_ArcaneTunnels/A01_SmallShrine_Main")]
+    UthasBracelet,
+    #[strum(serialize = "A02_ArcaneTunnels/A01_SmallShrine_SouthEast")]
+    UthasPuzzle,
+    #[strum(serialize = "A02_ArcaneTunnels/A01_SmallShrine_SouthWest")]
+    UthasCombat,
+    #[strum(serialize = "A02_ArcaneTunnels/A01_SmallShrine_BottomPassage")]
+    UthasPlatforming,
+    #[strum(serialize = "A02_ArcaneTunnels/A01_SmallShrine_EndPath")]
+    UthasEnd,
+    // Temple of the gods
+    #[strum(serialize = "A10_PenumbraTemple/A10_Entrance")]
+    SanctuaryStone,
+    #[strum(serialize = "A10_PenumbraTemple/A10_GodessChamber")]
+    Queen,
     // Firefall River
-    Location {
-        map: "A06_IronCaves/A06_Firefall_A",
-        locks: &[&[Lock::Location("A10_PenumbraTemple/A10_Entrance")]],
-    },
-    Location {
-        map: "A06_IronCaves/A06_Firefall_B",
-        locks: &[&[
-            Lock::Location("A06_IronCaves/A06_Firefall_A"),
-            Lock::Movement(&[Move::no_walljump(0, 3)]),
-        ]],
-    },
-    Location {
-        map: "A06_IronCaves/A06_LakeMolva",
-        locks: &[&[
-            Lock::Location("A06_IronCaves/A06_Firefall_B"),
-            Lock::Movement(&[Move::no_walljump(0, 1)]),
-        ]],
-    },
+    #[strum(serialize = "A06_IronCaves/A06_FireFall_A")]
+    FirefallSpiritHunter,
+    #[strum(serialize = "A06_IronCaves/A06_FireFall_B")]
+    Bunny,
+    #[strum(serialize = "A06_IronCaves/A06_LakeMolva")]
+    LakeMolva,
     // Steam House
-    Location {
-        map: "A06_IronCaves/A06_SteamHouse_Core",
-        locks: &[&[
-            Lock::Location("A06_IronCaves/A06_LakeMolva"),
-            Lock::Movement(&[Move::no_walljump(1, 2)]),
-        ]],
-    },
-    // really it's the requirements for the boiler and mia
-    Location {
-        map: "A06_IronCaves/A06_SteamHouse_Corridor",
-        locks: &[&[
-            Lock::Location("A06_IronCaves/A06_SteamHouse_Core"),
-            Lock::Item(Items::KeySteam),
-            Lock::Movement(&[Move::no_walljump(1, 4), Move::walljump(1, 3)]),
-        ]],
-    },
-    Location {
-        map: "A06_IronCaves/A06_Sirion",
-        locks: &[&[
-            Lock::Location("A06_IronCaves/A06_SteamHouse_Core"),
-            Lock::Item(Items::KeyFireMaster),
-            Lock::Movement(&[Move::walljump(0, 4), Move::no_walljump(0, 5)]),
-            Lock::Item(Items::SanctuaryStone),
-        ]],
-    },
+    #[strum(serialize = "A06_IronCaves/A06_SteamHouse_Core")]
+    SteamHouse,
+    #[strum(serialize = "A06_IronCaves/A06_SteamHouse_Corridor")]
+    SteamHousePlatforming,
+    #[strum(serialize = "A06_IronCaves/A06_Sirion")]
+    Sirion,
     // Rust Village
-    Location {
-        map: "A06_IronCave/A06_RustCity",
-        locks: &[&[
-            Lock::Location("A06_IronCaves/A06_SteamHouse_Core"),
-            Lock::Location("A06_IronCaves/A06_SteamHouse_Corridor"),
-            Lock::Movement(&[Move::no_walljump(1, 2)]),
-            Lock::IronJustice,
-        ]],
-    },
-    // Waterways
-    Location {
-        map: "A02_ArcaneTunnels/A02_CentralWaterWay_CenterAccess",
-        locks: &[&[Lock::Location("A02_ArcaneTunnels/A02_SouthArcane")]],
-    },
-    Location {
-        map: "A02_ArcaneTunnels/A02_BossRoom",
-        locks: &[&[
-            Lock::Location("A02_ArcaneTunnels/A02_SouthArcane"),
-            // for the tower elevator
-            Lock::Location("A10_PenumbraTemple/A10_GodessChamber"),
-            Lock::Location("A06_IronCaves/A06_LakeMolva"),
-            // movement requirements for oliver's diary area
-            Lock::Movement(&[Move::walljump(0, 4), Move::no_walljump(0, 8)]),
-            Lock::Item(Items::SanctuaryStone),
-        ]],
-    },
-];
+    #[strum(serialize = "A06_IronCaves/A06_RustCity")]
+    RustVillage,
+    // Waterway
+    #[strum(serialize = "A02_ArcaneTunnels/A02_CentralWaterWay_CenterAccess")]
+    Waterway,
+    #[strum(serialize = "A02_ArcaneTunnels/A02_BossRoom")]
+    Samael,
+}
+
+impl Locations {
+    pub fn locks(&self) -> &[&[Lock]] {
+        &[&[
+            Lock::Location(Locations::Crossroads),
+            Lock::Movement(&[Move::no_walljump(0, 1)]),
+        ]]
+        // match self {
+        //     Locations::Lab => &[&[]],
+        //     Locations::Bitoven => &[&[Lock::Location(Locations::Lab)]],
+        //     Locations::KeepDucks => &[&[Lock::Location(Locations::Bitoven)]],
+        //     Locations::KeepVessel => &[&[Lock::Location(Locations::Lab)]],
+        //     Locations::Shield => &[&[Lock::Location(Locations::KeepVessel)]],
+        //     Locations::FirstVoid => &[&[Lock::Location(Locations::Lab), Lock::Item(Items::OldKey)]],
+        //     Locations::Crates => &[&[Lock::Location(Locations::FirstVoid)]],
+        //     Locations::Memorial => &[&[Lock::Location(Locations::Crates)]],
+        //     Locations::ArcaneNorth => &[&[Lock::Location(Locations::Memorial)]],
+        //     Locations::ArcaneSouth => &[&[Lock::Location(Locations::ArcaneNorth)]],
+        //     Locations::ArcaneSpiritHunter => &[&[Lock::Location(Locations::ArcaneSouth)]],
+        //     Locations::ArcaneDucks => &[&[Lock::Location(Locations::ArcaneSpiritHunter)]],
+        //     Locations::Crossroads => &[&[Lock::Location(Locations::ArcaneSpiritHunter)]],
+        //     Locations::Well => &[&[
+        //         Lock::Location(Locations::Crossroads),
+        //         Lock::Movement(&[Move::no_walljump(0, 1)]),
+        //     ]],
+        //     Locations::Stoneheart => &[&[Lock::Location(Locations::ArcaneSpiritHunter)]],
+        //     Locations::WaterLevels => &[&[Lock::Location(Locations::Stoneheart)]],
+        //     Locations::NuosClaw => &[&[
+        //         Lock::Location(Locations::WaterLevels),
+        //         Lock::Item(Items::OldKey),
+        //     ]],
+        //     Locations::Tree => &[&[
+        //         Lock::Location(Locations::WaterLevels),
+        //         Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(2, 0)]),
+        //     ]],
+        //     Locations::ForestDucks => &[&[Lock::Location(Locations::Tree)]],
+        //     Locations::Gruh => &[&[
+        //         Lock::Location(Locations::Tree),
+        //         Lock::Item(Items::KeyHolyMaster),
+        //     ]],
+        //     Locations::TempleGardens => &[&[
+        //         Lock::Location(Locations::Stoneheart),
+        //         Lock::Movement(&[Move::no_walljump(1, 0)]),
+        //     ]],
+        //     Locations::AbandonedPath => &[&[
+        //         Lock::Location(Locations::Stoneheart),
+        //         Lock::Item(Items::KeyGraveyardKey),
+        //         Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(0, 3)]),
+        //     ]],
+        //     Locations::Beira => &[&[
+        //         Lock::Location(Locations::AbandonedPath),
+        //         Lock::Location(Locations::LakeMolva),
+        //         Lock::Location(Locations::TempleGardens),
+        //         Lock::Location(Locations::SanctuaryStone),
+        //         Lock::Item(Items::BeiraVessel),
+        //         // needs walljump for temple gardens blocked stairway soul
+        //         // also requires climbing tower
+        //         Lock::Movement(&[Move::walljump(3, 3)]),
+        //     ]],
+        //     Locations::UthasStart => &[&[
+        //         Lock::Location(Locations::AbandonedPath),
+        //         Lock::Movement(&[Move::no_walljump(0, 2)]),
+        //         Lock::Item(Items::KeyUthasTemple),
+        //     ]],
+        //     Locations::UthasBracelet => &[&[
+        //         Lock::Location(Locations::UthasStart),
+        //         Lock::Item(Items::OldKey),
+        //     ]],
+        //     Locations::UthasPuzzle => &[&[Lock::Location(Self::UthasBracelet)]],
+        //     Locations::UthasCombat => &[&[
+        //         Lock::Location(Locations::UthasBracelet),
+        //         Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(0, 3)]),
+        //         Lock::Item(Items::OldKey),
+        //     ]],
+        //     Locations::UthasPlatforming => &[&[
+        //         Lock::Location(Locations::UthasBracelet),
+        //         Lock::Movement(&[Move::no_walljump(1, 4), Move::walljump(1, 3)]),
+        //         Lock::Item(Items::OldKey),
+        //     ]],
+        //     Locations::UthasEnd => &[
+        //         &[
+        //             Lock::Location(Locations::UthasBracelet),
+        //             Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(0, 3)]),
+        //             Lock::Item(Items::OldKey),
+        //         ],
+        //         &[
+        //             Lock::Location(Locations::UthasBracelet),
+        //             Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(4, 3)]),
+        //         ],
+        //     ],
+        //     Locations::SanctuaryStone => &[&[
+        //         Lock::Location(Locations::TempleGardens),
+        //         Lock::Item(Items::KeyGodMaster),
+        //     ]],
+        //     Locations::Queen => &[&[
+        //         Lock::Location(Locations::SanctuaryStone),
+        //         Lock::Location(Locations::Samael),
+        //         Lock::Location(Locations::Sirion),
+        //         Lock::Location(Locations::Beira),
+        //     ]],
+        //     Locations::FirefallSpiritHunter => &[&[Lock::Location(Locations::SanctuaryStone)]],
+        //     Locations::Bunny => &[&[
+        //         Lock::Location(Self::FirefallSpiritHunter),
+        //         Lock::Movement(&[Move::no_walljump(0, 3)]),
+        //     ]],
+        //     Locations::LakeMolva => &[&[
+        //         Lock::Location(Locations::Bunny),
+        //         Lock::Movement(&[Move::no_walljump(0, 1)]),
+        //     ]],
+        //     Locations::SteamHouse => &[&[
+        //         Lock::Location(Locations::LakeMolva),
+        //         Lock::Movement(&[Move::no_walljump(1, 2)]),
+        //     ]],
+        //     Locations::SteamHousePlatforming => &[&[
+        //         Lock::Location(Locations::SteamHouse),
+        //         Lock::Item(Items::KeySteam),
+        //         Lock::Movement(&[Move::no_walljump(1, 4), Move::walljump(1, 3)]),
+        //     ]],
+        //     Locations::Sirion => &[&[
+        //         Lock::Location(Locations::SteamHouse),
+        //         Lock::Item(Items::KeyFireMaster),
+        //         Lock::Movement(&[Move::walljump(0, 4), Move::no_walljump(0, 5)]),
+        //         Lock::Item(Items::SanctuaryStone),
+        //     ]],
+        //     Locations::RustVillage => &[&[
+        //         Lock::Location(Locations::SteamHouse),
+        //         Lock::Location(Locations::SteamHousePlatforming),
+        //         Lock::Movement(&[Move::no_walljump(1, 2)]),
+        //         Lock::IronJustice,
+        //     ]],
+        //     Locations::Waterway => &[&[Lock::Location(Locations::ArcaneSouth)]],
+        //     Locations::Samael => &[&[
+        //         Lock::Location(Locations::ArcaneSouth),
+        //         // for the tower elevator
+        //         Lock::Location(Locations::SanctuaryStone),
+        //         Lock::Location(Locations::LakeMolva),
+        //         // movement requirements for oliver's diary area
+        //         Lock::Movement(&[Move::walljump(0, 4), Move::no_walljump(0, 8)]),
+        //         Lock::Item(Items::SanctuaryStone),
+        //     ]],
+        // }
+    }
+}

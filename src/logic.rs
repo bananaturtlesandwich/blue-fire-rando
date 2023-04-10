@@ -8,7 +8,7 @@ pub use writing::write;
 mod checks;
 pub use checks::CHECKS;
 mod locations;
-pub use locations::LOCATIONS;
+pub use locations::*;
 
 #[derive(Debug, Clone, Copy, strum::EnumIter, strum::AsRefStr)]
 pub enum Shop {
@@ -71,6 +71,7 @@ pub enum Drop {
 impl PartialEq for Drop {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
+            // ignore amount
             (Self::Item(l0, _), Self::Item(r0, _)) => l0 == r0,
             (Self::Weapon(l0), Self::Weapon(r0)) => l0 == r0,
             (Self::Tunic(l0), Self::Tunic(r0)) => l0 == r0,
@@ -113,20 +114,15 @@ impl Drop {
 
 #[derive(Debug)]
 pub struct Check {
-    location: &'static str,
+    location: Locations,
     context: Context,
     drop: Drop,
     locks: &'static [Lock],
 }
 
-pub struct Location {
-    map: &'static str,
-    locks: &'static [&'static [Lock]],
-}
-
 #[derive(Debug)]
-enum Lock {
-    Location(&'static str),
+pub enum Lock {
+    Location(Locations),
     Movement(&'static [Move]),
     Item(Items),
     Emote(Emotes),
