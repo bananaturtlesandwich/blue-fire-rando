@@ -1,7 +1,7 @@
 use super::*;
 use crate::{no_walljump, walljump};
 
-pub const CHECKS: [Check; 227] = [
+pub const CHECKS: [Check; 230] = [
     // Fire Keep
     Check {
         location: Locations::Lab,
@@ -1492,7 +1492,7 @@ pub const CHECKS: [Check; 227] = [
             "Blue Fire/Content/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Compositor/NPC_Onop_Compositor_Ready",
         ),
         drop: Drop::Tunic(Tunics::PerformerCostume),
-        // just Bech's requirements since everyone else is accessible
+        // just Bech's requirements since everyone else is easily accessible
         locks: &[Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)])],
     },
     Check {
@@ -1533,4 +1533,25 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Item(Items::ExtraLargePouch, 1),
         locks: &[],
     },
+    // Beira's Shrine
+    Check {
+        location: Locations::Beira,
+        context: Context::Overworld("Spirit_A01_AngryAmbusher"),
+        drop: Drop::Spirit(Spirits::AngryAmbusher),
+        locks: &[],
+    },
+    Check {
+        location: Locations::Beira,
+        context: Context::Cutscene(
+            "Blue Fire/Content/BlueFire/InteractiveObjects/Collectibles/BloodStone/BloodStone_BP"
+        ),
+        drop: Drop::Item(Items::FireEssenceSlot, 2),
+        locks: &[Lock::Item(Items::OddRock)],
+    },
+    Check {
+        location: Locations::Beira,
+        context: Context::Overworld("Chest_A01_Graveyard_Key_01"),
+        drop: Drop::Item(Items::RubyOre, 1),
+        locks: &[],
+    }
 ];
