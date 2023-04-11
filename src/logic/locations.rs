@@ -61,6 +61,8 @@ pub enum Locations {
     UthasStart,
     #[strum(serialize = "A02_ArcaneTunnels/A01_SmallShrine_Main")]
     UthasBracelet,
+    #[strum(serialize = "A01_StoneHeartCity/A01_SmallShrine")]
+    UthasDucks,
     #[strum(serialize = "A02_ArcaneTunnels/A01_SmallShrine_SouthEast")]
     UthasPuzzle,
     #[strum(serialize = "A02_ArcaneTunnels/A01_SmallShrine_SouthWest")]
@@ -81,9 +83,13 @@ pub enum Locations {
     Bunny,
     #[strum(serialize = "A06_IronCaves/A06_LakeMolva")]
     LakeMolva,
+    #[strum(serialize = "A06_IronCaves/A06_FireFallRiver")]
+    FirefallDucks,
     // Steam House
     #[strum(serialize = "A06_IronCaves/A06_SteamHouse_Core")]
     SteamHouse,
+    #[strum(serialize = "A06_IronCaves/A06_SteamHouse")]
+    SteamHouseDucks,
     #[strum(serialize = "A06_IronCaves/A06_SteamHouse_Corridor")]
     SteamHousePlatforming,
     #[strum(serialize = "A06_IronCaves/A06_Sirion")]
@@ -94,8 +100,22 @@ pub enum Locations {
     // Waterway
     #[strum(serialize = "A02_ArcaneTunnels/A02_CentralWaterWay_CenterAccess")]
     Waterway,
+    #[strum(serialize = "A02_ArcaneTunnels/A02_CentralWaterWay")]
+    WaterwayDucks,
     #[strum(serialize = "A02_ArcaneTunnels/A02_BossRoom")]
     Samael,
+    #[strum(serialize = "Voids/16_VoidPaul/Void_Paul")]
+    PathOfVictory,
+    #[strum(serialize = "Voids/03_VoidEasy/Void_Easy")]
+    ArigosChallenge,
+    #[strum(serialize = "Voids/02_Void04_V2/Void_04_V2")]
+    BorisasFate,
+    #[strum(serialize = "Voids/15_VoidFlauta/Void_Flauta")]
+    JuliansSong,
+    #[strum(serialize = "Voids/17_VoidSanti/Void_Santi")]
+    Alchemist,
+    #[strum(serialize = "don't look into it - after all it stares back")]
+    TheVoid,
 }
 
 impl Locations {
@@ -161,6 +181,7 @@ impl Locations {
                 Lock::Location(Locations::UthasStart),
                 Lock::Item(Items::OldKey),
             ]],
+            Locations::UthasDucks => &[&[Lock::Location(Self::UthasBracelet)]],
             Locations::UthasPuzzle => &[&[Lock::Location(Self::UthasBracelet)]],
             Locations::UthasCombat => &[&[
                 Lock::Location(Locations::UthasBracelet),
@@ -202,10 +223,12 @@ impl Locations {
                 Lock::Location(Locations::Bunny),
                 Lock::Movement(&[no_walljump!(0, 1)]),
             ]],
+            Locations::FirefallDucks => &[&[Lock::Location(Locations::LakeMolva)]],
             Locations::SteamHouse => &[&[
                 Lock::Location(Locations::LakeMolva),
                 Lock::Movement(&[no_walljump!(1, 2)]),
             ]],
+            Locations::SteamHouseDucks => &[&[Lock::Location(Locations::SteamHouse)]],
             Locations::SteamHousePlatforming => &[&[
                 Lock::Location(Locations::SteamHouse),
                 Lock::Item(Items::KeySteam),
@@ -224,6 +247,7 @@ impl Locations {
                 Lock::IronJustice,
             ]],
             Locations::Waterway => &[&[Lock::Location(Locations::ArcaneSouth)]],
+            Locations::WaterwayDucks => &[&[Lock::Location(Locations::Waterway)]],
             Locations::Samael => &[&[
                 Lock::Location(Locations::ArcaneSouth),
                 // for the tower elevator
@@ -232,6 +256,22 @@ impl Locations {
                 // movement requirements for oliver's diary area
                 Lock::Movement(&[walljump!(0, 4), no_walljump!(0, 8)]),
                 Lock::Item(Items::SanctuaryStone),
+            ]],
+            Locations::PathOfVictory => &[&[Lock::Location(Locations::ArcaneSouth)]],
+            Locations::ArigosChallenge => &[&[Lock::Location(Locations::Tree)]],
+            Locations::BorisasFate => &[&[
+                Lock::Location(Locations::Stoneheart),
+                Lock::Movement(&[walljump!(0, 2), no_walljump!(0, 4)]),
+            ]],
+            Locations::JuliansSong => &[&[Lock::Location(Locations::TempleGardens)]],
+            Locations::Alchemist => &[&[Lock::Location(Locations::LakeMolva)]],
+            Locations::TheVoid => &[&[
+                Lock::Location(Locations::PathOfVictory),
+                Lock::Location(Locations::ArigosChallenge),
+                Lock::Location(Locations::BorisasFate),
+                Lock::Location(Locations::JuliansSong),
+                Lock::Location(Locations::Alchemist),
+                Lock::Movement(&[walljump!(1, 3)]),
             ]],
         }
     }

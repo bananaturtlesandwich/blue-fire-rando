@@ -1,7 +1,7 @@
 use super::*;
 use crate::{no_walljump, walljump};
 
-pub const CHECKS: [Check; 230] = [
+pub const CHECKS: [Check; 252] = [
     // Fire Keep
     Check {
         location: Locations::Lab,
@@ -150,6 +150,12 @@ pub const CHECKS: [Check; 230] = [
         context: Context::Overworld("A02_Arcane_EmoteStatue_HatKid"),
         drop: Drop::Emote(Emotes::HatKid),
         locks: &[],
+    },
+    Check{
+        location: Locations::WaterwayDucks,
+        context: Context::Overworld("Duck"),
+        drop: Drop::Duck,
+        locks: &[Lock::Item(Items::SanctuaryStone), Lock::Movement(&[no_walljump!(0, 2)])],
     },
     Check {
         location: Locations::Waterway,
@@ -679,6 +685,12 @@ pub const CHECKS: [Check; 230] = [
             Lock::Item(Items::Book),
         ],
     },
+    Check{
+        location: Locations::Stoneheart,
+        context: Context::Overworld("Duck2"),
+        drop: Drop::Duck,
+        locks: &[Lock::Movement(&[no_walljump!(2, 0)])],
+    },
     Check {
         location: Locations::Stoneheart,
         context: Context::Cutscene(
@@ -689,6 +701,12 @@ pub const CHECKS: [Check; 230] = [
             Lock::Location(Locations::RustVillage),
             Lock::Item(Items::ComposerLetter),
         ],
+    },
+    Check{
+        location: Locations::Stoneheart,
+        context: Context::Overworld("Chest_A01_Tunic_AlphaTunic"),
+        drop: Drop::Tunic(Tunics::AlphaUmbra),
+        locks: &[Lock::Movement(&[walljump!(1, 0),no_walljump!(3, 0)])],
     },
     // Forest Temple
     Check {
@@ -967,14 +985,14 @@ pub const CHECKS: [Check; 230] = [
         location: Locations::TempleGardens,
         context: Context::Overworld("Chest_A01_TempleGardens_Sword_Shanks"),
         drop: Drop::Weapon(Weapons::SteelShanks),
-        locks: &[Lock::Movement(&[walljump!(2, 1)])],
+        locks: &[Lock::Movement(&[walljump!(1, 0)])],
     },
     Check {
         location: Locations::TempleGardens,
         context: Context::Overworld("Dance_Platform_Applause_Tunic_BananaKing"),
         drop: Drop::Tunic(Tunics::BananaKing),
         locks: &[
-            Lock::Movement(&[walljump!(2, 1)]),
+            Lock::Movement(&[walljump!(2, 0)]),
             Lock::Emote(Emotes::Applause),
         ],
     },
@@ -982,13 +1000,25 @@ pub const CHECKS: [Check; 230] = [
         location: Locations::TempleGardens,
         context: Context::Overworld("Spirit_A01_HolyCentry"),
         drop: Drop::Spirit(Spirits::HolyCentry),
-        locks: &[Lock::Movement(&[walljump!(2, 2)])],
+        locks: &[Lock::Movement(&[walljump!(1, 0)])],
     },
     Check {
         location: Locations::TempleGardens,
         context: Context::Overworld("Chest_A01_TempleGardens_Loot_05"),
         drop: Drop::Item(Items::SapphireOre, 1),
-        locks: &[Lock::Movement(&[walljump!(2, 2)])],
+        locks: &[Lock::Movement(&[walljump!(2, 0)])],
+    },
+    Check{
+        location: Locations::TempleGardens,
+        context: Context::Overworld("Pickup"),
+        drop: Drop::Ore(500),
+        locks: &[Lock::Movement(&[walljump!(2, 0)])],
+    },
+    Check{
+        location: Locations::TempleGardens,
+        context: Context::Overworld("Duck3"),
+        drop: Drop::Duck,
+        locks: &[Lock::Movement(&[walljump!(2, 0)])],
     },
     // Abandoned Path
     Check {
@@ -1033,6 +1063,12 @@ pub const CHECKS: [Check; 230] = [
         context: Context::Overworld("Chest_A01_Uthas_Loot_02"),
         drop: Drop::Item(Items::RubyOre, 1),
         locks: &[Lock::Location(Locations::UthasBracelet)],
+    },
+    Check{
+        location: Locations::UthasDucks,
+        context: Context::Overworld("Duck"),
+        drop: Drop::Duck,
+        locks: &[Lock::Movement(&[walljump!(2, 0), no_walljump!(4, 0)])],
     },
     Check {
         location: Locations::UthasBracelet,
@@ -1155,6 +1191,12 @@ pub const CHECKS: [Check; 230] = [
             Lock::Location(Locations::SanctuaryStone),
             Lock::Movement(&[walljump!(0, 2), no_walljump!(0, 3)]),
         ],
+    },
+    Check{
+        location: Locations::AbandonedPath,
+        context: Context::Overworld("Duck"),
+        drop: Drop::Duck,
+        locks: &[Lock::Location(Locations::SanctuaryStone), Lock::Movement(&[no_walljump!(0, 3)])],
     },
     Check {
         location: Locations::AbandonedPath,
@@ -1408,6 +1450,12 @@ pub const CHECKS: [Check; 230] = [
         drop: Drop::Item(Items::SapphireOre, 1),
         locks: &[],
     },
+    Check{
+        location: Locations::FirefallDucks,
+        context: Context::Overworld("Duck"),
+        drop: Drop::Duck,
+        locks: &[],
+    },
     Check {
         location: Locations::LakeMolva,
         context: Context::Overworld("A06_Firefall_EmoteStatue_Triceps"),
@@ -1428,6 +1476,12 @@ pub const CHECKS: [Check; 230] = [
         drop: Drop::Tunic(Tunics::SectMember),
         locks: &[Lock::Movement(&[walljump!(0, 1), no_walljump!(2, 0)])],
     },
+    Check{
+        location: Locations::SteamHouseDucks,
+        context: Context::Overworld("Duck"),
+        drop: Drop::Duck,
+        locks: &[Lock::Movement(&[walljump!(2, 3)])],
+    },
     Check {
         location: Locations::SteamHouse,
         context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Mira_Mia/NPC_Mira"),
@@ -1444,6 +1498,12 @@ pub const CHECKS: [Check; 230] = [
         location: Locations::SteamHousePlatforming,
         context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Mira_Mia/NPC_Mia"),
         drop: Drop::Weapon(Weapons::IronJustice),
+        locks: &[],
+    },
+    Check{
+        location:Locations::Sirion,
+        context: Context::Overworld("Duck"),
+        drop: Drop::Duck,
         locks: &[],
     },
     Check {
@@ -1503,6 +1563,12 @@ pub const CHECKS: [Check; 230] = [
         drop: Drop::Weapon(Weapons::KinaDefenders),
         locks: &[Lock::Item(Items::Rose)],
     },
+    Check{
+        location: Locations::RustVillage,
+        context: Context::Overworld("Duck"),
+        drop: Drop::Duck,
+        locks: &[],
+    },
     Check {
         location: Locations::RustVillage,
         context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Onops/Onop_Nuno/NPC_Onop_Nuno"),
@@ -1552,6 +1618,72 @@ pub const CHECKS: [Check; 230] = [
         location: Locations::Beira,
         context: Context::Overworld("Chest_A01_Graveyard_Key_01"),
         drop: Drop::Item(Items::RubyOre, 1),
+        locks: &[],
+    }, 
+    Check {
+        location: Locations::Beira,
+        context: Context::Overworld("Duck"),
+        drop: Drop::Duck,
+        locks: &[],
+    },
+    Check {
+        location: Locations::Queen,
+        context: Context::Overworld("Duck"),
+        drop: Drop::Duck,
+        locks: &[],
+    },
+    Check {
+        location: Locations::PathOfVictory,
+        context: Context::Overworld("Chest_Master"),
+        drop: Drop::Item(Items::VoidOre, 1),
+        locks: &[],
+    },
+    Check {
+        location: Locations::ArigosChallenge,
+        context: Context::Overworld("Chest_Master"),
+        drop: Drop::Item(Items::VoidOre, 1),
+        locks: &[Lock::Movement(&[walljump!(0, 0)])],
+    },
+    Check {
+        location: Locations::BorisasFate,
+        context: Context::Overworld("Chest_Master_Loot_04_V2"),
+        drop: Drop::Item(Items::VoidOre, 1),
+        locks: &[Lock::Movement(&[walljump!(0, 0), no_walljump!(2, 0)])],
+    },
+    Check {
+        location: Locations::BorisasFate,
+        context: Context::Overworld("Chest_Master_Loot_04_V21"),
+        drop: Drop::Item(Items::VoidOre, 1),
+        locks: &[Lock::Movement(&[walljump!(0, 1), no_walljump!(2, 0)])],
+    },
+    Check {
+        location: Locations::JuliansSong,
+        context: Context::Overworld("Chest_Master"),
+        drop: Drop::Item(Items::VoidOre, 1),
+        locks: &[Lock::Movement(&[no_walljump!(0, 3)])],
+    },
+    Check {
+        location: Locations::JuliansSong,
+        context: Context::Overworld("Chest_Master2"),
+        drop: Drop::Item(Items::VoidOre, 1),
+        locks: &[Lock::Movement(&[no_walljump!(0, 3)])],
+    },
+    Check {
+        location: Locations::Alchemist,
+        context: Context::Overworld("Chest_Master_Void_Santi_03"),
+        drop: Drop::Item(Items::VoidOre, 1),
+        locks: &[Lock::Movement(&[walljump!(2, 0)])],
+    },
+    Check {
+        location: Locations::Alchemist,
+        context: Context::Overworld("Chest_Master_Void_Santi_02"),
+        drop: Drop::Item(Items::VoidOre, 1),
+        locks: &[Lock::Movement(&[walljump!(1, 3)])],
+    },
+    Check {
+        location: Locations::TheVoid,
+        context: Context::Cutscene("Blue Fire/Content/BlueFire/Cinematics/AllVoids/AllVoids_Controller"),
+        drop: Drop::Tunic(Tunics::SilverCloack),
         locks: &[],
     }
 ];
