@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 #[derive(PartialEq, Clone, Copy, Debug, strum::AsRefStr)]
 pub enum Items {
     #[strum(serialize = "0")]

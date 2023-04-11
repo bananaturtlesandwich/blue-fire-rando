@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 mod drops;
 pub use drops::*;
 mod seeding;
@@ -131,25 +130,30 @@ pub enum Lock {
 }
 
 #[derive(Debug, PartialEq, PartialOrd)]
-struct Move {
+pub struct Move {
     extra_height: u8,
     horizontal: u8,
     walljump: bool,
 }
 
-impl Move {
-    const fn walljump(extra_height: u8, horizontal: u8) -> Self {
-        Self {
-            extra_height,
-            horizontal,
+// for some stupid reason const fn doesn't work in slices so i'll use macros instead
+#[macro_export]
+macro_rules! walljump {
+    ($eh: expr, $h: expr) => {
+        Move {
+            extra_height: $eh,
+            horizontal: $h,
             walljump: true,
         }
-    }
-    const fn no_walljump(extra_height: u8, horizontal: u8) -> Self {
-        Self {
-            extra_height,
-            horizontal,
+    };
+}
+#[macro_export]
+macro_rules! no_walljump {
+    ($eh: expr, $h: expr) => {
+        Move {
+            extra_height: $eh,
+            horizontal: $h,
             walljump: false,
         }
-    }
+    };
 }

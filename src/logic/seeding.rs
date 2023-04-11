@@ -1,8 +1,6 @@
 use super::*;
 use strum::{EnumCount, IntoEnumIterator};
 
-const BEGINNING: &str = "A02_ArcaneTunnels/A02_GameIntro_KeepSouth";
-
 const NOTENOUGH: &str =
     "you haven't picked enough checks for anything to be random - include more checks in the pool";
 
@@ -22,7 +20,7 @@ fn update(
     if !locks.iter().all(|lock| match lock {
         Lock::Location(loc) => locations.contains(loc),
         Lock::Movement(movement) => {
-            let mut current = Move::no_walljump(0, 0);
+            let mut current = crate::no_walljump!(0, 0);
             for drop in both() {
                 match drop {
                     Drop::Ability(Abilities::DoubleJump) | Drop::Ability(Abilities::SpinAttack) => {

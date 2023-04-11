@@ -1,4 +1,5 @@
 use super::*;
+use crate::{no_walljump, walljump};
 
 pub const CHECKS: [Check; 227] = [
     // Fire Keep
@@ -35,7 +36,7 @@ pub const CHECKS: [Check; 227] = [
         location: Locations::KeepDucks,
         context: Context::Overworld("Duck"),
         drop: Drop::Duck,
-        locks: &[Lock::Movement(&[Move::no_walljump(4, 0)])],
+        locks: &[Lock::Movement(&[no_walljump!(4, 0)])],
     },
     Check {
         location: Locations::KeepVessel,
@@ -78,9 +79,9 @@ pub const CHECKS: [Check; 227] = [
         context: Context::Overworld("Spirit_A02_RiverSpirit"),
         drop: Drop::Spirit(Spirits::RiverSpirit),
         locks: &[Lock::Movement(&[
-            Move::no_walljump(0, 2),
-            Move::no_walljump(2, 0),
-            Move::walljump(0, 0),
+            no_walljump!(0, 2),
+            no_walljump!(2, 0),
+            walljump!(0, 0),
         ])],
     },
     Check {
@@ -202,19 +203,13 @@ pub const CHECKS: [Check; 227] = [
         location: Locations::ArcaneNorth,
         context: Context::Overworld("Pickup4"),
         drop: Drop::Ore(250),
-        locks: &[Lock::Movement(&[
-            Move::walljump(0, 4),
-            Move::no_walljump(0, 8),
-        ])],
+        locks: &[Lock::Movement(&[walljump!(0, 4), no_walljump!(0, 8)])],
     },
     Check {
         location: Locations::ArcaneNorth,
         context: Context::Overworld("Chest_A02_NorthArcane_Loot_04"),
         drop: Drop::Item(Items::SapphireOre, 1),
-        locks: &[Lock::Movement(&[
-            Move::walljump(0, 4),
-            Move::no_walljump(0, 8),
-        ])],
+        locks: &[Lock::Movement(&[walljump!(0, 4), no_walljump!(0, 8)])],
     },
     Check {
         location: Locations::ArcaneSpiritHunter,
@@ -292,20 +287,20 @@ pub const CHECKS: [Check; 227] = [
         location: Locations::ArcaneSpiritHunter,
         context: Context::Overworld("Chest_A02_EastArcane_Loot_03"),
         drop: Drop::Item(Items::EmeraldOre, 1),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 1)])],
     },
     Check {
         location: Locations::ArcaneSpiritHunter,
         context: Context::Overworld("Pickup_A02_Arcane_SR_Loot"),
         drop: Drop::Ore(400),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 1)])],
     },
     // AND THESE ONES ARE NAMED FINE???
     Check {
         location: Locations::ArcaneSpiritHunter,
         context: Context::Overworld("Pickup_A02_Arcane_SR_Loot2"),
         drop: Drop::Ore(400),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 1)])],
     },
     // Crossroads
     Check {
@@ -325,9 +320,9 @@ pub const CHECKS: [Check; 227] = [
         context: Context::Overworld("Chest_A01_CrossRoads_Loot"),
         drop: Drop::Item(Items::SapphireOre, 1),
         locks: &[
-            Lock::Movement(&[Move::no_walljump(1, 0)]),
-            Lock::Movement(&[Move::no_walljump(0, 2)]),
-            Lock::Movement(&[Move::walljump(0, 0)]),
+            Lock::Movement(&[no_walljump!(1, 0)]),
+            Lock::Movement(&[no_walljump!(0, 2)]),
+            Lock::Movement(&[walljump!(0, 0)]),
         ],
     },
     Check {
@@ -335,9 +330,9 @@ pub const CHECKS: [Check; 227] = [
         context: Context::Overworld("Chest_A01_Well_SpinAttack"),
         drop: Drop::Ability(Abilities::SpinAttack),
         locks: &[
-            Lock::Movement(&[Move::no_walljump(1, 0)]),
-            Lock::Movement(&[Move::no_walljump(0, 2)]),
-            Lock::Movement(&[Move::walljump(0, 0)]),
+            Lock::Movement(&[no_walljump!(1, 0)]),
+            Lock::Movement(&[no_walljump!(0, 2)]),
+            Lock::Movement(&[walljump!(0, 0)]),
         ],
     },
     Check {
@@ -345,24 +340,24 @@ pub const CHECKS: [Check; 227] = [
         context: Context::Overworld("Pickup57"),
         drop: Drop::Ore(500),
         locks: &[
-            Lock::Movement(&[Move::no_walljump(1, 0)]),
-            Lock::Movement(&[Move::no_walljump(0, 2)]),
-            Lock::Movement(&[Move::walljump(0, 0)]),
+            Lock::Movement(&[no_walljump!(1, 0)]),
+            Lock::Movement(&[no_walljump!(0, 2)]),
+            Lock::Movement(&[walljump!(0, 0)]),
         ],
     },
     Check {
         location: Locations::Well,
         context: Context::Overworld("Pickup60"),
         drop: Drop::Ore(500),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 2)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 2)])],
     },
     Check {
         location: Locations::Well,
         context: Context::Overworld("Pickup5"),
         drop: Drop::Ore(500),
         locks: &[
-            Lock::Movement(&[Move::no_walljump(2, 2)]),
-            Lock::Movement(&[Move::walljump(1, 2)]),
+            Lock::Movement(&[no_walljump!(2, 2)]),
+            Lock::Movement(&[walljump!(1, 2)]),
         ],
     },
     Check {
@@ -417,7 +412,7 @@ pub const CHECKS: [Check; 227] = [
         location: Locations::Crossroads,
         context: Context::Overworld("Chest_A01_CrossRoads_Loot_03"),
         drop: Drop::Item(Items::SapphireOre, 1),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 1)])],
     },
     Check {
         location: Locations::Crossroads,
@@ -425,7 +420,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Tunic(Tunics::Galaxy),
         locks: &[
             Lock::Emote(Emotes::Techno),
-            Lock::Movement(&[Move::no_walljump(0, 1)]),
+            Lock::Movement(&[no_walljump!(0, 1)]),
         ],
     },
     Check {
@@ -451,10 +446,7 @@ pub const CHECKS: [Check; 227] = [
         location: Locations::Stoneheart,
         context: Context::Overworld("Chest_A01_Stoneheart_Loot_02"),
         drop: Drop::Item(Items::SapphireOre, 2),
-        locks: &[Lock::Movement(&[
-            Move::walljump(2, 0),
-            Move::no_walljump(4, 0),
-        ])],
+        locks: &[Lock::Movement(&[walljump!(2, 0), no_walljump!(4, 0)])],
     },
     Check {
         location: Locations::Stoneheart,
@@ -661,19 +653,13 @@ pub const CHECKS: [Check; 227] = [
         location: Locations::Stoneheart,
         context: Context::Overworld("Pickup_Book5"),
         drop: Drop::Item(Items::Book, 1),
-        locks: &[Lock::Movement(&[
-            Move::walljump(0, 0),
-            Move::no_walljump(1, 0),
-        ])],
+        locks: &[Lock::Movement(&[walljump!(0, 0), no_walljump!(1, 0)])],
     },
     Check {
         location: Locations::Stoneheart,
         context: Context::Overworld("Chest_A01_Stoneheart_Loot_01"),
         drop: Drop::Item(Items::SapphireOre, 1),
-        locks: &[Lock::Movement(&[
-            Move::walljump(0, 0),
-            Move::no_walljump(1, 0),
-        ])],
+        locks: &[Lock::Movement(&[walljump!(0, 0), no_walljump!(1, 0)])],
     },
     Check {
         location: Locations::Stoneheart,
@@ -751,19 +737,13 @@ pub const CHECKS: [Check; 227] = [
         location: Locations::WaterLevels,
         context: Context::Overworld("Spirit_A01_ForestGuardian"),
         drop: Drop::Spirit(Spirits::ForestGuardian),
-        locks: &[Lock::Movement(&[
-            Move::walljump(0, 0),
-            Move::no_walljump(5, 0),
-        ])],
+        locks: &[Lock::Movement(&[walljump!(0, 0), no_walljump!(5, 0)])],
     },
     Check {
         location: Locations::WaterLevels,
         context: Context::Overworld("Chest_A01_Nuos_Loot"),
         drop: Drop::Item(Items::EmeraldOre, 3),
-        locks: &[Lock::Movement(&[
-            Move::walljump(0, 4),
-            Move::no_walljump(2, 10),
-        ])],
+        locks: &[Lock::Movement(&[walljump!(0, 4), no_walljump!(2, 10)])],
     },
     Check {
         location: Locations::Tree,
@@ -781,46 +761,31 @@ pub const CHECKS: [Check; 227] = [
         location: Locations::Tree,
         context: Context::Overworld("A01_Nuos_EmoteStatue_Wave"),
         drop: Drop::Emote(Emotes::Wave),
-        locks: &[Lock::Movement(&[
-            Move::no_walljump(2, 1),
-            Move::walljump(0, 1),
-        ])],
+        locks: &[Lock::Movement(&[no_walljump!(2, 1), walljump!(0, 1)])],
     },
     Check {
         location: Locations::Tree,
         context: Context::Overworld("Chest_A01_Nuos_Loot_04"),
         drop: Drop::Item(Items::RubyOre, 1),
-        locks: &[Lock::Movement(&[
-            Move::no_walljump(2, 1),
-            Move::walljump(0, 1),
-        ])],
+        locks: &[Lock::Movement(&[no_walljump!(2, 1), walljump!(0, 1)])],
     },
     Check {
         location: Locations::Tree,
         context: Context::Overworld("Chest_A01_Nuos_Key_02"),
         drop: Drop::Item(Items::OldKey, 1),
-        locks: &[Lock::Movement(&[
-            Move::no_walljump(2, 1),
-            Move::walljump(0, 1),
-        ])],
+        locks: &[Lock::Movement(&[no_walljump!(2, 1), walljump!(0, 1)])],
     },
     Check {
         location: Locations::ForestDucks,
         context: Context::Overworld("Dance_Platform_Hello2_Chest"),
         drop: Drop::Item(Items::Apple, 1),
-        locks: &[Lock::Movement(&[
-            Move::no_walljump(2, 1),
-            Move::walljump(0, 1),
-        ])],
+        locks: &[Lock::Movement(&[no_walljump!(2, 1), walljump!(0, 1)])],
     },
     Check {
         location: Locations::ForestDucks,
         context: Context::Overworld("Duck"),
         drop: Drop::Duck,
-        locks: &[Lock::Movement(&[
-            Move::no_walljump(2, 1),
-            Move::walljump(0, 1),
-        ])],
+        locks: &[Lock::Movement(&[no_walljump!(2, 1), walljump!(0, 1)])],
     },
     Check {
         location: Locations::ForestDucks,
@@ -843,7 +808,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Item(Items::KeyGraveyardKey, 1),
         locks: &[
             Lock::Location(Locations::Gruh),
-            Lock::Movement(&[Move::walljump(0, 0), Move::no_walljump(1, 0)]),
+            Lock::Movement(&[walljump!(0, 0), no_walljump!(1, 0)]),
         ],
     },
     Check {
@@ -852,7 +817,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Item(Items::DeadRat, 1),
         locks: &[
             Lock::Location(Locations::Gruh),
-            Lock::Movement(&[Move::walljump(0, 0), Move::no_walljump(1, 0)]),
+            Lock::Movement(&[walljump!(0, 0), no_walljump!(1, 0)]),
         ],
     },
     Check {
@@ -861,7 +826,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Item(Items::EmeraldOre, 1),
         locks: &[
             Lock::Location(Locations::Gruh),
-            Lock::Movement(&[Move::walljump(0, 0), Move::no_walljump(1, 0)]),
+            Lock::Movement(&[walljump!(0, 0), no_walljump!(1, 0)]),
         ],
     },
     Check {
@@ -870,7 +835,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Item(Items::RubyOre, 1),
         locks: &[
             Lock::Location(Locations::Gruh),
-            Lock::Movement(&[Move::walljump(0, 0), Move::no_walljump(1, 0)]),
+            Lock::Movement(&[walljump!(0, 0), no_walljump!(1, 0)]),
         ],
     },
     Check {
@@ -881,7 +846,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Item(Items::SmallPouch, 1),
         locks: &[
             Lock::Location(Locations::Gruh),
-            Lock::Movement(&[Move::walljump(0, 0), Move::no_walljump(1, 0)]),
+            Lock::Movement(&[walljump!(0, 0), no_walljump!(1, 0)]),
         ],
     },
     Check {
@@ -890,7 +855,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Item(Items::FireEssence, 1),
         locks: &[
             Lock::Location(Locations::Gruh),
-            Lock::Movement(&[Move::walljump(0, 0), Move::no_walljump(1, 0)]),
+            Lock::Movement(&[walljump!(0, 0), no_walljump!(1, 0)]),
         ],
     },
     Check {
@@ -899,7 +864,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Item(Items::FireEssence, 2),
         locks: &[
             Lock::Location(Locations::Gruh),
-            Lock::Movement(&[Move::walljump(0, 0), Move::no_walljump(1, 0)]),
+            Lock::Movement(&[walljump!(0, 0), no_walljump!(1, 0)]),
         ],
     },
     // Temple Gardens
@@ -994,7 +959,7 @@ pub const CHECKS: [Check; 227] = [
         context: Context::Overworld("Dance_Platform_Wave_Chest"),
         drop: Drop::Item(Items::RottenApple, 1),
         locks: &[
-            Lock::Movement(&[Move::no_walljump(0, 4)]),
+            Lock::Movement(&[no_walljump!(0, 4)]),
             Lock::Emote(Emotes::Wave),
         ],
     },
@@ -1002,14 +967,14 @@ pub const CHECKS: [Check; 227] = [
         location: Locations::TempleGardens,
         context: Context::Overworld("Chest_A01_TempleGardens_Sword_Shanks"),
         drop: Drop::Weapon(Weapons::SteelShanks),
-        locks: &[Lock::Movement(&[Move::walljump(2, 1)])],
+        locks: &[Lock::Movement(&[walljump!(2, 1)])],
     },
     Check {
         location: Locations::TempleGardens,
         context: Context::Overworld("Dance_Platform_Applause_Tunic_BananaKing"),
         drop: Drop::Tunic(Tunics::BananaKing),
         locks: &[
-            Lock::Movement(&[Move::walljump(2, 1)]),
+            Lock::Movement(&[walljump!(2, 1)]),
             Lock::Emote(Emotes::Applause),
         ],
     },
@@ -1017,39 +982,39 @@ pub const CHECKS: [Check; 227] = [
         location: Locations::TempleGardens,
         context: Context::Overworld("Spirit_A01_HolyCentry"),
         drop: Drop::Spirit(Spirits::HolyCentry),
-        locks: &[Lock::Movement(&[Move::walljump(2, 2)])],
+        locks: &[Lock::Movement(&[walljump!(2, 2)])],
     },
     Check {
         location: Locations::TempleGardens,
         context: Context::Overworld("Chest_A01_TempleGardens_Loot_05"),
         drop: Drop::Item(Items::SapphireOre, 1),
-        locks: &[Lock::Movement(&[Move::walljump(2, 2)])],
+        locks: &[Lock::Movement(&[walljump!(2, 2)])],
     },
     // Abandoned Path
     Check {
         location: Locations::AbandonedPath,
         context: Context::Overworld("Chest_A01_Graveyard_Loot_03"),
         drop: Drop::Item(Items::SapphireOre, 1),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 3)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 3)])],
     },
     Check {
         location: Locations::AbandonedPath,
         context: Context::Overworld("A01_Graveyard_EmoteStatue_Aggressive"),
         drop: Drop::Emote(Emotes::Aggressive),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 2)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 2)])],
     },
     Check {
         location: Locations::AbandonedPath,
         context: Context::Overworld("Pickup_Necklace"),
         drop: Drop::Item(Items::Necklace, 1),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 2)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 2)])],
     },
     // Uthas Temple
     Check {
         location: Locations::UthasStart,
         context: Context::Overworld("Spirit_A01_LoveFlower"),
         drop: Drop::Spirit(Spirits::LoveFlower),
-        locks: &[Lock::Movement(&[Move::walljump(1, 0)])],
+        locks: &[Lock::Movement(&[walljump!(1, 0)])],
     },
     Check {
         location: Locations::UthasStart,
@@ -1080,44 +1045,35 @@ pub const CHECKS: [Check; 227] = [
         context: Context::Overworld("Chest_A01_Uthas_Key_01"),
         drop: Drop::Item(Items::OldKey, 1),
         locks: &[Lock::Movement(&[
-            Move::no_walljump(1, 0),
-            Move::walljump(0, 1),
-            Move::no_walljump(0, 3),
+            no_walljump!(1, 0),
+            walljump!(0, 1),
+            no_walljump!(0, 3),
         ])],
     },
     Check {
         location: Locations::UthasBracelet,
         context: Context::Overworld("Chest_A01_Uthas_Loot_04"),
         drop: Drop::Item(Items::EmeraldOre, 1),
-        locks: &[Lock::Movement(&[
-            Move::walljump(0, 1),
-            Move::no_walljump(0, 3),
-        ])],
+        locks: &[Lock::Movement(&[walljump!(0, 1), no_walljump!(0, 3)])],
     },
     Check {
         location: Locations::UthasBracelet,
         context: Context::Overworld("Chest_A01_Uthas_Loot"),
         drop: Drop::Weapon(Weapons::PeaceKeepers),
-        locks: &[Lock::Movement(&[
-            Move::walljump(0, 1),
-            Move::no_walljump(0, 3),
-        ])],
+        locks: &[Lock::Movement(&[walljump!(0, 1), no_walljump!(0, 3)])],
     },
     Check {
         location: Locations::UthasBracelet,
         context: Context::Overworld("A01_Uthas_EmoteStatue_Photo"),
         drop: Drop::Emote(Emotes::Photo),
-        locks: &[Lock::Movement(&[
-            Move::walljump(0, 1),
-            Move::no_walljump(0, 3),
-        ])],
+        locks: &[Lock::Movement(&[walljump!(0, 1), no_walljump!(0, 3)])],
     },
     Check {
         location: Locations::UthasBracelet,
         context: Context::Overworld("Chest_A01_Uthas_Loot_01"),
         drop: Drop::Ability(Abilities::DoubleJump),
         locks: &[
-            Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(0, 3)]),
+            Lock::Movement(&[walljump!(0, 1), no_walljump!(0, 3)]),
             Lock::Item(Items::KeyHolyMaster),
         ],
     },
@@ -1131,31 +1087,25 @@ pub const CHECKS: [Check; 227] = [
         location: Locations::UthasBracelet,
         context: Context::Overworld("A01_Uthas_EmoteStatue_Party"),
         drop: Drop::Emote(Emotes::Party),
-        locks: &[Lock::Movement(&[Move::no_walljump(1, 1)])],
+        locks: &[Lock::Movement(&[no_walljump!(1, 1)])],
     },
     Check {
         location: Locations::UthasBracelet,
         context: Context::Overworld("Chest_A01_Uthas_Loot_05"),
         drop: Drop::Item(Items::EmeraldOre, 1),
-        locks: &[Lock::Movement(&[Move::no_walljump(1, 1)])],
+        locks: &[Lock::Movement(&[no_walljump!(1, 1)])],
     },
     Check {
         location: Locations::UthasPlatforming,
         context: Context::Overworld("Chest_A01_Uthas_Key_03"),
         drop: Drop::Item(Items::OldKey, 1),
-        locks: &[Lock::Movement(&[
-            Move::no_walljump(1, 4),
-            Move::walljump(1, 2),
-        ])],
+        locks: &[Lock::Movement(&[no_walljump!(1, 4), walljump!(1, 2)])],
     },
     Check {
         location: Locations::UthasBracelet,
         context: Context::Overworld("Chest_A01_Uthas_Loot_06"),
         drop: Drop::Item(Items::EmeraldOre, 1),
-        locks: &[Lock::Movement(&[
-            Move::walljump(0, 1),
-            Move::no_walljump(0, 3),
-        ])],
+        locks: &[Lock::Movement(&[walljump!(0, 1), no_walljump!(0, 3)])],
     },
     Check {
         location: Locations::UthasBracelet,
@@ -1163,17 +1113,14 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Item(Items::KeyHolyMaster, 1),
         locks: &[
             Lock::Location(Locations::UthasEnd),
-            Lock::Movement(&[Move::no_walljump(0, 2)]),
+            Lock::Movement(&[no_walljump!(0, 2)]),
         ],
     },
     Check {
         location: Locations::UthasEnd,
         context: Context::Overworld("Chest_A01_Uthas_Key_05"),
         drop: Drop::Item(Items::OldKey, 1),
-        locks: &[Lock::Movement(&[
-            Move::no_walljump(1, 3),
-            Move::walljump(1, 0),
-        ])],
+        locks: &[Lock::Movement(&[no_walljump!(1, 3), walljump!(1, 0)])],
     },
     Check {
         location: Locations::UthasEnd,
@@ -1206,7 +1153,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Item(Items::Rose, 1),
         locks: &[
             Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[Move::walljump(0, 2), Move::no_walljump(0, 3)]),
+            Lock::Movement(&[walljump!(0, 2), no_walljump!(0, 3)]),
         ],
     },
     Check {
@@ -1215,7 +1162,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Item(Items::BremurPicture, 1),
         locks: &[
             Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[Move::walljump(0, 1), Move::no_walljump(0, 2)]),
+            Lock::Movement(&[walljump!(0, 1), no_walljump!(0, 2)]),
         ],
     },
     Check {
@@ -1224,7 +1171,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Weapon(Weapons::IceDestroyers),
         locks: &[
             Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
+            Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)]),
         ],
     },
     Check {
@@ -1233,7 +1180,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Tunic(Tunics::OnopCoat),
         locks: &[
             Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
+            Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)]),
         ],
     },
     Check {
@@ -1242,7 +1189,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Item(Items::Rose, 1),
         locks: &[
             Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
+            Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)]),
         ],
     },
     Check {
@@ -1251,7 +1198,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Item(Items::SapphireOre, 1),
         locks: &[
             Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
+            Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)]),
         ],
     },
     Check {
@@ -1260,7 +1207,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Item(Items::SapphireOre, 1),
         locks: &[
             Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
+            Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)]),
         ],
     },
     Check {
@@ -1270,7 +1217,7 @@ pub const CHECKS: [Check; 227] = [
         locks: &[
             Lock::Location(Locations::SanctuaryStone),
             Lock::Emote(Emotes::Levitation),
-            Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
+            Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)]),
         ],
     },
     Check {
@@ -1282,7 +1229,7 @@ pub const CHECKS: [Check; 227] = [
         locks: &[
             Lock::Location(Locations::RustVillage),
             Lock::Item(Items::ComposerLetter),
-            Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
+            Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)]),
         ],
     },
     Check {
@@ -1293,7 +1240,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Item(Items::BeiraVessel, 1),
         locks: &[
             Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[Move::walljump(1, 1), Move::no_walljump(4, 0)]),
+            Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)]),
         ],
     },
     // Firefall River
@@ -1303,59 +1250,56 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Weapon(Weapons::EmberTwins),
         locks: &[
             Lock::Emote(Emotes::HatKid),
-            Lock::Movement(&[Move::no_walljump(1, 4)]),
+            Lock::Movement(&[no_walljump!(1, 4)]),
         ],
     },
     Check {
         location: Locations::FirefallSpiritHunter,
         context: Context::Overworld("Pickup_A06_SRL4"),
         drop: Drop::Ore(250),
-        locks: &[Lock::Movement(&[Move::no_walljump(1, 4)])],
+        locks: &[Lock::Movement(&[no_walljump!(1, 4)])],
     },
     Check {
         location: Locations::FirefallSpiritHunter,
         context: Context::Overworld("Pickup_A06_SRL5"),
         drop: Drop::Ore(200),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 1)])],
     },
     Check {
         location: Locations::FirefallSpiritHunter,
         context: Context::Overworld("Chest_A06_River_Loot_01"),
         drop: Drop::Item(Items::SapphireOre, 1),
-        locks: &[Lock::Movement(&[
-            Move::walljump(0, 0),
-            Move::no_walljump(0, 1),
-        ])],
+        locks: &[Lock::Movement(&[walljump!(0, 0), no_walljump!(0, 1)])],
     },
     Check {
         location: Locations::FirefallSpiritHunter,
         context: Context::Overworld("Chest_A06_River_Loot_03"),
         drop: Drop::Item(Items::SapphireOre, 1),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 3)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 3)])],
     },
     Check {
         location: Locations::FirefallSpiritHunter,
         context: Context::Overworld("Pickup_A06_SRL2"),
         drop: Drop::Ore(200),
-        locks: &[Lock::Movement(&[Move::no_walljump(1, 3)])],
+        locks: &[Lock::Movement(&[no_walljump!(1, 3)])],
     },
     Check {
         location: Locations::FirefallSpiritHunter,
         context: Context::Overworld("Pickup_A06_SRL"),
         drop: Drop::Ore(300),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 3)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 3)])],
     },
     Check {
         location: Locations::FirefallSpiritHunter,
         context: Context::Overworld("Pickup_A06_SRL3"),
         drop: Drop::Ore(300),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 3)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 3)])],
     },
     Check {
         location: Locations::FirefallSpiritHunter,
         context: Context::Overworld("Pickup8"),
         drop: Drop::Ore(200),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 3)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 3)])],
     },
     // i can't find pickups 11, 12 and 6
     Check {
@@ -1370,7 +1314,7 @@ pub const CHECKS: [Check; 227] = [
         location: Locations::Bunny,
         context: Context::Overworld("Pickup9"),
         drop: Drop::Ore(150),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 1)])],
     },
     Check {
         location: Locations::Bunny,
@@ -1378,7 +1322,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Item(Items::RareCheese, 1),
         locks: &[
             Lock::Emote(Emotes::Windmill),
-            Lock::Movement(&[Move::no_walljump(1, 4)]),
+            Lock::Movement(&[no_walljump!(1, 4)]),
         ],
     },
     Check {
@@ -1387,25 +1331,25 @@ pub const CHECKS: [Check; 227] = [
             "Blue Fire/Content/BlueFire/NPC/Onops/Onop_Onari/NPC_Master_Onari",
         ),
         drop: Drop::Tunic(Tunics::BunnySuit),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 1)])],
     },
     Check {
         location: Locations::Bunny,
         context: Context::Overworld("Chest_A06_River_Loot_02"),
         drop: Drop::Item(Items::SapphireOre, 1),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 1)])],
     },
     Check {
         location: Locations::Bunny,
         context: Context::Overworld("Pickup10"),
         drop: Drop::Ore(150),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 1)])],
     },
     Check {
         location: Locations::Bunny,
         context: Context::Overworld("A06_Firefall_EmoteStatue_KungFu"),
         drop: Drop::Emote(Emotes::KungFu),
-        locks: &[Lock::Movement(&[Move::no_walljump(0, 1)])],
+        locks: &[Lock::Movement(&[no_walljump!(0, 1)])],
     },
     Check {
         location: Locations::Bunny,
@@ -1425,7 +1369,7 @@ pub const CHECKS: [Check; 227] = [
         drop: Drop::Spirit(Spirits::HammerKing),
         locks: &[
             Lock::Emote(Emotes::Party),
-            Lock::Movement(&[Move::no_walljump(1, 0)]),
+            Lock::Movement(&[no_walljump!(1, 0)]),
         ],
     },
     Check {
@@ -1482,10 +1426,7 @@ pub const CHECKS: [Check; 227] = [
             "Blue Fire/Content/BlueFire/NPC/Onops/NPC_Onop_SectMember_Tunic",
         ),
         drop: Drop::Tunic(Tunics::SectMember),
-        locks: &[Lock::Movement(&[
-            Move::walljump(0, 1),
-            Move::no_walljump(2, 0),
-        ])],
+        locks: &[Lock::Movement(&[walljump!(0, 1), no_walljump!(2, 0)])],
     },
     Check {
         location: Locations::SteamHouse,
@@ -1497,7 +1438,7 @@ pub const CHECKS: [Check; 227] = [
         location: Locations::SteamHouse,
         context: Context::Overworld("Chest_A06_SteamHouse_Tunic_SteamSuit"),
         drop: Drop::Tunic(Tunics::SteamWorkerTunic),
-        locks: &[Lock::Movement(&[Move::no_walljump(1, 1)])],
+        locks: &[Lock::Movement(&[no_walljump!(1, 1)])],
     },
     Check {
         location: Locations::SteamHousePlatforming,
@@ -1552,10 +1493,7 @@ pub const CHECKS: [Check; 227] = [
         ),
         drop: Drop::Tunic(Tunics::PerformerCostume),
         // just Bech's requirements since everyone else is accessible
-        locks: &[Lock::Movement(&[
-            Move::walljump(1, 1),
-            Move::no_walljump(4, 0),
-        ])],
+        locks: &[Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)])],
     },
     Check {
         location: Locations::RustVillage,
