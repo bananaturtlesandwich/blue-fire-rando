@@ -1,7 +1,7 @@
 use super::*;
 use crate::{no_walljump, walljump};
 
-pub const CHECKS: [Check; 252] = [
+pub const CHECKS: [Check; 253] = [
     // Fire Keep
     Check {
         location: Locations::Lab,
@@ -270,6 +270,12 @@ pub const CHECKS: [Check; 252] = [
         context: Context::Shop(Shop::SpiritHunter, 3, 2500),
         drop: Drop::Spirit(Spirits::ShadowGru),
         locks: &[],
+    },
+    Check {
+        location: Locations::ArcaneSpiritHunter,
+        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/SpiritHunter/NPC_SpiritHunter"),
+        drop: Drop::Tunic(Tunics::ThiefsCloack),
+        locks: &[Lock::SpiritHunter],
     },
     Check {
         location: Locations::ArcaneSpiritHunter,
@@ -677,13 +683,7 @@ pub const CHECKS: [Check; 252] = [
         location: Locations::Stoneheart,
         context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Merchant/NPC_Merchant"),
         drop: Drop::Tunic(Tunics::MerchantsRobe),
-        locks: &[
-            Lock::Item(Items::Book),
-            Lock::Item(Items::Book),
-            Lock::Item(Items::Book),
-            Lock::Item(Items::Book),
-            Lock::Item(Items::Book),
-        ],
+        locks: &[Lock::Mork],
     },
     Check{
         location: Locations::Stoneheart,
@@ -1169,7 +1169,7 @@ pub const CHECKS: [Check; 252] = [
     Check {
         location: Locations::SanctuaryStone,
         context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/Cinematics/InsideTemple/InsideTemple_Controller",
+            "Blue Fire/Content/BlueFire/Cinematics/LeaveTemple/LeaveTemple_Controller",
         ),
         drop: Drop::Item(Items::SanctuaryStone, 1),
         locks: &[],
@@ -1680,9 +1680,10 @@ pub const CHECKS: [Check; 252] = [
         drop: Drop::Item(Items::VoidOre, 1),
         locks: &[Lock::Movement(&[walljump!(1, 3)])],
     },
+    // don't ask. if you want to know look through #clips-and-screenshots
     Check {
         location: Locations::TheVoid,
-        context: Context::Cutscene("Blue Fire/Content/BlueFire/Cinematics/AllVoids/AllVoids_Controller"),
+        context: Context::Cutscene("Blue Fire/Content/BlueFire/Player/Logic/Player_Character_BP"),
         drop: Drop::Tunic(Tunics::SilverCloack),
         locks: &[],
     }

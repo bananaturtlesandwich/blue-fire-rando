@@ -125,6 +125,8 @@ pub enum Lock {
     Movement(&'static [Move]),
     Item(Items),
     Emote(Emotes),
+    SpiritHunter,
+    Mork,
     EvolairTunic,
     IronJustice,
 }
@@ -138,14 +140,14 @@ pub struct Move {
 
 // for some stupid reason const fn doesn't work in slices so i'll use macros instead
 #[macro_export]
-macro_rules! walljump {
-    ($eh: expr, $h: expr) => {
+macro_rules! walljump {
+    ($eh: expr, $h: expr) => {
         Move {
             extra_height: $eh,
             horizontal: $h,
             walljump: true,
         }
-    };
+    };
 }
 #[macro_export]
 macro_rules! no_walljump {

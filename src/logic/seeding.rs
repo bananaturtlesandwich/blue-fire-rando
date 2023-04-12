@@ -72,6 +72,24 @@ fn update(
             let emote = Drop::Emote(*emote);
             both().any(|drop| drop == &emote)
         }
+        Lock::Mork => {
+            both().fold(0, |acc, drop| {
+                if drop == &Drop::Item(Items::Book, 1) {
+                    acc + 1
+                } else {
+                    acc
+                }
+            }) == 5
+        }
+        Lock::SpiritHunter => {
+            both().fold(0, |acc, drop| {
+                if matches!(drop, Drop::Spirit(_)) {
+                    acc + 1
+                } else {
+                    acc
+                }
+            }) >= 10
+        }
         Lock::EvolairTunic => both().any(|drop| drop == &Drop::Tunic(Tunics::SteamWorkerTunic)),
         Lock::IronJustice => both().any(|drop| drop == &Drop::Weapon(Weapons::IronJustice)),
     }) {
@@ -107,6 +125,12 @@ fn update(
                     .iter()
                     .position(|drop| drop == &emote)
             }
+            Lock::Mork => possible[0..checks.len()]
+                .iter()
+                .position(|drop| drop == &Drop::Item(Items::Book, 1)),
+            Lock::SpiritHunter => possible[0..checks.len()]
+                .iter()
+                .position(|drop| matches!(drop, Drop::Spirit(_))),
             Lock::EvolairTunic => possible[0..checks.len()]
                 .iter()
                 .position(|drop| drop == &Drop::Tunic(Tunics::SteamWorkerTunic)),
@@ -149,8 +173,7 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
     let mut progression: Vec<Check> = Vec::with_capacity(pool.len());
     let mut locations = Vec::with_capacity(Locations::COUNT);
     let mut rng = rand::thread_rng();
-    // use !pool.is_empty when everything is documented so everything is accessible
-    while locations.len() != Locations::COUNT {
+    while locations.len() != Locations::COUNT && !pool.is_empty() {
         // shuffle the possible drops
         use rand::seq::SliceRandom;
         possible.shuffle(&mut rng);
