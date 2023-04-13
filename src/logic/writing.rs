@@ -180,7 +180,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     let (x, y) = (9.0 * index as f32).to_radians().sin_cos();
                     pos.x -= 1000.0 * x;
                     pos.y -= 1000.0 * y;
-                    set_location(insert, &mut map, pos);
+                    set_location(insert, &mut map, pos, (0.0, 0.0, 0.0));
                     let norm = map.exports[insert]
                         .get_normal_export_mut()
                         .ok_or(Error::Assumption)?;
@@ -327,7 +327,21 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     let insert = map.exports.len();
                     transplant(actor, &mut map, &donor);
                     let loc = get_location(i, &map);
-                    set_location(insert, &mut map, loc);
+                    set_location(
+                        insert,
+                        &mut map,
+                        loc,
+                        // some of the ducks are impossible to physically reach
+                        match location {
+                            Locations::ArcaneDucks => (0.0, 150.0, 0.0),
+                            Locations::ForestDucks if name == "Duck" => (0.0, 0.0, 800.0),
+                            Locations::AbandonedPath if name == "Duck" => (0.0, 0.0, 300.0),
+                            Locations::Stoneheart if name == "Duck2" => (0.0, -100.0, 0.0),
+                            Locations::FirefallDucks | Locations::Sirion => (0.0, 0.0, 100.0),
+                            Locations::WaterwayDucks => (500.0, 0.0, 100.0),
+                            _ => (0.0, 0.0, 0.0),
+                        },
+                    );
                     // create unique id to prevent multiple checks being registered as collected
                     let mut counter: u16 = match name.rfind(|ch: char| ch.to_digit(10).is_none()) {
                         Some(index) if index != name.len() - 1 => {
