@@ -137,7 +137,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
         ..
     } in checks
     {
-        match dbg!(context) {
+        match context {
             Context::Shop(shopkeep, index, price) => {
                 let (mut savegame, loc) = get_savegame(app, &pak)?;
                 savegame.exports[1]
@@ -322,7 +322,6 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         include_bytes!("../blueprints/collectibles.umap").as_slice(),
                         include_bytes!("../blueprints/collectibles.uexp").as_slice(),
                     )?;
-                    dbg!(i, &loc);
                     delete(i, &mut map);
                     let insert = map.exports.len();
                     transplant(actor, &mut map, &donor);

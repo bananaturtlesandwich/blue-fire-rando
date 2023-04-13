@@ -85,15 +85,6 @@ pub fn transplant<C: std::io::Seek + std::io::Read, D: std::io::Seek + std::io::
             }
         })
     }
-    // add export names
-    for export in children.iter() {
-        recipient.add_fname(&export.get_base_export().object_name.content);
-        if let Some(norm) = export.get_normal_export() {
-            for prop in norm.properties.iter() {
-                super::add_prop_names(prop, recipient, false)
-            }
-        }
-    }
     // finally add the exports
     recipient.exports.append(&mut children);
 
@@ -144,12 +135,6 @@ pub fn transplant<C: std::io::Seek + std::io::Read, D: std::io::Seek + std::io::
             }
         }
         i += 1;
-    }
-    // add import names
-    for import in imports.iter() {
-        recipient.add_fname(&import.class_package.content);
-        recipient.add_fname(&import.class_name.content);
-        recipient.add_fname(&import.object_name.content);
     }
     recipient.imports.append(&mut imports);
 }
