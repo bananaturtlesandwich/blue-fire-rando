@@ -102,6 +102,7 @@ fn set_byte(
 }
 
 pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
+    let mut used = Vec::with_capacity(checks.len());
     let pak = unpak::Pak::new(
         app.pak.join("Blue Fire-WindowsNoEditor.pak"),
         unpak::Version::FrozenIndex,
@@ -327,20 +328,31 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     transplant(actor, &mut map, &donor);
                     let loc = get_location(i, &map);
                     set_location(insert, &mut map, loc);
+                    // create unique id to prevent multiple checks being registered as collected
+                    let mut counter: u16 = match name.rfind(|ch: char| ch.to_digit(10).is_none()) {
+                        Some(index) if index != name.len() - 1 => {
+                            name[index + 1..].parse().unwrap()
+                        }
+                        _ => 1,
+                    };
+                    while used.contains(&format!("{name}{counter}")) {
+                        counter += 1;
+                    }
+                    used.push(format!("{name}{counter}"));
                     let norm = &mut map.exports[insert]
                         .get_normal_export_mut()
                         .ok_or(Error::Assumption)?;
                     match norm.properties.iter_mut().find_map(|prop| {
                         cast!(Property, StrProperty, prop).filter(|id| id.name.content == "ID")
                     }) {
-                        Some(id) => id.value = Some(name.to_string()),
+                        Some(id) => id.value = Some(format!("{name}{counter}")),
                         None => {
                             norm.properties
                                 .push(Property::StrProperty(str_property::StrProperty {
                                     name: FName::from_slice("ID"),
                                     property_guid: None,
                                     duplication_index: 0,
-                                    value: Some(name.to_string()),
+                                    value: Some(format!("{name}{counter}")),
                                 }))
                         }
                     }
