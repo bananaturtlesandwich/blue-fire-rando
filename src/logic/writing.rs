@@ -42,32 +42,6 @@ fn extract(
     ))
 }
 
-fn get_savegame(
-    app: &crate::Rando,
-    pak: &unpak::Pak,
-) -> Result<(Asset<std::fs::File>, std::path::PathBuf), Error> {
-    let initialised = app.pak.join(MOD).join(SAVEGAME).exists();
-    let (mut savegame, loc) = extract(app, pak, SAVEGAME)?;
-    if !initialised {
-        let default = savegame.exports[1]
-            .get_normal_export_mut()
-            .ok_or(Error::Assumption)?;
-        if app.dash {
-            cast!(Property, StructProperty, &mut default.properties[2])
-                .and_then(|inventory| cast!(Property, BoolProperty, &mut inventory.value[1]))
-                .ok_or(Error::Assumption)?
-                .value = false;
-        }
-        if app.emotes {
-            cast!(Property, ArrayProperty, &mut default.properties[15])
-                .ok_or(Error::Assumption)?
-                .value
-                .clear()
-        }
-    }
-    Ok((savegame, loc))
-}
-
 fn byte_property(name: &str, enum_type: &str, val: &str) -> Property {
     Property::ByteProperty(int_property::ByteProperty {
         name: FName::from_slice(name),
@@ -117,6 +91,22 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
         .object_name
         .content = "Pickup_A02_SRF2".to_string();
     save(&mut bullshit, &loc)?;
+    let (mut savegame, savegame_loc) = extract(app, &pak, SAVEGAME)?;
+    let default = savegame.exports[1]
+        .get_normal_export_mut()
+        .ok_or(Error::Assumption)?;
+    if app.dash {
+        cast!(Property, StructProperty, &mut default.properties[2])
+            .and_then(|inventory| cast!(Property, BoolProperty, &mut inventory.value[1]))
+            .ok_or(Error::Assumption)?
+            .value = false;
+    }
+    if app.emotes {
+        cast!(Property, ArrayProperty, &mut default.properties[15])
+            .ok_or(Error::Assumption)?
+            .value
+            .clear()
+    }
     let mut shop_emotes: Vec<_> = checks
         .iter()
         .filter_map(|check| {
@@ -139,7 +129,6 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
     {
         match context {
             Context::Shop(shopkeep, index, price) => {
-                let (mut savegame, loc) = get_savegame(app, &pak)?;
                 savegame.exports[1]
                     .get_normal_export_mut()
                     .and_then(|norm| {
@@ -213,7 +202,6 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     .value = Some(format!("{}{index}", shopkeep.as_ref()));
                     save(&mut map, loc)?;
                 }
-                save(&mut savegame, loc)?;
             }
             // sapphire ore turns to house keys?????
             Context::Cutscene(cutscene) => {
@@ -531,7 +519,6 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                         ));
                     Ok(())
                 }
-                let (mut savegame, loc) = get_savegame(app, &pak)?;
                 match &drop {
                     Drop::Ability(ability) => {
                         add_item(&mut savegame, Drop::Item(ability.as_item(), 1))?;
@@ -576,12 +563,10 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     Drop::Duck => add_item(&mut savegame, Drop::Item(Items::Duck, 1))?,
                     _ => add_item(&mut savegame, drop)?,
                 }
-                save(&mut savegame, loc)?;
             }
         }
     }
     // clear out emote shop items
-    let (mut savegame, loc) = get_savegame(app, &pak)?;
     let default = savegame.exports[1]
         .get_normal_export_mut()
         .ok_or(Error::Assumption)?;
@@ -595,7 +580,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
         .value
         .remove(i);
     }
-    save(&mut savegame, loc)?;
+    save(&mut savegame, savegame_loc)?;
     // change the logo so people know it worked
     let logo_path = app
         .pak
