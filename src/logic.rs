@@ -1,11 +1,9 @@
 mod drops;
 pub use drops::*;
-mod seeding;
-pub use seeding::randomise;
-mod writing;
-pub use writing::write;
 mod checks;
 pub use checks::CHECKS;
+mod seeding;
+pub use seeding::randomise;
 mod locations;
 pub use locations::*;
 
@@ -26,7 +24,7 @@ pub enum Shop {
 }
 
 impl Shop {
-    fn location(&self) -> unreal_asset::types::vector::Vector<f32> {
+    pub fn location(&self) -> unreal_asset::types::vector::Vector<f32> {
         use unreal_asset::types::vector::Vector;
         match self {
             Shop::Mork => Vector::new(52459.4, -17121.4, -35.13),
@@ -101,7 +99,7 @@ impl PartialEq for Drop {
 }
 
 impl Drop {
-    fn as_u8(&self) -> u8 {
+    pub fn as_u8(&self) -> u8 {
         match self {
             Drop::Item(_, _) => 0,
             Drop::Weapon(_) => 1,
@@ -114,7 +112,7 @@ impl Drop {
         }
     }
 
-    fn inner_as_u8(&self) -> u8 {
+    pub fn inner_as_u8(&self) -> u8 {
         match self {
             Drop::Item(inner, _) => *inner as u8,
             Drop::Weapon(inner) => *inner as u8,
@@ -130,9 +128,9 @@ impl Drop {
 
 #[derive(Debug)]
 pub struct Check {
-    location: Locations,
-    context: Context,
-    drop: Drop,
+    pub location: Locations,
+    pub context: Context,
+    pub drop: Drop,
     locks: &'static [Lock],
 }
 

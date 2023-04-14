@@ -67,8 +67,8 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Result
                         },
                         &mut map,
                         &open_from_bytes(
-                            include_bytes!("../../blueprints/collectibles.umap").as_slice(),
-                            include_bytes!("../../blueprints/collectibles.uexp").as_slice(),
+                            include_bytes!("../blueprints/collectibles.umap").as_slice(),
+                            include_bytes!("../blueprints/collectibles.uexp").as_slice(),
                         )?,
                     );
                     let mut pos = shop.location();

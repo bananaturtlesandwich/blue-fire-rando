@@ -1,6 +1,7 @@
 mod io;
 mod logic;
 mod map;
+mod writing;
 
 pub struct Rando {
     notifs: egui_modal::Modal,

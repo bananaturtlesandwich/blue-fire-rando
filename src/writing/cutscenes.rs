@@ -10,8 +10,8 @@ pub fn write(cutscenes: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Res
             &pak,
             |_| {
                 Ok(open_from_bytes(
-                    include_bytes!("../../blueprints/hook.uasset"),
-                    include_bytes!("../../blueprints/hook.uexp"),
+                    include_bytes!("../blueprints/hook.uasset"),
+                    include_bytes!("../blueprints/hook.uexp"),
                 )?)
             },
             &drop,

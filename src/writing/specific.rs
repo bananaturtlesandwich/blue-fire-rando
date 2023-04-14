@@ -14,16 +14,16 @@ pub fn write(cases: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Result<
                         loc,
                         match case {
                             Case::Bremur => {
-                                include_bytes!("../../blueprints/bremur_hook.uasset").as_slice()
+                                include_bytes!("../blueprints/bremur_hook.uasset").as_slice()
                             }
                             Case::Paulale => {
-                                include_bytes!("../../blueprints/paulale_hook.uasset").as_slice()
+                                include_bytes!("../blueprints/paulale_hook.uasset").as_slice()
                             }
                             Case::Angels => {
-                                include_bytes!("../../blueprints/angel_hook.uasset").as_slice()
+                                include_bytes!("../blueprints/angel_hook.uasset").as_slice()
                             }
                             Case::AllVoids => {
-                                include_bytes!("../../blueprints/player_hook.uasset").as_slice()
+                                include_bytes!("../blueprints/player_hook.uasset").as_slice()
                             }
                         },
                     )?;
@@ -31,16 +31,16 @@ pub fn write(cases: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Result<
                         loc.with_extension("uexp"),
                         match case {
                             Case::Bremur => {
-                                include_bytes!("../../blueprints/bremur_hook.uexp").as_slice()
+                                include_bytes!("../blueprints/bremur_hook.uexp").as_slice()
                             }
                             Case::Paulale => {
-                                include_bytes!("../../blueprints/paulale_hook.uexp").as_slice()
+                                include_bytes!("../blueprints/paulale_hook.uexp").as_slice()
                             }
                             Case::Angels => {
-                                include_bytes!("../../blueprints/angel_hook.uexp").as_slice()
+                                include_bytes!("../blueprints/angel_hook.uexp").as_slice()
                             }
                             Case::AllVoids => {
-                                include_bytes!("../../blueprints/player_hook.uexp").as_slice()
+                                include_bytes!("../blueprints/player_hook.uexp").as_slice()
                             }
                         },
                     )?;

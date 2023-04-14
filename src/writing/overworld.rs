@@ -7,8 +7,8 @@ pub fn write(
 ) -> Result<(), Error> {
     let mut used = Vec::with_capacity(checks.len());
     let donor = open_from_bytes(
-        include_bytes!("../../blueprints/collectibles.umap"),
-        include_bytes!("../../blueprints/collectibles.uexp"),
+        include_bytes!("../blueprints/collectibles.umap"),
+        include_bytes!("../blueprints/collectibles.uexp"),
     )?;
     for (location, checks) in checks {
         let (mut map, loc) = extract(app, &pak, &format!("{PREFIX}{location}.umap"))?;

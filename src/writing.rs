@@ -1,4 +1,4 @@
-use super::*;
+use super::logic::*;
 use crate::{io::*, map::*};
 use unreal_asset::{exports::*, properties::*, reader::asset_trait::AssetTrait, types::FName, *};
 
@@ -118,14 +118,14 @@ pub fn write(
         .join(MOD)
         .join("Blue Fire/Content/BlueFire/HUD/Menu/Blue-Fire-Logo.uasset");
     std::fs::create_dir_all(logo.parent().expect("is a file"))?;
-    std::fs::write(&logo, include_bytes!("../blueprints/logo.uasset"))?;
+    std::fs::write(&logo, include_bytes!("blueprints/logo.uasset"))?;
     std::fs::write(
         logo.with_extension("uexp"),
-        include_bytes!("../blueprints/logo.uexp"),
+        include_bytes!("blueprints/logo.uexp"),
     )?;
     // package the mod in the most scuffed way possible
-    std::fs::write("UnrealPak.exe", include_bytes!("../UnrealPak.exe"))?;
-    std::fs::write("pak.bat", include_str!("../pak.bat"))?;
+    std::fs::write("UnrealPak.exe", include_bytes!("UnrealPak.exe"))?;
+    std::fs::write("pak.bat", include_str!("pak.bat"))?;
     // for some reason calling with rust doesn't work so a batch file will do
     std::process::Command::new("./pak.bat")
         .arg(app.pak.join("rando_p"))

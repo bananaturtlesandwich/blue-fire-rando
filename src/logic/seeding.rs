@@ -297,5 +297,5 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
         return Err(NOTENOUGH.to_string());
     }
     std::fs::write("spoiler_log.txt", format!("{overworld:#?}")).unwrap_or_default();
-    write(overworld, savegames, cutscenes, cases, app).map_err(|e| e.to_string())
+    crate::writing::write(overworld, savegames, cutscenes, cases, app).map_err(|e| e.to_string())
 }
