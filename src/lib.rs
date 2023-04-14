@@ -6,7 +6,9 @@ mod writing;
 pub struct Rando {
     notifs: egui_modal::Modal,
     pak: std::path::PathBuf,
-    item: bool,
+    items: bool,
+    gems: bool,
+    keys: bool,
     weapons: bool,
     tunics: bool,
     spirits: bool,
@@ -46,7 +48,9 @@ impl Rando {
                 }
                 .join("Blue Fire\\Content\\Paks")
             },
-            item: get_bool("item"),
+            items: get_bool("items"),
+            gems: get_bool("gems"),
+            keys: get_bool("keys"),
             weapons: get_bool("weapons"),
             tunics: get_bool("tunics"),
             spirits: get_bool("spirits"),
@@ -96,7 +100,9 @@ impl eframe::App for Rando {
                 ui[0].checkbox(&mut self.weapons, "Weapons e.g Dual blades");
                 ui[0].checkbox(&mut self.emotes, "Emotes e.g Smug dance");
                 ui[0].checkbox(&mut self.tunics, "Tunics e.g Bunny suit");
-                ui[0].checkbox(&mut self.item, "Items e.g Ruby/Rose");
+                ui[0].checkbox(&mut self.items, "Items e.g Rose");
+                ui[0].checkbox(&mut self.gems, "Gems e.g Void ore");
+                ui[0].checkbox(&mut self.keys, "Keys e.g Old key");
 
                 ui[1].heading(egui::RichText::new("Extra options").underline());
                 ui[1].checkbox(&mut self.treasure, "Treasures e.g Seagull soup");
@@ -132,6 +138,7 @@ impl eframe::App for Rando {
                     }
                     ui.label("to race!")
                 });
+                ui[1].label("installing should take about 15 seconds because a lot of data is procedurally written to disk")
             });
             ui.vertical_centered_justified(|ui| {
                 if ui.button("uninstall seed").clicked() {
@@ -175,7 +182,9 @@ impl eframe::App for Rando {
 
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
         storage.set_string("pak", self.pak.to_str().unwrap_or_default().to_string());
-        storage.set_string("item", self.item.to_string());
+        storage.set_string("items", self.items.to_string());
+        storage.set_string("gems", self.gems.to_string());
+        storage.set_string("keys", self.keys.to_string());
         storage.set_string("weapons", self.weapons.to_string());
         storage.set_string("tunics", self.tunics.to_string());
         storage.set_string("spirits", self.spirits.to_string());

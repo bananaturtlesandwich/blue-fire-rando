@@ -121,7 +121,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Result
                                 Property,
                                 ArrayProperty,
                                 &mut stats.value[match drop {
-                                    Drop::Item(item, _) if item.is_key_item() => 7,
+                                    Drop::Item(item, _) if item.key_item() => 7,
                                     _ => 6,
                                 }]
                             )
@@ -131,7 +131,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Result
                         .push(unreal_asset::properties::Property::StructProperty(
                             unreal_asset::properties::struct_property::StructProperty {
                                 name: FName::from_slice(match drop {
-                                    Drop::Item(item, _) if item.is_key_item() => {
+                                    Drop::Item(item, _) if item.key_item() => {
                                         "PassiveInventory_48_636C916F4A37F051CF9B14A1402B4C94"
                                     }
                                     _ => "Inventory_23_288399C5416269F828550FB7376E7942",

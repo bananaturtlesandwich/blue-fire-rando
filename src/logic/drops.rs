@@ -168,7 +168,7 @@ pub enum Items {
 }
 
 impl Items {
-    pub fn is_treasure(&self) -> bool {
+    pub fn treasure(&self) -> bool {
         matches!(
             self,
             Items::Apple
@@ -184,26 +184,27 @@ impl Items {
         )
     }
 
-    pub fn is_not_consumable(&self) -> bool {
+    pub fn gem(&self) -> bool {
         matches!(
             self,
-            Items::BasicPouch
-                | Items::SmallPouch
-                | Items::LargePouch
-                | Items::ExtraLargePouch
-                | Items::SanctuaryStone
-                | Items::BeiraVessel
-                | Items::FireEssenceSlot
-                | Items::Shield
-                | Items::FireBall
-                | Items::WallRun
-                | Items::DoubleJump
-                | Items::SpinAttack
-                | Items::Sprint,
+            Items::RubyOre | Items::SapphireOre | Items::EmeraldOre | Items::VoidOre
         )
     }
 
-    pub fn is_key_item(&self) -> bool {
+    pub fn key(&self) -> bool {
+        matches!(
+            self,
+            Items::OldKey
+                | Items::KeyGraveyardKey
+                | Items::KeyUthasTemple
+                | Items::KeyHolyMaster
+                | Items::KeyGodMaster
+                | Items::KeySteam
+                | Items::KeyFireMaster
+        )
+    }
+
+    pub fn key_item(&self) -> bool {
         matches!(
             self,
             Items::BasicPouch

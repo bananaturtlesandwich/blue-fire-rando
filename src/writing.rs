@@ -189,7 +189,7 @@ fn create_hook<C: std::io::Read + std::io::Seek>(
         _ => 1,
     };
     *key_item.assignment_expression = match &drop {
-        Drop::Item(item, _) if item.is_key_item() => KismetExpression::ExTrue(ExTrue::default()),
+        Drop::Item(item, _) if item.key_item() => KismetExpression::ExTrue(ExTrue::default()),
         _ => KismetExpression::ExFalse(ExFalse::default()),
     };
     let self_refs: Vec<usize> = hook

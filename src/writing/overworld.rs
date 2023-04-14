@@ -102,8 +102,8 @@ pub fn write(
                                 cast!(Property, BoolProperty, prop)
                                     .filter(|bool| bool.name.content == "KeyItem")
                             }) {
-                                Some(key_item) => key_item.value = item.is_key_item(),
-                                None if item.is_key_item() => chest.properties.push(
+                                Some(key_item) => key_item.value = item.key_item(),
+                                None if item.key_item() => chest.properties.push(
                                     Property::BoolProperty(int_property::BoolProperty {
                                         name: FName::from_slice("KeyItem"),
                                         property_guid: None,

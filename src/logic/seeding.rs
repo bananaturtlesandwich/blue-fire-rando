@@ -162,10 +162,16 @@ fn update(
 }
 
 pub fn randomise(app: &crate::Rando) -> Result<(), String> {
-    let in_pool = |drop: &Drop| match drop {
-        Drop::Item(item, _) => match item.is_treasure() {
-            true => app.treasure,
-            false => app.item,
+    let in_pool = |check: &Check| match &check.drop {
+        Drop::Item(item, _) => match item.gem() {
+            true => app.gems,
+            false => match item.treasure() {
+                true => app.treasure,
+                false => match item.key() {
+                    true => app.keys,
+                    false => app.items,
+                },
+            },
         },
         Drop::Weapon(_) => app.weapons,
         Drop::Tunic(_) => app.tunics,
@@ -179,7 +185,7 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
         Drop::Duck => app.ducks,
     };
     let (mut pool, mut unrandomised): (Vec<Check>, Vec<Check>) =
-        CHECKS.into_iter().partition(|check| in_pool(&check.drop));
+        CHECKS.into_iter().partition(in_pool);
     if pool.len() <= 1 {
         return Err(NOTENOUGH.to_string());
     }
@@ -283,15 +289,7 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
     }
     overworld = overworld
         .into_iter()
-        .map(|(key, value)| {
-            (
-                key,
-                value
-                    .into_iter()
-                    .filter(|check| in_pool(&check.drop))
-                    .collect(),
-            )
-        })
+        .map(|(key, value)| (key, value.into_iter().filter(in_pool).collect()))
         .collect();
     if overworld.is_empty() {
         return Err(NOTENOUGH.to_string());
