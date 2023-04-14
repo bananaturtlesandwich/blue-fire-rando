@@ -51,9 +51,12 @@ pub fn write(
                         _ => (0.0, 0.0, 0.0),
                     },
                 );
+                let mut name = name.to_string();
                 // create unique id to prevent multiple checks being registered as collected
                 let mut counter: u16 = match name.rfind(|ch: char| ch.to_digit(10).is_none()) {
-                    Some(index) if index != name.len() - 1 => name[index + 1..].parse().unwrap(),
+                    Some(index) if index != name.len() - 1 => {
+                        name.drain(index + 1..).collect::<String>().parse().unwrap()
+                    }
                     _ => 1,
                 };
                 while used.contains(&format!("{name}{counter}")) {

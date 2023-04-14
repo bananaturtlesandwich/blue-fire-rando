@@ -54,9 +54,11 @@ fn give_unique_name<C: std::io::Seek + std::io::Read>(orig: &mut FName, asset: &
         *orig = asset.add_fname(&orig.content);
         return;
     }
-    let name = orig.content.as_str();
+    let mut name = orig.content.clone();
     let mut counter: u16 = match name.rfind(|ch: char| ch.to_digit(10).is_none()) {
-        Some(index) if index != name.len() - 1 => name[index + 1..].parse().unwrap(),
+        Some(index) if index != name.len() - 1 => {
+            name.drain(index + 1..).collect::<String>().parse().unwrap()
+        }
         _ => 1,
     };
     while asset
@@ -65,7 +67,7 @@ fn give_unique_name<C: std::io::Seek + std::io::Read>(orig: &mut FName, asset: &
     {
         counter += 1;
     }
-    orig.content = format!("{name}{counter}")
+    *orig = asset.add_fname(&format!("{name}{counter}"))
 }
 
 /// on all possible export references
