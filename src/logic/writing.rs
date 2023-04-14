@@ -2,6 +2,11 @@ use super::*;
 use crate::{io::*, map::*};
 use unreal_asset::{exports::*, properties::*, reader::asset_trait::AssetTrait, types::FName, *};
 
+mod cutscenes;
+mod overworld;
+mod savegames;
+mod specific;
+
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("unreal_asset: {0}")]
@@ -26,20 +31,15 @@ fn extract(
     path: &str,
 ) -> Result<(Asset<std::fs::File>, std::path::PathBuf), Error> {
     let loc = app.pak.join(MOD).join(path);
-    Ok((
-        {
-            if !loc.exists() {
-                std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-                pak.read_to_file(path, &loc)?;
-                pak.read_to_file(
-                    &path.replace(".uasset", ".uexp").replace(".umap", ".uexp"),
-                    loc.with_extension("uexp"),
-                )?;
-            }
-            open(&loc)?
-        },
-        loc,
-    ))
+    if path != "Blue Fire/Content/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap" {
+        std::fs::create_dir_all(loc.parent().expect("is a file"))?;
+        pak.read_to_file(path, &loc)?;
+        pak.read_to_file(
+            &path.replace(".uasset", ".uexp").replace(".umap", ".uexp"),
+            loc.with_extension("uexp"),
+        )?;
+    }
+    Ok((open(&loc)?, loc))
 }
 
 fn byte_property(name: &str, enum_type: &str, val: &str) -> Property {
@@ -75,495 +75,52 @@ fn set_byte(
     Ok(())
 }
 
-pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
-    let mut used = Vec::with_capacity(checks.len());
+pub fn write(
+    checks: std::collections::HashMap<Locations, Vec<Check>>,
+    savegames: Vec<Check>,
+    cutscenes: Vec<Check>,
+    cases: Vec<Check>,
+    app: &crate::Rando,
+) -> Result<(), Error> {
     let pak = unpak::Pak::new(
         app.pak.join("Blue Fire-WindowsNoEditor.pak"),
         unpak::Version::FrozenIndex,
     )?;
-    let (mut bullshit, loc) = extract(
-        app,
-        &pak,
+    // correct the shenanigans in spirit hunter
+    let loc = app
+        .pak
+        .join(MOD)
+        .join("Blue Fire/Content/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap");
+    std::fs::create_dir_all(loc.parent().expect("is a file"))?;
+    pak.read_to_file(
         "Blue Fire/Content/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap",
+        &loc,
     )?;
-    bullshit.exports[440]
+    pak.read_to_file(
+        "Blue Fire/Content/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.uexp",
+        loc.with_extension("uexp"),
+    )?;
+    let mut spirit_hunter = open(&loc)?;
+    spirit_hunter.exports[440]
         .get_base_export_mut()
         .object_name
         .content = "Pickup_A02_SRF2".to_string();
-    save(&mut bullshit, &loc)?;
-    let (mut savegame, savegame_loc) = extract(app, &pak, SAVEGAME)?;
-    let default = savegame.exports[1]
-        .get_normal_export_mut()
-        .ok_or(Error::Assumption)?;
-    if app.dash {
-        cast!(Property, StructProperty, &mut default.properties[2])
-            .and_then(|inventory| cast!(Property, BoolProperty, &mut inventory.value[1]))
-            .ok_or(Error::Assumption)?
-            .value = false;
-    }
-    if app.emotes {
-        cast!(Property, ArrayProperty, &mut default.properties[15])
-            .ok_or(Error::Assumption)?
-            .value
-            .clear()
-    }
-    let mut shop_emotes: Vec<_> = checks
-        .iter()
-        .filter_map(|check| {
-            if let Context::Shop(keep, i, _) = check.context {
-                if matches!(check.drop, Drop::Emote(_) | Drop::Ability(_)) {
-                    return Some((keep, i));
-                }
-            }
-            None
-        })
-        .collect();
-    // sort descending
-    shop_emotes.sort_unstable_by_key(|(_, i)| std::cmp::Reverse(*i));
-    for Check {
-        location,
-        context,
-        drop,
-        ..
-    } in checks
-    {
-        match context {
-            Context::Shop(shopkeep, index, price) => {
-                savegame.exports[1]
-                    .get_normal_export_mut()
-                    .and_then(|norm| {
-                        cast!(
-                            Property,
-                            ArrayProperty,
-                            &mut norm.properties[shopkeep as usize]
-                        )
-                    })
-                    .ok_or(Error::Assumption)?
-                    .value[index] = Property::StructProperty(
-                    unreal_asset::properties::struct_property::StructProperty {
-                        name: FName::from_slice(shopkeep.as_ref()),
-                        struct_type: Some(FName::from_slice("Inventory")),
-                        struct_guid: None,
-                        property_guid: None,
-                        duplication_index: 0,
-                        serialize_none: true,
-                        value: drop.as_shop_entry(price),
-                    },
-                );
-                if matches!(drop, Drop::Emote(_) | Drop::Ability(_)) {
-                    let (mut map, loc) = extract(app, &pak, &format!("{PREFIX}{location}.umap"))?;
-                    let insert = map.exports.len();
-                    transplant(
-                        match drop {
-                            Drop::Ability(_) => 36,
-                            Drop::Emote(_) => 20,
-                            _ => unimplemented!(),
-                        },
-                        &mut map,
-                        &open_from_bytes(
-                            include_bytes!("../blueprints/collectibles.umap").as_slice(),
-                            include_bytes!("../blueprints/collectibles.uexp").as_slice(),
-                        )?,
-                    );
-                    let mut pos = shopkeep.location();
-                    let (x, y) = (9.0 * index as f32).to_radians().sin_cos();
-                    pos.x -= 1000.0 * x;
-                    pos.y -= 1000.0 * y;
-                    set_location(insert, &mut map, pos, (0.0, 0.0, 0.0));
-                    let norm = map.exports[insert]
-                        .get_normal_export_mut()
-                        .ok_or(Error::Assumption)?;
-                    if let Drop::Emote(emote) = drop {
-                        use int_property::BytePropertyValue;
-                        cast!(
-                            BytePropertyValue,
-                            FName,
-                            &mut cast!(Property, ByteProperty, &mut norm.properties[2])
-                                .ok_or(Error::Assumption)?
-                                .value
-                        )
-                        .ok_or(Error::Assumption)?
-                        .content = format!("E_Emotes::NewEnumerator{}", emote.as_ref());
-                    }
-                    if let Drop::Ability(ability) = drop {
-                        set_byte("Ability", "Abilities", ability.as_ref(), norm)?;
-                        set_byte("Type", "InventoryItemType", drop.as_ref(), norm)?;
-                    }
-                    cast!(
-                        Property,
-                        StrProperty,
-                        &mut norm.properties[match drop {
-                            Drop::Ability(_) => 11,
-                            Drop::Emote(_) => 6,
-                            _ => unimplemented!(),
-                        }]
-                    )
-                    .ok_or(Error::Assumption)?
-                    .value = Some(format!("{}{index}", shopkeep.as_ref()));
-                    save(&mut map, loc)?;
-                }
-            }
-            Context::Cutscene(cutscene) => write_cutscene(
-                app,
-                &pak,
-                |_| {
-                    Ok(open_from_bytes(
-                        include_bytes!("../blueprints/hook.uasset"),
-                        include_bytes!("../blueprints/hook.uexp"),
-                    )?)
-                },
-                &drop,
-                cutscene,
-                69,
-            )?,
-            Context::Specific(case, index) => write_cutscene(
-                app,
-                &pak,
-                |loc| {
-                    if !loc.exists() {
-                        std::fs::write(
-                            loc,
-                            match case {
-                                Case::Bremur => {
-                                    include_bytes!("../blueprints/bremur_hook.uasset").as_slice()
-                                }
-                                Case::Paulale => {
-                                    include_bytes!("../blueprints/paulale_hook.uasset").as_slice()
-                                }
-                                Case::Angels => {
-                                    include_bytes!("../blueprints/angel_hook.uasset").as_slice()
-                                }
-                                Case::AllVoids => {
-                                    include_bytes!("../blueprints/player_hook.uasset").as_slice()
-                                }
-                            },
-                        )?;
-                        std::fs::write(
-                            loc.with_extension("uexp"),
-                            match case {
-                                Case::Bremur => {
-                                    include_bytes!("../blueprints/bremur_hook.uexp").as_slice()
-                                }
-                                Case::Paulale => {
-                                    include_bytes!("../blueprints/paulale_hook.uexp").as_slice()
-                                }
-                                Case::Angels => {
-                                    include_bytes!("../blueprints/angel_hook.uexp").as_slice()
-                                }
-                                Case::AllVoids => {
-                                    include_bytes!("../blueprints/player_hook.uexp").as_slice()
-                                }
-                            },
-                        )?;
-                    }
-                    Ok(open(loc)?)
-                },
-                &drop,
-                case.as_ref(),
-                index,
-            )?,
-            Context::Overworld(name) => {
-                let (mut map, loc) = extract(app, &pak, &format!("{PREFIX}{location}.umap"))?;
-                let mut i = map
-                    .exports
-                    .iter()
-                    .position(|ex| ex.get_base_export().object_name.content == name)
-                    .ok_or(Error::Assumption)?;
-                let class = map
-                    .get_import(map.exports[i].get_base_export().class_index)
-                    .map(|import| import.object_name.content.to_owned())
-                    .unwrap_or_default();
-                let is_chest = || {
-                    matches!(
-                        class.as_str(),
-                        "Chest_Master_C" | "Chest_Master_Child_C" | "Chest_Dance_C"
-                    )
-                };
-                let mut replace = |actor: usize| -> Result<(), Error> {
-                    let donor = open_from_bytes(
-                        include_bytes!("../blueprints/collectibles.umap").as_slice(),
-                        include_bytes!("../blueprints/collectibles.uexp").as_slice(),
-                    )?;
-                    delete(i, &mut map);
-                    let insert = map.exports.len();
-                    transplant(actor, &mut map, &donor);
-                    let loc = get_location(i, &map);
-                    set_location(
-                        insert,
-                        &mut map,
-                        loc,
-                        // some of the ducks are impossible to physically reach
-                        match location {
-                            Locations::ArcaneDucks => (0.0, 150.0, 0.0),
-                            Locations::ForestDucks if name == "Duck" => (0.0, 0.0, 800.0),
-                            Locations::AbandonedPath if name == "Duck" => (0.0, 0.0, 300.0),
-                            Locations::Stoneheart if name == "Duck2" => (0.0, -100.0, 0.0),
-                            Locations::FirefallDucks | Locations::Sirion => (0.0, 0.0, 100.0),
-                            Locations::WaterwayDucks => (500.0, 0.0, 100.0),
-                            _ => (0.0, 0.0, 0.0),
-                        },
-                    );
-                    // create unique id to prevent multiple checks being registered as collected
-                    let mut counter: u16 = match name.rfind(|ch: char| ch.to_digit(10).is_none()) {
-                        Some(index) if index != name.len() - 1 => {
-                            name[index + 1..].parse().unwrap()
-                        }
-                        _ => 1,
-                    };
-                    while used.contains(&format!("{name}{counter}")) {
-                        counter += 1;
-                    }
-                    used.push(format!("{name}{counter}"));
-                    let norm = &mut map.exports[insert]
-                        .get_normal_export_mut()
-                        .ok_or(Error::Assumption)?;
-                    match norm.properties.iter_mut().find_map(|prop| {
-                        cast!(Property, StrProperty, prop).filter(|id| id.name.content == "ID")
-                    }) {
-                        Some(id) => id.value = Some(format!("{name}{counter}")),
-                        None => {
-                            norm.properties
-                                .push(Property::StrProperty(str_property::StrProperty {
-                                    name: FName::from_slice("ID"),
-                                    property_guid: None,
-                                    duplication_index: 0,
-                                    value: Some(format!("{name}{counter}")),
-                                }))
-                        }
-                    }
-                    i = insert;
-                    Ok(())
-                };
-                match &drop {
-                    Drop::Item(item, amount) => {
-                        if !is_chest() {
-                            replace(36)?;
-                        }
-                        let chest = map.exports[i]
-                            .get_normal_export_mut()
-                            .ok_or(Error::Assumption)?;
-                        set_byte("Type", "InventoryItemType", drop.as_ref(), chest)?;
-                        set_byte("Item", "Items", item.as_ref(), chest)?;
-                        match chest.properties.iter_mut().find_map(|prop| {
-                            cast!(Property, BoolProperty, prop)
-                                .filter(|bool| bool.name.content == "KeyItem")
-                        }) {
-                            Some(key_item) => key_item.value = item.is_key_item(),
-                            None if item.is_key_item() => chest.properties.push(
-                                Property::BoolProperty(int_property::BoolProperty {
-                                    name: FName::from_slice("KeyItem"),
-                                    property_guid: None,
-                                    duplication_index: 0,
-                                    value: true,
-                                }),
-                            ),
-                            _ => (),
-                        }
-                        match chest.properties.iter_mut().find_map(|prop| {
-                            cast!(Property, IntProperty, prop)
-                                .filter(|amount| amount.name.content == "Amount")
-                        }) {
-                            Some(num) => num.value = *amount,
-                            None => chest.properties.push(Property::IntProperty(
-                                int_property::IntProperty {
-                                    name: FName::from_slice("Amount"),
-                                    property_guid: None,
-                                    duplication_index: 0,
-                                    value: *amount,
-                                },
-                            )),
-                        }
-                    }
-                    Drop::Weapon(weapon) => {
-                        if !is_chest() {
-                            replace(36)?;
-                        }
-                        let chest = map.exports[i]
-                            .get_normal_export_mut()
-                            .ok_or(Error::Assumption)?;
-                        set_byte("Type", "InventoryItemType", drop.as_ref(), chest)?;
-                        set_byte("Weapon", "Weapons", weapon.as_ref(), chest)?;
-                    }
-                    Drop::Tunic(tunic) => {
-                        if !is_chest() {
-                            replace(36)?;
-                        }
-                        let chest = map.exports[i]
-                            .get_normal_export_mut()
-                            .ok_or(Error::Assumption)?;
-                        set_byte("Type", "InventoryItemType", drop.as_ref(), chest)?;
-                        set_byte("Tunic", "Tunics", tunic.as_ref(), chest)?;
-                    }
-                    Drop::Spirit(spirit) if is_chest() => {
-                        let chest = map.exports[i]
-                            .get_normal_export_mut()
-                            .ok_or(Error::Assumption)?;
-                        set_byte("Type", "InventoryItemType", drop.as_ref(), chest)?;
-                        set_byte("Amulet", "Spirits", spirit.as_ref(), chest)?;
-                    }
-                    Drop::Spirit(spirit) => {
-                        if class != "Spirit_C" {
-                            replace(26)?;
-                        }
-                        let spirit_bp = map.exports[i]
-                            .get_normal_export_mut()
-                            .ok_or(Error::Assumption)?;
-                        set_byte("Amulet", "Spirits", spirit.as_ref(), spirit_bp)?;
-                    }
-                    Drop::Ability(ability) => {
-                        if !is_chest() {
-                            replace(36)?;
-                        }
-                        let chest = map.exports[i]
-                            .get_normal_export_mut()
-                            .ok_or(Error::Assumption)?;
-                        set_byte("Type", "InventoryItemType", drop.as_ref(), chest)?;
-                        set_byte("Ability", "Abilities", ability.as_ref(), chest)?;
-                    }
-                    Drop::Emote(emote) => {
-                        if class != "EmoteStatue_BP_C" {
-                            replace(20)?;
-                        }
-                        let statue = map.exports[i]
-                            .get_normal_export_mut()
-                            .ok_or(Error::Assumption)?;
-                        set_byte("Emote", "E_Emotes", emote.as_ref(), statue)?;
-                    }
-                    Drop::Ore(amount) => {
-                        if class != "Pickup_C" {
-                            replace(5)?;
-                        }
-                        let pickup = map.exports[i]
-                            .get_normal_export_mut()
-                            .ok_or(Error::Assumption)?;
-                        set_byte("Type", "PickUpList", "5", pickup)?;
-                        match pickup.properties.iter_mut().find_map(|prop| {
-                            cast!(Property, IntProperty, prop)
-                                .filter(|amount| amount.name.content == "Souls/LifeAmount")
-                        }) {
-                            Some(num) => num.value = *amount,
-                            None => pickup.properties.push(Property::IntProperty(
-                                int_property::IntProperty {
-                                    name: FName::from_slice("Souls/LifeAmount"),
-                                    property_guid: None,
-                                    duplication_index: 0,
-                                    value: *amount,
-                                },
-                            )),
-                        }
-                    }
-                    Drop::Duck => replace(18)?,
-                }
-                save(&mut map, &loc)?;
-            }
-            Context::Starting => {
-                fn add_item(savegame: &mut Asset<std::fs::File>, drop: Drop) -> Result<(), Error> {
-                    savegame.exports[1]
-                        .get_normal_export_mut()
-                        .and_then(|default| {
-                            cast!(Property, StructProperty, &mut default.properties[3])
-                        })
-                        .and_then(|stats| {
-                            cast!(
-                                Property,
-                                ArrayProperty,
-                                &mut stats.value[match drop {
-                                    Drop::Item(item, _) if item.is_key_item() => 7,
-                                    _ => 6,
-                                }]
-                            )
-                        })
-                        .ok_or(Error::Assumption)?
-                        .value
-                        .push(unreal_asset::properties::Property::StructProperty(
-                            unreal_asset::properties::struct_property::StructProperty {
-                                name: FName::from_slice(match drop {
-                                    Drop::Item(item, _) if item.is_key_item() => {
-                                        "PassiveInventory_48_636C916F4A37F051CF9B14A1402B4C94"
-                                    }
-                                    _ => "Inventory_23_288399C5416269F828550FB7376E7942",
-                                }),
-                                struct_type: Some(FName::from_slice("Inventory")),
-                                struct_guid: None,
-                                property_guid: None,
-                                duplication_index: 0,
-                                serialize_none: true,
-                                value: drop.as_shop_entry(0),
-                            },
-                        ));
-                    Ok(())
-                }
-                match &drop {
-                    Drop::Ability(ability) => {
-                        add_item(&mut savegame, Drop::Item(ability.as_item(), 1))?;
-                        savegame.exports[1]
-                            .get_normal_export_mut()
-                            .and_then(|default| {
-                                cast!(Property, StructProperty, &mut default.properties[2])
-                            })
-                            .and_then(|abilities| {
-                                cast!(
-                                    Property,
-                                    BoolProperty,
-                                    &mut abilities.value[ability.savegame_index()]
-                                )
-                            })
-                            .ok_or(Error::Assumption)?
-                            .value = true;
-                    }
-                    Drop::Emote(emote) => {
-                        let emotes = savegame.exports[1]
-                            .get_normal_export_mut()
-                            .and_then(|default| {
-                                cast!(Property, ArrayProperty, &mut default.properties[15])
-                            })
-                            .ok_or(Error::Assumption)?;
-                        emotes.value.push(byte_property(
-                            &emotes.value.len().to_string(),
-                            "E_Emotes",
-                            emote.as_ref(),
-                        ))
-                    }
-                    Drop::Ore(amount) => {
-                        savegame.exports[1]
-                            .get_normal_export_mut()
-                            .and_then(|default| {
-                                cast!(Property, StructProperty, &mut default.properties[3])
-                            })
-                            .and_then(|stats| cast!(Property, IntProperty, &mut stats.value[0]))
-                            .ok_or(Error::Assumption)?
-                            .value += *amount;
-                    }
-                    Drop::Duck => add_item(&mut savegame, Drop::Item(Items::Duck, 1))?,
-                    _ => add_item(&mut savegame, drop)?,
-                }
-            }
-        }
-    }
-    // clear out emote shop items
-    let default = savegame.exports[1]
-        .get_normal_export_mut()
-        .ok_or(Error::Assumption)?;
-    for (shopkeep, i) in shop_emotes {
-        cast!(
-            Property,
-            ArrayProperty,
-            &mut default.properties[shopkeep as usize]
-        )
-        .ok_or(Error::Assumption)?
-        .value
-        .remove(i);
-    }
-    save(&mut savegame, savegame_loc)?;
+    save(&mut spirit_hunter, &loc)?;
+    std::thread::scope(|thread| {
+        thread.spawn(|| -> Result<(), Error> { overworld::write(checks, &app, &pak) });
+        thread.spawn(|| -> Result<(), Error> { cutscenes::write(cutscenes, &app, &pak) });
+        thread.spawn(|| -> Result<(), Error> { savegames::write(savegames, &app, &pak) });
+        thread.spawn(|| -> Result<(), Error> { specific::write(cases, &app, &pak) });
+    });
     // change the logo so people know it worked
-    let logo_path = app
+    let logo = app
         .pak
         .join(MOD)
         .join("Blue Fire/Content/BlueFire/HUD/Menu/Blue-Fire-Logo.uasset");
-    std::fs::create_dir_all(logo_path.parent().expect("is a file"))?;
-    std::fs::write(&logo_path, include_bytes!("../blueprints/logo.uasset"))?;
+    std::fs::create_dir_all(logo.parent().expect("is a file"))?;
+    std::fs::write(&logo, include_bytes!("../blueprints/logo.uasset"))?;
     std::fs::write(
-        logo_path.with_extension("uexp"),
+        logo.with_extension("uexp"),
         include_bytes!("../blueprints/logo.uexp"),
     )?;
     // package the mod in the most scuffed way possible
@@ -576,7 +133,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
     Ok(())
 }
 
-fn write_cutscene<C: std::io::Read + std::io::Seek>(
+fn create_hook<C: std::io::Read + std::io::Seek>(
     app: &crate::Rando,
     pak: &unpak::Pak,
     get_hook: impl Fn(&std::path::PathBuf) -> Result<Asset<C>, Error>,
