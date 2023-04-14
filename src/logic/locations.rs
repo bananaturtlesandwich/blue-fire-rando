@@ -1,7 +1,7 @@
 use super::*;
 use crate::{no_walljump, walljump};
 
-#[derive(Debug, PartialEq, strum::AsRefStr, strum::Display, strum::EnumIter, strum::EnumCount)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, strum::Display, strum::EnumIter, strum::EnumCount)]
 pub enum Locations {
     // Fire Keep
     #[strum(serialize = "A02_ArcaneTunnels/A02_GameIntro_KeepSouth")]

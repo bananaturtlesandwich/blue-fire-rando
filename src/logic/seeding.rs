@@ -9,12 +9,18 @@ fn update(
     locations: &[Locations],
     possible: &mut Vec<Drop>,
     checks: &mut Vec<Check>,
-    progression: &mut Vec<Check>,
+    overworld: &mut std::collections::HashMap<Locations, Vec<Check>>,
+    cutscenes: &mut Vec<Check>,
+    savegames: &mut Vec<Check>,
+    cases: &mut Vec<Check>,
 ) -> bool {
     let both = || {
         possible[0..checks.len()]
             .iter()
-            .chain(progression.iter().map(|check| &check.drop))
+            .chain(overworld.values().flatten().map(|check| &check.drop))
+            .chain(cutscenes.iter().map(|check| &check.drop))
+            .chain(savegames.iter().map(|check| &check.drop))
+            .chain(cases.iter().map(|check| &check.drop))
     };
     // see if there's any requirements met and what they are
     if !locks.iter().all(|lock| match lock {
@@ -65,8 +71,7 @@ fn update(
         }
         Lock::Item(item) => {
             let drop = Drop::Item(*item, 1);
-            possible[0..checks.len()].contains(&drop)
-                || item.is_key_item() && progression.iter().any(|check| check.drop == drop)
+            both().any(|prog| prog == &drop)
         }
         Lock::Emote(emote) => {
             let emote = Drop::Emote(*emote);
@@ -140,14 +145,24 @@ fn update(
         } {
             let mut check = checks.remove(i);
             check.drop = possible.remove(i);
-            progression.push(check);
+            match check.context {
+                Context::Shop(_, _, _) | Context::Starting => savegames.push(check),
+                Context::Overworld(_) => match overworld.get_mut(&check.location) {
+                    Some(checks) => checks.push(check),
+                    None => {
+                        overworld.insert(check.location.clone(), vec![check]);
+                    }
+                },
+                Context::Cutscene(_) => cutscenes.push(check),
+                Context::Specific(_, _) => cases.push(check),
+            }
         }
     }
     true
 }
 
 pub fn randomise(app: &crate::Rando) -> Result<(), String> {
-    let in_pool = |check: &Check| match &check.drop {
+    let in_pool = |drop: &Drop| match drop {
         Drop::Item(item, _) => match item.is_treasure() {
             true => app.treasure,
             false => app.item,
@@ -164,13 +179,16 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
         Drop::Duck => app.ducks,
     };
     let (mut pool, mut unrandomised): (Vec<Check>, Vec<Check>) =
-        CHECKS.into_iter().partition(in_pool);
+        CHECKS.into_iter().partition(|check| in_pool(&check.drop));
     if pool.len() <= 1 {
         return Err(NOTENOUGH.to_string());
     }
     let mut possible: Vec<Drop> = pool.iter().map(|check| check.drop).collect();
     let mut checks: Vec<Check> = Vec::with_capacity(pool.len());
-    let mut progression: Vec<Check> = Vec::with_capacity(pool.len());
+    let mut overworld = std::collections::HashMap::with_capacity(Locations::COUNT);
+    let mut cutscenes = Vec::with_capacity(checks.len());
+    let mut savegames = Vec::with_capacity(checks.len());
+    let mut cases = Vec::with_capacity(checks.len());
     let mut locations = Vec::with_capacity(Locations::COUNT);
     let mut rng = rand::thread_rng();
     while locations.len() != Locations::COUNT && !pool.is_empty() {
@@ -187,7 +205,10 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
                         &locations,
                         &mut possible,
                         &mut checks,
-                        &mut progression,
+                        &mut overworld,
+                        &mut cutscenes,
+                        &mut savegames,
+                        &mut cases,
                     )
                 })
             {
@@ -202,7 +223,10 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
                     &locations,
                     &mut possible,
                     &mut checks,
-                    &mut progression,
+                    &mut overworld,
+                    &mut cutscenes,
+                    &mut savegames,
+                    &mut cases,
                 )
             {
                 checks.push(pool.remove(i));
@@ -216,21 +240,62 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
                     &locations,
                     &mut possible,
                     &mut checks,
-                    &mut progression,
+                    &mut overworld,
+                    &mut cutscenes,
+                    &mut savegames,
+                    &mut cases,
                 )
             {
-                progression.push(unrandomised.remove(i));
+                match unrandomised[i].context {
+                    Context::Shop(_, _, _) | Context::Starting => {
+                        savegames.push(unrandomised.remove(i))
+                    }
+                    Context::Overworld(_) => match overworld.get_mut(&unrandomised[i].location) {
+                        Some(checks) => checks.push(unrandomised.remove(i)),
+                        None => {
+                            overworld.insert(
+                                unrandomised[i].location.clone(),
+                                vec![unrandomised.remove(i)],
+                            );
+                        }
+                    },
+                    Context::Cutscene(_) => cutscenes.push(unrandomised.remove(i)),
+                    Context::Specific(_, _) => cases.push(unrandomised.remove(i)),
+                }
             }
         }
     }
     for (check, drop) in checks.iter_mut().zip(possible.into_iter()) {
         check.drop = drop
     }
-    progression.append(&mut checks);
-    progression = progression.into_iter().filter(in_pool).collect();
-    if progression.is_empty() {
+    for check in checks {
+        match check.context {
+            Context::Shop(_, _, _) | Context::Starting => savegames.push(check),
+            Context::Overworld(_) => match overworld.get_mut(&check.location) {
+                Some(checks) => checks.push(check),
+                None => {
+                    overworld.insert(check.location.clone(), vec![check]);
+                }
+            },
+            Context::Cutscene(_) => cutscenes.push(check),
+            Context::Specific(_, _) => cases.push(check),
+        }
+    }
+    overworld = overworld
+        .into_iter()
+        .map(|(key, value)| {
+            (
+                key,
+                value
+                    .into_iter()
+                    .filter(|check| in_pool(&check.drop))
+                    .collect(),
+            )
+        })
+        .collect();
+    if overworld.is_empty() {
         return Err(NOTENOUGH.to_string());
     }
-    std::fs::write("spoiler_log.txt", format!("{progression:#?}")).unwrap_or_default();
-    write(progression, app).map_err(|e| e.to_string())
+    std::fs::write("spoiler_log.txt", format!("{overworld:#?}")).unwrap_or_default();
+    write(overworld, savegames, cutscenes, cases, app).map_err(|e| e.to_string())
 }
