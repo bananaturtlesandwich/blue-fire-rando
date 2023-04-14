@@ -203,91 +203,65 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
                     save(&mut map, loc)?;
                 }
             }
-            // sapphire ore turns to house keys?????
-            Context::Cutscene(cutscene) => {
-                let loc = app
-                    .pak
-                    .join(MOD)
-                    .join("Blue Fire/Content/BlueFire/Libraries");
-                std::fs::create_dir_all(&loc)?;
-                let mut hook = open_from_bytes(
-                    include_bytes!("../blueprints/hook.uasset").as_slice(),
-                    include_bytes!("../blueprints/hook.uexp").as_slice(),
-                )?;
-                // edit the item given by the kismet bytecode in the hook
-                let exports::Export::FunctionExport(
-                    exports::function_export::FunctionExport{
-                        struct_export: struct_export::StructExport{
-                            script_bytecode:Some(bytecode),
-                            ..
-                        },
-                        ..
+            Context::Cutscene(cutscene) => write_cutscene(
+                app,
+                &pak,
+                |_| {
+                    Ok(open_from_bytes(
+                        include_bytes!("../blueprints/hook.uasset"),
+                        include_bytes!("../blueprints/hook.uexp"),
+                    )?)
+                },
+                &drop,
+                cutscene,
+                69,
+            )?,
+            Context::Specific(case, index) => write_cutscene(
+                app,
+                &pak,
+                |loc| {
+                    if !loc.exists() {
+                        std::fs::write(
+                            loc,
+                            match case {
+                                Case::Bremur => {
+                                    include_bytes!("../blueprints/bremur_hook.uasset").as_slice()
+                                }
+                                Case::Paulale => {
+                                    include_bytes!("../blueprints/paulale_hook.uasset").as_slice()
+                                }
+                                Case::Angels => {
+                                    include_bytes!("../blueprints/angel_hook.uasset").as_slice()
+                                }
+                                Case::AllVoids => {
+                                    include_bytes!("../blueprints/player_hook.uasset").as_slice()
+                                }
+                            },
+                        )?;
+                        std::fs::write(
+                            loc.with_extension("uexp"),
+                            match case {
+                                Case::Bremur => {
+                                    include_bytes!("../blueprints/bremur_hook.uexp").as_slice()
+                                }
+                                Case::Paulale => {
+                                    include_bytes!("../blueprints/paulale_hook.uexp").as_slice()
+                                }
+                                Case::Angels => {
+                                    include_bytes!("../blueprints/angel_hook.uexp").as_slice()
+                                }
+                                Case::AllVoids => {
+                                    include_bytes!("../blueprints/player_hook.uexp").as_slice()
+                                }
+                            },
+                        )?;
                     }
-                ) = &mut hook.exports[69] else {
-                    return Err(Error::Assumption)
-                };
-                use unreal_asset::kismet::*;
-                let [
-                    KismetExpression::ExLet(item_type),
-                    KismetExpression::ExLet(index),
-                    KismetExpression::ExLet(amount),
-                    KismetExpression::ExLetBool(key_item)
-                ] = &mut bytecode[0..4] else {
-                    return Err(Error::Assumption)
-                };
-                let (
-                    KismetExpression::ExByteConst(item_type),
-                    KismetExpression::ExByteConst(index),
-                    KismetExpression::ExIntConst(amount),
-                ) = (
-                    item_type.expression.as_mut(),
-                    index.expression.as_mut(),
-                    amount.expression.as_mut(),
-                ) else {
-                    return Err(Error::Assumption)
-                };
-                item_type.value = drop.as_u8();
-                index.value = drop.inner_as_u8();
-                amount.value = match &drop {
-                    Drop::Item(_, amount) => *amount,
-                    Drop::Ore(amount) => *amount,
-                    _ => 1,
-                };
-                key_item.assignment_expression = Box::new(match &drop {
-                    Drop::Item(item, _) if item.is_key_item() => {
-                        KismetExpression::ExTrue(ExTrue::default())
-                    }
-                    _ => KismetExpression::ExFalse(ExFalse::default()),
-                });
-                let new_name = format!("{}_Hook", cutscene.split('/').last().unwrap_or_default());
-                let self_refs: Vec<usize> = hook
-                    .get_name_map_index_list()
-                    .iter()
-                    .enumerate()
-                    .filter_map(|(i, name)| name.contains("hook").then_some(i))
-                    .collect();
-                for i in self_refs {
-                    let name = hook.get_name_reference_mut(i as i32);
-                    *name = name.replace("hook", &new_name);
-                }
-                save(&mut hook, loc.join(&new_name).with_extension("uasset"))?;
-                let loc = app.pak.join(MOD).join(cutscene).with_extension("uasset");
-                std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-                pak.read_to_file(&format!("{cutscene}.uasset"), &loc)?;
-                pak.read_to_file(&format!("{cutscene}.uexp"), loc.with_extension("uexp"))?;
-                let mut cutscene = open(&loc)?;
-                let universal_refs: Vec<usize> = cutscene
-                    .get_name_map_index_list()
-                    .iter()
-                    .enumerate()
-                    .filter_map(|(i, name)| name.contains("UniversalFunctions").then_some(i))
-                    .collect();
-                for i in universal_refs {
-                    let name = cutscene.get_name_reference_mut(i as i32);
-                    *name = name.replace("UniversalFunctions", &new_name);
-                }
-                save(&mut cutscene, &loc)?;
-            }
+                    Ok(open(loc)?)
+                },
+                &drop,
+                case.as_ref(),
+                index,
+            )?,
             Context::Overworld(name) => {
                 let (mut map, loc) = extract(app, &pak, &format!("{PREFIX}{location}.umap"))?;
                 let mut i = map
@@ -599,6 +573,95 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando) -> Result<(), Error> {
     std::process::Command::new("./pak.bat")
         .arg(app.pak.join("rando_p"))
         .output()?;
+    Ok(())
+}
+
+fn write_cutscene<C: std::io::Read + std::io::Seek>(
+    app: &crate::Rando,
+    pak: &unpak::Pak,
+    get_hook: impl Fn(&std::path::PathBuf) -> Result<Asset<C>, Error>,
+    drop: &Drop,
+    cutscene: &str,
+    index: usize,
+) -> Result<(), Error> {
+    let mut loc = app
+        .pak
+        .join(MOD)
+        .join("Blue Fire/Content/BlueFire/Libraries");
+    std::fs::create_dir_all(&loc)?;
+    let new_name = format!("{}_Hook", cutscene.split('/').last().unwrap_or_default());
+    loc = loc.join(&new_name).with_extension("uasset");
+    let mut hook = get_hook(&loc)?;
+    // edit the item given by the kismet bytecode in the hook
+    let exports::Export::FunctionExport(
+                    exports::function_export::FunctionExport{
+                        struct_export: struct_export::StructExport{
+                            script_bytecode:Some(bytecode),
+                            ..
+                        },
+                        ..
+                    }
+                ) = &mut hook.exports[index] else {
+                    return Err(Error::Assumption)
+                };
+    use unreal_asset::kismet::*;
+    let [
+            KismetExpression::ExLet(item_type),
+            KismetExpression::ExLet(index),
+            KismetExpression::ExLet(amount),
+            KismetExpression::ExLetBool(key_item)
+        ] = &mut bytecode[0..4] else {
+            return Err(Error::Assumption)
+        };
+    let [
+            KismetExpression::ExByteConst(item_type),
+            KismetExpression::ExByteConst(index),
+            KismetExpression::ExIntConst(amount),
+        ] = [
+            item_type.expression.as_mut(),
+            index.expression.as_mut(),
+            amount.expression.as_mut(),
+        ] else {
+            return Err(Error::Assumption)
+        };
+    item_type.value = drop.as_u8();
+    index.value = drop.inner_as_u8();
+    amount.value = match &drop {
+        Drop::Item(_, amount) => *amount,
+        Drop::Ore(amount) => *amount,
+        _ => 1,
+    };
+    *key_item.assignment_expression = match &drop {
+        Drop::Item(item, _) if item.is_key_item() => KismetExpression::ExTrue(ExTrue::default()),
+        _ => KismetExpression::ExFalse(ExFalse::default()),
+    };
+    let self_refs: Vec<usize> = hook
+        .get_name_map_index_list()
+        .iter()
+        .enumerate()
+        .filter_map(|(i, name)| name.contains("hook").then_some(i))
+        .collect();
+    for i in self_refs {
+        let name = hook.get_name_reference_mut(i as i32);
+        *name = name.replace("hook", &new_name);
+    }
+    save(&mut hook, loc)?;
+    let loc = app.pak.join(MOD).join(cutscene).with_extension("uasset");
+    std::fs::create_dir_all(loc.parent().expect("is a file"))?;
+    pak.read_to_file(&format!("{cutscene}.uasset"), &loc)?;
+    pak.read_to_file(&format!("{cutscene}.uexp"), loc.with_extension("uexp"))?;
+    let mut cutscene = open(&loc)?;
+    let universal_refs: Vec<usize> = cutscene
+        .get_name_map_index_list()
+        .iter()
+        .enumerate()
+        .filter_map(|(i, name)| name.contains("UniversalFunctions").then_some(i))
+        .collect();
+    for i in universal_refs {
+        let name = cutscene.get_name_reference_mut(i as i32);
+        *name = name.replace("UniversalFunctions", &new_name);
+    }
+    save(&mut cutscene, &loc)?;
     Ok(())
 }
 

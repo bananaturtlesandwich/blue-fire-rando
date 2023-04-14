@@ -1,7 +1,7 @@
 use super::*;
 use crate::{no_walljump, walljump};
 
-pub const CHECKS: [Check; 253] = [
+pub const CHECKS: [Check; 255] = [
     // Fire Keep
     Check {
         location: Locations::Lab,
@@ -151,11 +151,14 @@ pub const CHECKS: [Check; 253] = [
         drop: Drop::Emote(Emotes::HatKid),
         locks: &[],
     },
-    Check{
+    Check {
         location: Locations::WaterwayDucks,
         context: Context::Overworld("Duck"),
         drop: Drop::Duck,
-        locks: &[Lock::Item(Items::SanctuaryStone), Lock::Movement(&[no_walljump!(0, 2)])],
+        locks: &[
+            Lock::Item(Items::SanctuaryStone),
+            Lock::Movement(&[no_walljump!(0, 2)]),
+        ],
     },
     Check {
         location: Locations::Waterway,
@@ -685,7 +688,7 @@ pub const CHECKS: [Check; 253] = [
         drop: Drop::Tunic(Tunics::MerchantsRobe),
         locks: &[Lock::Mork],
     },
-    Check{
+    Check {
         location: Locations::Stoneheart,
         context: Context::Overworld("Duck2"),
         drop: Drop::Duck,
@@ -702,11 +705,11 @@ pub const CHECKS: [Check; 253] = [
             Lock::Item(Items::ComposerLetter),
         ],
     },
-    Check{
+    Check {
         location: Locations::Stoneheart,
         context: Context::Overworld("Chest_A01_Tunic_AlphaTunic"),
         drop: Drop::Tunic(Tunics::AlphaUmbra),
-        locks: &[Lock::Movement(&[walljump!(1, 0),no_walljump!(3, 0)])],
+        locks: &[Lock::Movement(&[walljump!(1, 0), no_walljump!(3, 0)])],
     },
     // Forest Temple
     Check {
@@ -822,11 +825,21 @@ pub const CHECKS: [Check; 253] = [
     // Tavern
     Check {
         location: Locations::Stoneheart,
-        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Bremur/NPC_Bremur"),
+        context: Context::Specific(Case::Bremur, 69),
         drop: Drop::Item(Items::KeyGraveyardKey, 1),
         locks: &[
             Lock::Location(Locations::Gruh),
             Lock::Movement(&[walljump!(0, 0), no_walljump!(1, 0)]),
+        ],
+    },
+    Check {
+        location: Locations::Stoneheart,
+        context: Context::Specific(Case::Bremur, 70),
+        drop: Drop::Weapon(Weapons::BremurFamilySwords),
+        locks: &[
+            Lock::Location(Locations::Gruh),
+            Lock::Movement(&[walljump!(0, 0), no_walljump!(1, 0)]),
+            Lock::Item(Items::BremurPicture),
         ],
     },
     Check {
@@ -894,9 +907,7 @@ pub const CHECKS: [Check; 253] = [
     },
     Check {
         location: Locations::TempleGardens,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/InteractiveObjects/Collectibles/BloodStone/BloodStone_BP",
-        ),
+        context: Context::Specific(Case::Angels, 70),
         drop: Drop::Item(Items::FireEssenceSlot, 2),
         locks: &[Lock::EvolairTunic],
     },
@@ -1008,13 +1019,13 @@ pub const CHECKS: [Check; 253] = [
         drop: Drop::Item(Items::SapphireOre, 1),
         locks: &[Lock::Movement(&[walljump!(2, 0)])],
     },
-    Check{
+    Check {
         location: Locations::TempleGardens,
         context: Context::Overworld("Pickup"),
         drop: Drop::Ore(500),
         locks: &[Lock::Movement(&[walljump!(2, 0)])],
     },
-    Check{
+    Check {
         location: Locations::TempleGardens,
         context: Context::Overworld("Duck3"),
         drop: Drop::Duck,
@@ -1064,7 +1075,7 @@ pub const CHECKS: [Check; 253] = [
         drop: Drop::Item(Items::RubyOre, 1),
         locks: &[Lock::Location(Locations::UthasBracelet)],
     },
-    Check{
+    Check {
         location: Locations::UthasDucks,
         context: Context::Overworld("Duck"),
         drop: Drop::Duck,
@@ -1192,11 +1203,14 @@ pub const CHECKS: [Check; 253] = [
             Lock::Movement(&[walljump!(0, 2), no_walljump!(0, 3)]),
         ],
     },
-    Check{
+    Check {
         location: Locations::AbandonedPath,
         context: Context::Overworld("Duck"),
         drop: Drop::Duck,
-        locks: &[Lock::Location(Locations::SanctuaryStone), Lock::Movement(&[no_walljump!(0, 3)])],
+        locks: &[
+            Lock::Location(Locations::SanctuaryStone),
+            Lock::Movement(&[no_walljump!(0, 3)]),
+        ],
     },
     Check {
         location: Locations::AbandonedPath,
@@ -1450,7 +1464,7 @@ pub const CHECKS: [Check; 253] = [
         drop: Drop::Item(Items::SapphireOre, 1),
         locks: &[],
     },
-    Check{
+    Check {
         location: Locations::FirefallDucks,
         context: Context::Overworld("Duck"),
         drop: Drop::Duck,
@@ -1476,7 +1490,7 @@ pub const CHECKS: [Check; 253] = [
         drop: Drop::Tunic(Tunics::SectMember),
         locks: &[Lock::Movement(&[walljump!(0, 1), no_walljump!(2, 0)])],
     },
-    Check{
+    Check {
         location: Locations::SteamHouseDucks,
         context: Context::Overworld("Duck"),
         drop: Drop::Duck,
@@ -1500,8 +1514,8 @@ pub const CHECKS: [Check; 253] = [
         drop: Drop::Weapon(Weapons::IronJustice),
         locks: &[],
     },
-    Check{
-        location:Locations::Sirion,
+    Check {
+        location: Locations::Sirion,
         context: Context::Overworld("Duck"),
         drop: Drop::Duck,
         locks: &[],
@@ -1548,10 +1562,15 @@ pub const CHECKS: [Check; 253] = [
     },
     Check {
         location: Locations::RustVillage,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Compositor/NPC_Onop_Compositor_Ready",
-        ),
+        context: Context::Specific(Case::Paulale, 69),
         drop: Drop::Tunic(Tunics::PerformerCostume),
+        // just Bech's requirements since everyone else is easily accessible
+        locks: &[Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)])],
+    },
+    Check {
+        location: Locations::RustVillage,
+        context: Context::Specific(Case::Paulale, 70),
+        drop: Drop::Item(Items::SapphireOre, 2),
         // just Bech's requirements since everyone else is easily accessible
         locks: &[Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)])],
     },
@@ -1563,7 +1582,7 @@ pub const CHECKS: [Check; 253] = [
         drop: Drop::Weapon(Weapons::KinaDefenders),
         locks: &[Lock::Item(Items::Rose)],
     },
-    Check{
+    Check {
         location: Locations::RustVillage,
         context: Context::Overworld("Duck"),
         drop: Drop::Duck,
@@ -1608,9 +1627,7 @@ pub const CHECKS: [Check; 253] = [
     },
     Check {
         location: Locations::Beira,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/InteractiveObjects/Collectibles/BloodStone/BloodStone_BP"
-        ),
+        context: Context::Specific(Case::Angels, 71),
         drop: Drop::Item(Items::FireEssenceSlot, 2),
         locks: &[Lock::Item(Items::OddRock)],
     },
@@ -1619,7 +1636,7 @@ pub const CHECKS: [Check; 253] = [
         context: Context::Overworld("Chest_A01_Graveyard_Key_01"),
         drop: Drop::Item(Items::RubyOre, 1),
         locks: &[],
-    }, 
+    },
     Check {
         location: Locations::Beira,
         context: Context::Overworld("Duck"),
@@ -1683,8 +1700,8 @@ pub const CHECKS: [Check; 253] = [
     // don't ask. if you want to know look through #clips-and-screenshots
     Check {
         location: Locations::TheVoid,
-        context: Context::Cutscene("Blue Fire/Content/BlueFire/Player/Logic/Player_Character_BP"),
+        context: Context::Specific(Case::AllVoids, 69),
         drop: Drop::Tunic(Tunics::SilverCloack),
         locks: &[],
-    }
+    },
 ];
