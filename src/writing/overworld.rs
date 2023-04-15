@@ -11,7 +11,7 @@ pub fn write(
         let mut threads = Vec::new();
         for (location, checks) in checks {
             threads.push(thread.spawn(move || -> Result<(), Error> {
-                let (mut map, loc) = extract(app, &pak, &format!("{PREFIX}{location}.umap"))?;
+                let (mut map, loc) = extract(app, pak, &format!("{PREFIX}{location}.umap"))?;
                 for Check { context, drop, .. } in checks {
                     match context {
                         Context::Shop(shop, index, ..) => {

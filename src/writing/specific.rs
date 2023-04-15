@@ -7,7 +7,7 @@ pub fn write(cases: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Result<
         };
         create_hook(
             app,
-            &pak,
+            pak,
             |loc| {
                 if !loc.exists() {
                     std::fs::write(

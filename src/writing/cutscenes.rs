@@ -10,7 +10,7 @@ pub fn write(cutscenes: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Res
                 };
                 create_hook(
                     app,
-                    &pak,
+                    pak,
                     |_| {
                         Ok(open_from_bytes(
                             include_bytes!("../blueprints/hook.uasset"),
