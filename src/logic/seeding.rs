@@ -1,26 +1,20 @@
 use super::*;
 use strum::{EnumCount, IntoEnumIterator};
 
-const NOTENOUGH: &str =
-    "you haven't picked enough checks for anything to be random - include more checks in the pool";
-
 fn update(
     locks: &[Lock],
     locations: &[Locations],
     possible: &mut Vec<Drop>,
     checks: &mut Vec<Check>,
-    overworld: &mut std::collections::HashMap<Locations, Vec<Check>>,
-    cutscenes: &mut Vec<Check>,
-    savegames: &mut Vec<Check>,
-    cases: &mut Vec<Check>,
+    data: &mut Data,
 ) -> bool {
     let both = || {
         possible[0..checks.len()]
             .iter()
-            .chain(overworld.values().flatten().map(|check| &check.drop))
-            .chain(cutscenes.iter().map(|check| &check.drop))
-            .chain(savegames.iter().map(|check| &check.drop))
-            .chain(cases.iter().map(|check| &check.drop))
+            .chain(data.overworld.values().flatten().map(|check| &check.drop))
+            .chain(data.cutscenes.iter().map(|check| &check.drop))
+            .chain(data.savegames.iter().map(|check| &check.drop))
+            .chain(data.cases.iter().map(|check| &check.drop))
     };
     // see if there's any requirements met and what they are
     if !locks.iter().all(|lock| match lock {
@@ -88,7 +82,7 @@ fn update(
         }
         Lock::SpiritHunter => {
             both().fold(0, |acc, drop| {
-                if matches!(drop, Drop::Spirit(_)) {
+                if matches!(drop, Drop::Spirit(..)) {
                     acc + 1
                 } else {
                     acc
@@ -103,8 +97,8 @@ fn update(
     for lock in locks {
         // freeze any progression items where they are
         while let Some(i) = match lock {
-            Lock::Location(_) => None,
-            Lock::Movement(_) => possible[0..checks.len()].iter().position(|drop| {
+            Lock::Location(..) => None,
+            Lock::Movement(..) => possible[0..checks.len()].iter().position(|drop| {
                 matches!(
                     drop,
                     Drop::Spirit(Spirits::PossesedBook)
@@ -135,7 +129,7 @@ fn update(
                 .position(|drop| drop == &Drop::Item(Items::Book, 1)),
             Lock::SpiritHunter => possible[0..checks.len()]
                 .iter()
-                .position(|drop| matches!(drop, Drop::Spirit(_))),
+                .position(|drop| matches!(drop, Drop::Spirit(..))),
             Lock::EvolairTunic => possible[0..checks.len()]
                 .iter()
                 .position(|drop| drop == &Drop::Tunic(Tunics::SteamWorkerTunic)),
@@ -145,25 +139,39 @@ fn update(
         } {
             let mut check = checks.remove(i);
             check.drop = possible.remove(i);
-            match check.context {
-                Context::Shop(_, _, _) | Context::Starting => savegames.push(check),
-                Context::Overworld(_) => match overworld.get_mut(&check.location) {
-                    Some(checks) => checks.push(check),
-                    None => {
-                        overworld.insert(check.location.clone(), vec![check]);
-                    }
-                },
-                Context::Cutscene(_) => cutscenes.push(check),
-                Context::Specific(_, _) => cases.push(check),
-            }
+            push(check, data);
         }
     }
     true
 }
 
+fn push(check: Check, data: &mut Data) {
+    match check.context {
+        // same thing as over world but match doesn't allow guard clauses for each pattern
+        Context::Shop(..) if matches!(check.drop, Drop::Ability(..) | Drop::Emote(..)) => {
+            // add to shop emotes
+            match data.overworld.get_mut(&check.location) {
+                Some(checks) => checks.push(check),
+                None => {
+                    data.overworld.insert(check.location.clone(), vec![check]);
+                }
+            }
+        }
+        Context::Overworld(..) => match data.overworld.get_mut(&check.location) {
+            Some(checks) => checks.push(check),
+            None => {
+                data.overworld.insert(check.location.clone(), vec![check]);
+            }
+        },
+        Context::Shop(..) | Context::Starting => data.savegames.push(check),
+        Context::Cutscene(..) => data.cutscenes.push(check),
+        Context::Specific(..) => data.cases.push(check),
+    }
+}
+
 pub fn randomise(app: &crate::Rando) -> Result<(), String> {
     let in_pool = |check: &Check| match &check.drop {
-        Drop::Item(item, _) => match item.gem() {
+        Drop::Item(item, ..) => match item.gem() {
             true => app.gems,
             false => match item.treasure() {
                 true => app.treasure,
@@ -173,28 +181,30 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
                 },
             },
         },
-        Drop::Weapon(_) => app.weapons,
-        Drop::Tunic(_) => app.tunics,
-        Drop::Spirit(_) => app.spirits,
+        Drop::Weapon(..) => app.weapons,
+        Drop::Tunic(..) => app.tunics,
+        Drop::Spirit(..) => app.spirits,
         Drop::Ability(ability) => match ability == &Abilities::Dash {
             true => app.dash,
             false => app.abilities,
         },
-        Drop::Emote(_) => app.emotes,
-        Drop::Ore(_) => app.ore,
+        Drop::Emote(..) => app.emotes,
+        Drop::Ore(..) => app.ore,
         Drop::Duck => app.ducks,
     };
     let (mut pool, mut unrandomised): (Vec<Check>, Vec<Check>) =
         CHECKS.into_iter().partition(in_pool);
     if pool.len() <= 1 {
-        return Err(NOTENOUGH.to_string());
+        return Err("you haven't picked enough checks for anything to be random - include more checks in the pool".to_string());
     }
     let mut possible: Vec<Drop> = pool.iter().map(|check| check.drop).collect();
     let mut checks: Vec<Check> = Vec::with_capacity(pool.len());
-    let mut overworld = std::collections::HashMap::with_capacity(Locations::COUNT);
-    let mut cutscenes = Vec::with_capacity(checks.len());
-    let mut savegames = Vec::with_capacity(checks.len());
-    let mut cases = Vec::with_capacity(checks.len());
+    let mut data = Data {
+        overworld: std::collections::HashMap::with_capacity(Locations::COUNT),
+        cutscenes: Vec::with_capacity(checks.len()),
+        savegames: Vec::with_capacity(checks.len()),
+        cases: Vec::with_capacity(checks.len()),
+    };
     let mut locations = Vec::with_capacity(Locations::COUNT);
     let mut rng = rand::thread_rng();
     while locations.len() != Locations::COUNT && !pool.is_empty() {
@@ -205,18 +215,10 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
         // update accessible locations
         for loc in Locations::iter() {
             if !locations.contains(&loc)
-                && loc.locks().iter().any(|locks| {
-                    update(
-                        locks,
-                        &locations,
-                        &mut possible,
-                        &mut checks,
-                        &mut overworld,
-                        &mut cutscenes,
-                        &mut savegames,
-                        &mut cases,
-                    )
-                })
+                && loc
+                    .locks()
+                    .iter()
+                    .any(|locks| update(locks, &locations, &mut possible, &mut checks, &mut data))
             {
                 locations.push(loc);
             }
@@ -229,10 +231,7 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
                     &locations,
                     &mut possible,
                     &mut checks,
-                    &mut overworld,
-                    &mut cutscenes,
-                    &mut savegames,
-                    &mut cases,
+                    &mut data,
                 )
             {
                 checks.push(pool.remove(i));
@@ -246,28 +245,10 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
                     &locations,
                     &mut possible,
                     &mut checks,
-                    &mut overworld,
-                    &mut cutscenes,
-                    &mut savegames,
-                    &mut cases,
+                    &mut data,
                 )
             {
-                match unrandomised[i].context {
-                    Context::Shop(_, _, _) | Context::Starting => {
-                        savegames.push(unrandomised.remove(i))
-                    }
-                    Context::Overworld(_) => match overworld.get_mut(&unrandomised[i].location) {
-                        Some(checks) => checks.push(unrandomised.remove(i)),
-                        None => {
-                            overworld.insert(
-                                unrandomised[i].location.clone(),
-                                vec![unrandomised.remove(i)],
-                            );
-                        }
-                    },
-                    Context::Cutscene(_) => cutscenes.push(unrandomised.remove(i)),
-                    Context::Specific(_, _) => cases.push(unrandomised.remove(i)),
-                }
+                push(unrandomised.remove(i), &mut data);
             }
         }
     }
@@ -275,25 +256,16 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
         check.drop = drop
     }
     for check in checks {
-        match check.context {
-            Context::Shop(_, _, _) | Context::Starting => savegames.push(check),
-            Context::Overworld(_) => match overworld.get_mut(&check.location) {
-                Some(checks) => checks.push(check),
-                None => {
-                    overworld.insert(check.location.clone(), vec![check]);
-                }
-            },
-            Context::Cutscene(_) => cutscenes.push(check),
-            Context::Specific(_, _) => cases.push(check),
-        }
+        push(check, &mut data)
     }
-    overworld = overworld
+    data.overworld = data
+        .overworld
         .into_iter()
         .map(|(key, value)| (key, value.into_iter().filter(in_pool).collect()))
         .collect();
-    if overworld.is_empty() {
-        return Err(NOTENOUGH.to_string());
-    }
-    std::fs::write("spoiler_log.txt", format!("{overworld:#?}")).unwrap_or_default();
-    crate::writing::write(overworld, savegames, cutscenes, cases, app).map_err(|e| e.to_string())
+    data.savegames = data.savegames.into_iter().filter(in_pool).collect();
+    data.cutscenes = data.cutscenes.into_iter().filter(in_pool).collect();
+    data.cases = data.cases.into_iter().filter(in_pool).collect();
+    std::fs::write("spoiler_log.txt", format!("{data:#?}")).unwrap_or_default();
+    crate::writing::write(data, app).map_err(|e| e.to_string())
 }

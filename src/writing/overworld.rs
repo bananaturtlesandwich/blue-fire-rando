@@ -52,7 +52,7 @@ pub fn write(
                                 Locations::AbandonedPath if name == "Duck" => (0.0, 0.0, 300.0),
                                 Locations::Stoneheart if name == "Duck2" => (0.0, -100.0, 0.0),
                                 Locations::FirefallDucks | Locations::Sirion => (0.0, 0.0, 100.0),
-                                Locations::WaterwayDucks => (500.0, 0.0, 100.0),
+                                Locations::WaterwayDucks => (800.0, 0.0, 100.0),
                                 _ => (0.0, 0.0, 0.0),
                             },
                         );

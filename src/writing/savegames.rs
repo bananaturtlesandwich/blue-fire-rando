@@ -20,8 +20,8 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Result
     let mut shop_emotes: Vec<_> = checks
         .iter()
         .filter_map(|check| {
-            if let Context::Shop(keep, i, _) = check.context {
-                if matches!(check.drop, Drop::Emote(_) | Drop::Ability(_)) {
+            if let Context::Shop(keep, i, ..) = check.context {
+                if matches!(check.drop, Drop::Emote(..) | Drop::Ability(..)) {
                     return Some((keep, i));
                 }
             }
@@ -56,13 +56,13 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Result
                         value: drop.as_shop_entry(price),
                     },
                 );
-                if matches!(drop, Drop::Emote(_) | Drop::Ability(_)) {
+                if matches!(drop, Drop::Emote(..) | Drop::Ability(..)) {
                     let (mut map, loc) = extract(app, &pak, &format!("{PREFIX}{location}.umap"))?;
                     let insert = map.exports.len();
                     transplant(
                         match drop {
-                            Drop::Ability(_) => 36,
-                            Drop::Emote(_) => 20,
+                            Drop::Ability(..) => 36,
+                            Drop::Emote(..) => 20,
                             _ => unimplemented!(),
                         },
                         &mut map,
@@ -99,8 +99,8 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Result
                         Property,
                         StrProperty,
                         &mut norm.properties[match drop {
-                            Drop::Ability(_) => 11,
-                            Drop::Emote(_) => 6,
+                            Drop::Ability(..) => 11,
+                            Drop::Emote(..) => 6,
                             _ => unimplemented!(),
                         }]
                     )
@@ -121,7 +121,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Result
                                 Property,
                                 ArrayProperty,
                                 &mut stats.value[match drop {
-                                    Drop::Item(item, _) if item.key_item() => 7,
+                                    Drop::Item(item, ..) if item.key_item() => 7,
                                     _ => 6,
                                 }]
                             )
@@ -131,7 +131,7 @@ pub fn write(checks: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Result
                         .push(unreal_asset::properties::Property::StructProperty(
                             unreal_asset::properties::struct_property::StructProperty {
                                 name: FName::from_slice(match drop {
-                                    Drop::Item(item, _) if item.key_item() => {
+                                    Drop::Item(item, ..) if item.key_item() => {
                                         "PassiveInventory_48_636C916F4A37F051CF9B14A1402B4C94"
                                     }
                                     _ => "Inventory_23_288399C5416269F828550FB7376E7942",

@@ -75,13 +75,7 @@ fn set_byte(
     Ok(())
 }
 
-pub fn write(
-    checks: std::collections::HashMap<Locations, Vec<Check>>,
-    savegames: Vec<Check>,
-    cutscenes: Vec<Check>,
-    cases: Vec<Check>,
-    app: &crate::Rando,
-) -> Result<(), Error> {
+pub fn write(data: Data, app: &crate::Rando) -> Result<(), Error> {
     let pak = unpak::Pak::new(
         app.pak.join("Blue Fire-WindowsNoEditor.pak"),
         unpak::Version::FrozenIndex,
@@ -107,10 +101,10 @@ pub fn write(
         .content = "Pickup_A02_SRF2".to_string();
     save(&mut spirit_hunter, &loc)?;
     std::thread::scope(|thread| {
-        thread.spawn(|| -> Result<(), Error> { overworld::write(checks, &app, &pak) });
-        thread.spawn(|| -> Result<(), Error> { cutscenes::write(cutscenes, &app, &pak) });
-        thread.spawn(|| -> Result<(), Error> { savegames::write(savegames, &app, &pak) });
-        thread.spawn(|| -> Result<(), Error> { specific::write(cases, &app, &pak) });
+        thread.spawn(|| -> Result<(), Error> { overworld::write(data.overworld, &app, &pak) });
+        thread.spawn(|| -> Result<(), Error> { cutscenes::write(data.cutscenes, &app, &pak) });
+        thread.spawn(|| -> Result<(), Error> { savegames::write(data.savegames, &app, &pak) });
+        thread.spawn(|| -> Result<(), Error> { specific::write(data.cases, &app, &pak) });
     });
     // change the logo so people know it worked
     let logo = app
@@ -189,7 +183,7 @@ fn create_hook<C: std::io::Read + std::io::Seek>(
         _ => 1,
     };
     *key_item.assignment_expression = match &drop {
-        Drop::Item(item, _) if item.key_item() => KismetExpression::ExTrue(ExTrue::default()),
+        Drop::Item(item, ..) if item.key_item() => KismetExpression::ExTrue(ExTrue::default()),
         _ => KismetExpression::ExFalse(ExFalse::default()),
     };
     let self_refs: Vec<usize> = hook
@@ -230,8 +224,8 @@ impl Drop {
                 "Item_3_54327288464702F41977D48660F8979E",
                 "Items",
                 match self {
-                    Drop::Item(item, _) => item.as_ref(),
-                    Drop::Ore(_) => Items::KinbankDebitCard.as_ref(),
+                    Drop::Item(item, ..) => item.as_ref(),
+                    Drop::Ore(..) => Items::KinbankDebitCard.as_ref(),
                     Drop::Duck => Items::Duck.as_ref(),
                     _ => "25",
                 },
@@ -242,7 +236,7 @@ impl Drop {
                 duplication_index: 0,
                 value: match self {
                     Drop::Item(_, amount) => *amount,
-                    Drop::Emote(_) => 0,
+                    Drop::Emote(..) => 0,
                     _ => 1,
                 },
             }),

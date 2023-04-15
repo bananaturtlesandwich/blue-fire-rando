@@ -7,6 +7,14 @@ pub use seeding::randomise;
 mod locations;
 pub use locations::*;
 
+#[derive(Debug)]
+pub struct Data {
+    pub overworld: std::collections::HashMap<Locations, Vec<Check>>,
+    pub cutscenes: Vec<Check>,
+    pub savegames: Vec<Check>,
+    pub cases: Vec<Check>,
+}
+
 #[derive(Debug, Clone, Copy, strum::EnumIter, strum::AsRefStr)]
 pub enum Shop {
     #[strum(serialize = "ShopA")]
@@ -86,7 +94,7 @@ impl PartialEq for Drop {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             // ignore amount
-            (Self::Item(l0, _), Self::Item(r0, _)) => l0 == r0,
+            (Self::Item(l0, ..), Self::Item(r0, ..)) => l0 == r0,
             (Self::Weapon(l0), Self::Weapon(r0)) => l0 == r0,
             (Self::Tunic(l0), Self::Tunic(r0)) => l0 == r0,
             (Self::Spirit(l0), Self::Spirit(r0)) => l0 == r0,
@@ -101,13 +109,13 @@ impl PartialEq for Drop {
 impl Drop {
     pub fn as_u8(&self) -> u8 {
         match self {
-            Drop::Item(_, _) => 0,
-            Drop::Weapon(_) => 1,
-            Drop::Tunic(_) => 2,
-            Drop::Spirit(_) => 3,
-            Drop::Ability(_) => 6,
-            Drop::Emote(_) => 7,
-            Drop::Ore(_) => 8,
+            Drop::Item(..) => 0,
+            Drop::Weapon(..) => 1,
+            Drop::Tunic(..) => 2,
+            Drop::Spirit(..) => 3,
+            Drop::Ability(..) => 6,
+            Drop::Emote(..) => 7,
+            Drop::Ore(..) => 8,
             Drop::Duck => 9,
         }
     }

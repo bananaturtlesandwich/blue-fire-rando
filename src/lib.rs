@@ -67,7 +67,7 @@ impl Rando {
 macro_rules! notify {
     ($self:expr, $result: expr, $message: literal) => {
         match $result {
-            Ok(_) => $self.notifs.open_dialog(
+            Ok(..) => $self.notifs.open_dialog(
                 Some("success"),
                 Some($message),
                 Some(egui_modal::Icon::Success),
