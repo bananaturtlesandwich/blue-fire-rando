@@ -62,7 +62,9 @@ fn register_names<C: std::io::Read + std::io::Seek>(asset: &mut Asset<C>) {
             }
         }
     }
-    // since we know there isn't a reference we can use force_add_duplicates
+    // remove duplicate names
+    unregistered.sort_unstable();
+    unregistered.dedup();
     for name in unregistered {
         asset.add_name_reference(name, true);
     }

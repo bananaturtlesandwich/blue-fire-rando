@@ -147,9 +147,10 @@ fn update(
 
 fn push(check: Check, data: &mut Data) {
     match check.context {
-        // same thing as over world but match doesn't allow guard clauses for each pattern
-        Context::Shop(..) if matches!(check.drop, Drop::Ability(..) | Drop::Emote(..)) => {
-            // add to shop emotes
+        Context::Shop(shop, index, ..)
+            if matches!(check.drop, Drop::Ability(..) | Drop::Emote(..)) =>
+        {
+            data.shop_emotes.push((shop, index));
             match data.overworld.get_mut(&check.location) {
                 Some(checks) => checks.push(check),
                 None => {
@@ -204,6 +205,7 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
         cutscenes: Vec::with_capacity(checks.len()),
         savegames: Vec::with_capacity(checks.len()),
         cases: Vec::with_capacity(checks.len()),
+        shop_emotes: Vec::with_capacity(checks.len()),
     };
     let mut locations = Vec::with_capacity(Locations::COUNT);
     let mut rng = rand::thread_rng();
@@ -266,6 +268,9 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
     data.savegames = data.savegames.into_iter().filter(in_pool).collect();
     data.cutscenes = data.cutscenes.into_iter().filter(in_pool).collect();
     data.cases = data.cases.into_iter().filter(in_pool).collect();
+    // sort descending so removing in order doesn't mess up indexes
+    data.shop_emotes
+        .sort_unstable_by_key(|(_, i)| std::cmp::Reverse(*i));
     std::fs::write("spoiler_log.txt", format!("{data:#?}")).unwrap_or_default();
     crate::writing::write(data, app).map_err(|e| e.to_string())
 }

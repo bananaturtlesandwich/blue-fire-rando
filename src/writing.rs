@@ -103,7 +103,9 @@ pub fn write(data: Data, app: &crate::Rando) -> Result<(), Error> {
     std::thread::scope(|thread| {
         thread.spawn(|| -> Result<(), Error> { overworld::write(data.overworld, &app, &pak) });
         thread.spawn(|| -> Result<(), Error> { cutscenes::write(data.cutscenes, &app, &pak) });
-        thread.spawn(|| -> Result<(), Error> { savegames::write(data.savegames, &app, &pak) });
+        thread.spawn(|| -> Result<(), Error> {
+            savegames::write(data.savegames, data.shop_emotes, &app, &pak)
+        });
         thread.spawn(|| -> Result<(), Error> { specific::write(data.cases, &app, &pak) });
     });
     // change the logo so people know it worked

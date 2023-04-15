@@ -13,6 +13,7 @@ pub struct Data {
     pub cutscenes: Vec<Check>,
     pub savegames: Vec<Check>,
     pub cases: Vec<Check>,
+    pub shop_emotes: Vec<(Shop, usize)>,
 }
 
 #[derive(Debug, Clone, Copy, strum::EnumIter, strum::AsRefStr)]
