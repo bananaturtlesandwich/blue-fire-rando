@@ -5,12 +5,12 @@ pub fn write(
     app: &crate::Rando,
     pak: &unpak::Pak,
 ) -> Result<(), Error> {
-    let used = std::sync::Arc::new(std::sync::Mutex::new(Vec::with_capacity(checks.len())));
-    // so it isn't moved
-    let used = &used;
-    std::thread::scope(|thread| {
+    // reference so it isn't moved
+    let used = &std::sync::Arc::new(std::sync::Mutex::new(Vec::with_capacity(checks.len())));
+    std::thread::scope(|thread| -> Result<(), Error> {
+        let mut threads = Vec::new();
         for (location, checks) in checks {
-            thread.spawn(move || -> Result<(), Error> {
+            threads.push(thread.spawn(move || -> Result<(), Error> {
                 let (mut map, loc) = extract(app, &pak, &format!("{PREFIX}{location}.umap"))?;
                 for Check { context, drop, .. } in checks {
                     match context {
@@ -274,8 +274,12 @@ pub fn write(
                 }
                 save(&mut map, &loc)?;
                 Ok(())
-            });
+            }));
         }
-    });
+        for thread in threads {
+            thread.join().unwrap()?;
+        }
+        Ok(())
+    })?;
     Ok(())
 }

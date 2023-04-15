@@ -1,9 +1,10 @@
 use super::*;
 
 pub fn write(cutscenes: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Result<(), Error> {
-    std::thread::scope(|thread| {
+    std::thread::scope(|thread| -> Result<(), Error> {
+        let mut threads = Vec::with_capacity(cutscenes.len());
         for Check { context, drop, .. } in cutscenes {
-            thread.spawn(move || -> Result<(), Error> {
+            threads.push(thread.spawn(move || -> Result<(), Error> {
                 let Context::Cutscene(cutscene) = context else {
                     return Err(Error::Assumption);
                 };
@@ -21,8 +22,12 @@ pub fn write(cutscenes: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Res
                     69,
                 )?;
                 Ok(())
-            });
+            }));
         }
-    });
+        for thread in threads {
+            thread.join().unwrap()?;
+        }
+        Ok(())
+    })?;
     Ok(())
 }
