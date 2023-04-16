@@ -145,6 +145,7 @@ pub enum Lock {
     Movement(&'static [Move]),
     Item(Items),
     Emote(Emotes),
+    Money(u32),
     SpiritHunter,
     Mork,
     EvolairTunic,

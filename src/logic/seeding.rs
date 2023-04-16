@@ -71,6 +71,29 @@ fn update(
             let emote = Drop::Emote(*emote);
             both().any(|drop| drop == &emote)
         }
+        Lock::Money(amount) => {
+            if amount < &3000 {
+                true
+            } else if amount < &6000 {
+                both().any(|drop| matches!(drop, Drop::Item(Items::SmallPouch, ..)))
+            } else if amount < &10000 {
+                both().any(|drop| {
+                    matches!(
+                        drop,
+                        Drop::Item(Items::SmallPouch, ..) | Drop::Item(Items::LargePouch, ..)
+                    )
+                })
+            } else {
+                both().any(|drop| {
+                    matches!(
+                        drop,
+                        Drop::Item(Items::SmallPouch, ..)
+                            | Drop::Item(Items::LargePouch, ..)
+                            | Drop::Item(Items::ExtraLargePouch, ..)
+                    )
+                })
+            }
+        }
         Lock::Mork => {
             both().fold(0, |acc, drop| {
                 if drop == &Drop::Item(Items::Book, 1) {
@@ -123,6 +146,31 @@ fn update(
                 possible[0..checks.len()]
                     .iter()
                     .position(|drop| drop == &emote)
+            }
+            Lock::Money(amount) => {
+                if amount < &3000 {
+                    None
+                } else if amount < &6000 {
+                    possible[0..checks.len()]
+                        .iter()
+                        .position(|drop| matches!(drop, Drop::Item(Items::SmallPouch, ..)))
+                } else if amount < &10000 {
+                    possible[0..checks.len()].iter().position(|drop| {
+                        matches!(
+                            drop,
+                            Drop::Item(Items::SmallPouch, ..) | Drop::Item(Items::LargePouch, ..)
+                        )
+                    })
+                } else {
+                    possible[0..checks.len()].iter().position(|drop| {
+                        matches!(
+                            drop,
+                            Drop::Item(Items::SmallPouch, ..)
+                                | Drop::Item(Items::LargePouch, ..)
+                                | Drop::Item(Items::ExtraLargePouch, ..)
+                        )
+                    })
+                }
             }
             Lock::Mork => possible[0..checks.len()]
                 .iter()
@@ -271,6 +319,16 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
     // sort descending so removing in order doesn't mess up indexes
     data.shop_emotes
         .sort_unstable_by_key(|(_, i)| std::cmp::Reverse(*i));
-    std::fs::write("spoiler_log.txt", format!("{data:#?}")).unwrap_or_default();
+    std::fs::write(
+        "spoiler_log.txt",
+        format!(
+            "{:#?}\n{:#?}\n{:#?}\n{:#?}",
+            data.overworld.values().flatten().collect::<Vec<_>>(),
+            data.savegames,
+            data.cutscenes,
+            data.cases
+        ),
+    )
+    .unwrap_or_default();
     crate::writing::write(data, app).map_err(|e| e.to_string())
 }
