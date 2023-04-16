@@ -102,7 +102,7 @@ fn ask_game_path() -> Option<std::path::PathBuf> {
 fn get_pak_str(pak: &std::path::PathBuf) -> String {
     let mut pak_str = pak.to_str().unwrap_or_default().to_string();
     pak_str.truncate(pak_str.len() - 13);
-    pak_str = "...".to_string() + &pak_str[(pak_str.len() - 40).clamp(0, 1000)..];
+    pak_str = "...".to_string() + &pak_str[(pak_str.len() - 50).clamp(0, 1000)..];
     pak_str
 }
 
@@ -147,6 +147,19 @@ macro_rules! notify {
 impl eframe::App for Rando {
     fn update(&mut self, ctx: &eframe::egui::Context, _: &mut eframe::Frame) {
         use eframe::egui;
+
+        let mut fonts = egui::FontDefinitions::default();
+        fonts.font_data.insert(
+            "cinzel".to_string(),
+            egui::FontData::from_static(include_bytes!("Cinzel-Regular.ttf")),
+        );
+        fonts
+            .families
+            .get_mut(&egui::FontFamily::Proportional)
+            .unwrap()
+            .insert(0, "cinzel".to_string());
+        ctx.set_fonts(fonts);
+
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.heading(
