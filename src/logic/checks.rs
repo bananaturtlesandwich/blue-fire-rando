@@ -1,7 +1,7 @@
 use super::*;
 use crate::{no_walljump, walljump};
 
-pub const CHECKS: [Check; 255] = [
+pub const CHECKS: [Check; 252] = [
     // Fire Keep
     Check {
         location: Locations::Lab,
@@ -955,24 +955,25 @@ pub const CHECKS: [Check; 255] = [
         drop: Drop::Tunic(Tunics::ForestTunic),
         locks: &[],
     },
-    Check {
-        location: Locations::TempleGardens,
-        context: Context::Shop(Shop::Nilo, 0, 1500),
-        drop: Drop::Item(Items::EmeraldOre, 1),
-        locks: &[Lock::Money(1500)],
-    },
-    Check {
-        location: Locations::TempleGardens,
-        context: Context::Shop(Shop::Nilo, 1, 800),
-        drop: Drop::Item(Items::SapphireOre, 1),
-        locks: &[Lock::Money(800)],
-    },
-    Check {
-        location: Locations::TempleGardens,
-        context: Context::Shop(Shop::Nilo, 2, 500),
-        drop: Drop::Item(Items::RubyOre, 1),
-        locks: &[Lock::Money(500)],
-    },
+    // editing the savegame doesn't edit unlike other shops
+    // Check {
+    //     location: Locations::TempleGardens,
+    //     context: Context::Shop(Shop::Nilo, 0, 1500),
+    //     drop: Drop::Item(Items::EmeraldOre, 1),
+    //     locks: &[Lock::Money(1500)],
+    // },
+    // Check {
+    //     location: Locations::TempleGardens,
+    //     context: Context::Shop(Shop::Nilo, 1, 800),
+    //     drop: Drop::Item(Items::SapphireOre, 1),
+    //     locks: &[Lock::Money(800)],
+    // },
+    // Check {
+    //     location: Locations::TempleGardens,
+    //     context: Context::Shop(Shop::Nilo, 2, 500),
+    //     drop: Drop::Item(Items::RubyOre, 1),
+    //     locks: &[Lock::Money(500)],
+    // },
     Check {
         location: Locations::TempleGardens,
         context: Context::Overworld("Dance_Platform_Wave_Chest"),

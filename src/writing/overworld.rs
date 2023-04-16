@@ -110,6 +110,7 @@ pub fn write(
                                             (0.0, 0.0, 100.0)
                                         }
                                         Locations::WaterwayDucks => (800.0, 0.0, 100.0),
+                                        Locations::Queen => (500.0, -500.0, 0.0),
                                         _ => (0.0, 0.0, 0.0),
                                     },
                                 );

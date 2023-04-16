@@ -6,7 +6,7 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native(
         "",
         eframe::NativeOptions {
-            initial_window_size: Some(eframe::epaint::Vec2::new(400.0, 360.0)),
+            initial_window_size: Some(eframe::epaint::Vec2::new(500.0, 390.0)),
             resizable: false,
             icon_data: Some(eframe::IconData {
                 rgba: include_bytes!("umby.rgba").to_vec(),
