@@ -19,11 +19,11 @@ pub enum Error {
     Assumption,
 }
 
-pub const MOD: &str = "rando_p";
+pub const MOD: &str = "rando_p/Blue Fire/Content/BlueFire";
 
-const SAVEGAME: &str = "Blue Fire/Content/BlueFire/Player/Logic/FrameWork/BlueFireSaveGame.uasset";
+const SAVEGAME: &str = "Player/Logic/FrameWork/BlueFireSaveGame.uasset";
 
-const PREFIX: &str = "Blue Fire/Content/BlueFire/Maps/World/";
+const PREFIX: &str = "Maps/World/";
 
 fn extract(
     app: &crate::Rando,
@@ -31,11 +31,14 @@ fn extract(
     path: &str,
 ) -> Result<(Asset<std::fs::File>, std::path::PathBuf), Error> {
     let loc = app.pak.join(MOD).join(path);
-    if path != "Blue Fire/Content/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap" {
+    if path != "Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap" {
         std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-        pak.read_to_file(path, &loc)?;
+        pak.read_to_file(&format!("/Game/BlueFire/{path}"), &loc)?;
         pak.read_to_file(
-            &path.replace(".uasset", ".uexp").replace(".umap", ".uexp"),
+            &format!(
+                "/Game/BlueFire/{}",
+                path.replace(".uasset", ".uexp").replace(".umap", ".uexp")
+            ),
             loc.with_extension("uexp"),
         )?;
     }
@@ -84,14 +87,14 @@ pub fn write(data: Data, app: &crate::Rando) -> Result<(), Error> {
     let loc = app
         .pak
         .join(MOD)
-        .join("Blue Fire/Content/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap");
+        .join("Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap");
     std::fs::create_dir_all(loc.parent().expect("is a file"))?;
     pak.read_to_file(
-        "Blue Fire/Content/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap",
+        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap",
         &loc,
     )?;
     pak.read_to_file(
-        "Blue Fire/Content/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.uexp",
+        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.uexp",
         loc.with_extension("uexp"),
     )?;
     let mut spirit_hunter = open(&loc)?;
@@ -114,10 +117,7 @@ pub fn write(data: Data, app: &crate::Rando) -> Result<(), Error> {
         Ok(())
     })?;
     // change the logo so people know it worked
-    let logo = app
-        .pak
-        .join(MOD)
-        .join("Blue Fire/Content/BlueFire/HUD/Menu/Blue-Fire-Logo.uasset");
+    let logo = app.pak.join(MOD).join("HUD/Menu/Blue-Fire-Logo.uasset");
     std::fs::create_dir_all(logo.parent().expect("is a file"))?;
     std::fs::write(&logo, include_bytes!("blueprints/logo.uasset"))?;
     std::fs::write(
@@ -142,10 +142,7 @@ fn create_hook<C: std::io::Read + std::io::Seek>(
     cutscene: &str,
     index: usize,
 ) -> Result<(), Error> {
-    let mut loc = app
-        .pak
-        .join(MOD)
-        .join("Blue Fire/Content/BlueFire/Libraries");
+    let mut loc = app.pak.join(MOD).join("Libraries");
     std::fs::create_dir_all(&loc)?;
     let new_name = format!("{}_Hook", cutscene.split('/').last().unwrap_or_default());
     loc = loc.join(&new_name).with_extension("uasset");
@@ -206,8 +203,11 @@ fn create_hook<C: std::io::Read + std::io::Seek>(
     save(&mut hook, loc)?;
     let loc = app.pak.join(MOD).join(cutscene).with_extension("uasset");
     std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-    pak.read_to_file(&format!("{cutscene}.uasset"), &loc)?;
-    pak.read_to_file(&format!("{cutscene}.uexp"), loc.with_extension("uexp"))?;
+    pak.read_to_file(&format!("/Game/BlueFire/{cutscene}.uasset"), &loc)?;
+    pak.read_to_file(
+        &format!("/Game/BlueFire/{cutscene}.uexp"),
+        loc.with_extension("uexp"),
+    )?;
     let mut cutscene = open(&loc)?;
     let universal_refs: Vec<usize> = cutscene
         .get_name_map_index_list()

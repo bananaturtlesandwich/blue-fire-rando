@@ -48,17 +48,13 @@ impl Shop {
 
 #[derive(Debug, strum::AsRefStr)]
 pub enum Case {
-    #[strum(serialize = "Blue Fire/Content/BlueFire/NPC/Bremur/NPC_Bremur")]
+    #[strum(serialize = "NPC/Bremur/NPC_Bremur")]
     Bremur,
-    #[strum(
-        serialize = "Blue Fire/Content/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Compositor/NPC_Onop_Compositor_Ready"
-    )]
+    #[strum(serialize = "NPC/Onops/MUSIC_Onops/Onop_Compositor/NPC_Onop_Compositor_Ready")]
     Paulale,
-    #[strum(
-        serialize = "Blue Fire/Content/BlueFire/InteractiveObjects/Collectibles/BloodStone/BloodStone_BP"
-    )]
+    #[strum(serialize = "InteractiveObjects/Collectibles/BloodStone/BloodStone_BP")]
     Angels,
-    #[strum(serialize = "Blue Fire/Content/BlueFire/Player/Logic/Player_Character_BP")]
+    #[strum(serialize = "Player/Logic/Player_Character_BP")]
     AllVoids,
 }
 

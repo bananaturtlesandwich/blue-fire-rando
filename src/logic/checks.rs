@@ -23,9 +23,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::Bitoven,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Bitoven",
-        ),
+        context: Context::Cutscene("NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Bitoven"),
         drop: Drop::Ore(500),
         locks: &[
             Lock::Location(Locations::RustVillage),
@@ -276,7 +274,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::ArcaneSpiritHunter,
-        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/SpiritHunter/NPC_SpiritHunter"),
+        context: Context::Cutscene("NPC/SpiritHunter/NPC_SpiritHunter"),
         drop: Drop::Tunic(Tunics::ThiefsCloack),
         locks: &[Lock::SpiritHunter],
     },
@@ -549,9 +547,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::Stoneheart,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/NPC/Orip/BP_Orip_Saw/NPC_Orip_Stoneheart",
-        ),
+        context: Context::Cutscene("NPC/Orip/BP_Orip_Saw/NPC_Orip_Stoneheart"),
         drop: Drop::Item(Items::OddRock, 1),
         locks: &[],
     },
@@ -684,7 +680,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::Stoneheart,
-        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Merchant/NPC_Merchant"),
+        context: Context::Cutscene("NPC/Merchant/NPC_Merchant"),
         drop: Drop::Tunic(Tunics::MerchantsRobe),
         locks: &[Lock::Mork],
     },
@@ -696,9 +692,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::Stoneheart,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Wolfgang",
-        ),
+        context: Context::Cutscene("NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Wolfgang"),
         drop: Drop::Ore(500),
         locks: &[
             Lock::Location(Locations::RustVillage),
@@ -816,9 +810,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::Gruh,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/Cinematics/NuosTempleEnd/Nuos_Temple_End_Controller",
-        ),
+        context: Context::Cutscene("Cinematics/NuosTempleEnd/Nuos_Temple_End_Controller"),
         drop: Drop::Item(Items::KeyUthasTemple, 1),
         locks: &[],
     },
@@ -871,9 +863,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::Stoneheart,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/NPC/Onops/Onop_Thief/NPC_Onop_Thief",
-        ),
+        context: Context::Cutscene("NPC/Onops/Onop_Thief/NPC_Onop_Thief"),
         drop: Drop::Item(Items::SmallPouch, 1),
         locks: &[
             Lock::Location(Locations::Gruh),
@@ -961,7 +951,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::TempleGardens,
-        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Nilo/NPC_Nilo"),
+        context: Context::Cutscene("NPC/Nilo/NPC_Nilo"),
         drop: Drop::Tunic(Tunics::ForestTunic),
         locks: &[],
     },
@@ -1171,17 +1161,13 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::UthasEnd,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/Cinematics/UthasTempleEnd/Uthas_Temple_End_Controller",
-        ),
+        context: Context::Cutscene("Cinematics/UthasTempleEnd/Uthas_Temple_End_Controller"),
         drop: Drop::Item(Items::KeyGodMaster, 1),
         locks: &[Lock::Item(Items::OldKey), Lock::Item(Items::KeyHolyMaster)],
     },
     Check {
         location: Locations::SanctuaryStone,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/Cinematics/LeaveTemple/LeaveTemple_Controller",
-        ),
+        context: Context::Cutscene("Cinematics/LeaveTemple/LeaveTemple_Controller"),
         drop: Drop::Item(Items::SanctuaryStone, 1),
         locks: &[],
     },
@@ -1278,9 +1264,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::AbandonedPath,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Bech",
-        ),
+        context: Context::Cutscene("NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Bech"),
         drop: Drop::Ore(500),
         locks: &[
             Lock::Location(Locations::RustVillage),
@@ -1290,9 +1274,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::AbandonedPath,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/Cinematics/VesselVon/VesselVon_Controller",
-        ),
+        context: Context::Cutscene("Cinematics/VesselVon/VesselVon_Controller"),
         drop: Drop::Item(Items::BeiraVessel, 1),
         locks: &[
             Lock::Location(Locations::SanctuaryStone),
@@ -1360,9 +1342,7 @@ pub const CHECKS: [Check; 255] = [
     // i can't find pickups 11, 12 and 6
     Check {
         location: Locations::Bunny,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/NPC/Onops/Onop_Speedo/NPC_Onop_Speedo",
-        ),
+        context: Context::Cutscene("NPC/Onops/Onop_Speedo/NPC_Onop_Speedo"),
         drop: Drop::Ability(Abilities::Sprint),
         locks: &[],
     },
@@ -1383,9 +1363,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::Bunny,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/NPC/Onops/Onop_Onari/NPC_Master_Onari",
-        ),
+        context: Context::Cutscene("NPC/Onops/Onop_Onari/NPC_Master_Onari"),
         drop: Drop::Tunic(Tunics::BunnySuit),
         locks: &[Lock::Movement(&[no_walljump!(0, 1)])],
     },
@@ -1409,7 +1387,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::Bunny,
-        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Mira_Mia/NPC_Mia_Firefall"),
+        context: Context::Cutscene("NPC/Mira_Mia/NPC_Mia_Firefall"),
         drop: Drop::Ore(5000),
         locks: &[Lock::Location(Locations::RustVillage)],
     },
@@ -1443,15 +1421,13 @@ pub const CHECKS: [Check; 255] = [
     // myurder
     Check {
         location: Locations::LakeMolva,
-        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Onops/Onop_Codi/NPC_Onop_Codi"),
+        context: Context::Cutscene("NPC/Onops/Onop_Codi/NPC_Onop_Codi"),
         drop: Drop::Item(Items::HouseKey, 1),
         locks: &[Lock::Location(Locations::RustVillage)],
     },
     Check {
         location: Locations::LakeMolva,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Viveldi",
-        ),
+        context: Context::Cutscene("NPC/Onops/MUSIC_Onops/Onop_Musicians/NPC_Onop_IO_Viveldi"),
         drop: Drop::Ore(500),
         locks: &[
             Lock::Location(Locations::RustVillage),
@@ -1484,9 +1460,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::LakeMolva,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/NPC/Onops/NPC_Onop_SectMember_Tunic",
-        ),
+        context: Context::Cutscene("NPC/Onops/NPC_Onop_SectMember_Tunic"),
         drop: Drop::Tunic(Tunics::SectMember),
         locks: &[Lock::Movement(&[walljump!(0, 1), no_walljump!(2, 0)])],
     },
@@ -1498,7 +1472,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::SteamHouse,
-        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Mira_Mia/NPC_Mira"),
+        context: Context::Cutscene("NPC/Mira_Mia/NPC_Mira"),
         drop: Drop::Item(Items::KeySteam, 1),
         locks: &[],
     },
@@ -1510,7 +1484,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::SteamHousePlatforming,
-        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Mira_Mia/NPC_Mia"),
+        context: Context::Cutscene("NPC/Mira_Mia/NPC_Mia"),
         drop: Drop::Weapon(Weapons::IronJustice),
         locks: &[],
     },
@@ -1522,9 +1496,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::RustVillage,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/Cinematics/RustCity_Von/RustCityVon_Controller",
-        ),
+        context: Context::Cutscene("Cinematics/RustCity_Von/RustCityVon_Controller"),
         drop: Drop::Item(Items::KeyFireMaster, 1),
         locks: &[],
     },
@@ -1542,7 +1514,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::RustVillage,
-        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Onops/Onop_Mon/NPC_Onop_Mon"),
+        context: Context::Cutscene("NPC/Onops/Onop_Mon/NPC_Onop_Mon"),
         drop: Drop::Item(Items::HouseContract, 1),
         locks: &[Lock::Item(Items::HouseKey)],
     },
@@ -1554,9 +1526,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::RustVillage,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/NPC/Onops/MUSIC_Onops/Onop_Compositor/NPC_Onop_Compositor",
-        ),
+        context: Context::Cutscene("NPC/Onops/MUSIC_Onops/Onop_Compositor/NPC_Onop_Compositor"),
         drop: Drop::Item(Items::ComposerLetter, 4),
         locks: &[],
     },
@@ -1576,9 +1546,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::RustVillage,
-        context: Context::Cutscene(
-            "Blue Fire/Content/BlueFire/NPC/Onops/Onop_Barri/NPC_Master_BarriStage2",
-        ),
+        context: Context::Cutscene("NPC/Onops/Onop_Barri/NPC_Master_BarriStage2"),
         drop: Drop::Weapon(Weapons::KinaDefenders),
         locks: &[Lock::Item(Items::Rose)],
     },
@@ -1590,7 +1558,7 @@ pub const CHECKS: [Check; 255] = [
     },
     Check {
         location: Locations::RustVillage,
-        context: Context::Cutscene("Blue Fire/Content/BlueFire/NPC/Onops/Onop_Nuno/NPC_Onop_Nuno"),
+        context: Context::Cutscene("NPC/Onops/Onop_Nuno/NPC_Onop_Nuno"),
         drop: Drop::Ore(3000),
         locks: &[Lock::Item(Items::RareSnow)],
     },
