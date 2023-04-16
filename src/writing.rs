@@ -19,7 +19,7 @@ pub enum Error {
     Assumption,
 }
 
-pub const MOD: &str = "rando_p/Blue Fire/Content/BlueFire";
+pub const MOD: &str = "rando_p/PROA34/Content/BlueFire";
 
 const SAVEGAME: &str = "Player/Logic/FrameWork/BlueFireSaveGame.uasset";
 
@@ -80,7 +80,7 @@ fn set_byte(
 
 pub fn write(data: Data, app: &crate::Rando) -> Result<(), Error> {
     let pak = unpak::Pak::new(
-        app.pak.join("Blue Fire-WindowsNoEditor.pak"),
+        app.pak.join("PROA34-WindowsNoEditor.pak"),
         unpak::Version::FrozenIndex,
     )?;
     // correct the shenanigans in spirit hunter

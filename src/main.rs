@@ -1,6 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use blue_fire_rando::Rando;
+use blue_fire_rando_drm_free::Rando;
 
 fn main() -> Result<(), eframe::Error> {
     eframe::run_native(

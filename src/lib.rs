@@ -23,7 +23,7 @@ pub struct Rando {
 }
 
 #[cfg(not(debug_assertions))]
-const EXE: &str = "blue-fire-rando.exe";
+const EXE: &str = "blue-fire-rando-drm-free.exe";
 
 impl Rando {
     pub fn new(ctx: &eframe::CreationContext) -> Self {
@@ -91,12 +91,12 @@ impl Rando {
 
 fn ask_game_path() -> Option<std::path::PathBuf> {
     let path = rfd::FileDialog::new()
-        .set_title("Select where you have Blue Fire installed (e.g C:/Program Files (x86)/Steam/steamapps/common/Blue Fire)")
+        .set_title(
+            "Select where you have Blue Fire installed (e.g C:/Amazon Games/Library/Blue Fire)",
+        )
         .pick_folder()?;
-    (path.ends_with("Blue Fire")
-        && !path.ends_with("Blue Fire/Blue Fire")
-        && path.join("Blue Fire/Content/Paks").exists())
-    .then(|| path.join("Blue Fire\\Content\\Paks"))
+    (path.ends_with("Blue Fire") && path.join("PROA34/Content/Paks").exists())
+        .then(|| path.join("PROA34\\Content\\Paks"))
 }
 
 fn get_pak_str(pak: &std::path::PathBuf) -> String {

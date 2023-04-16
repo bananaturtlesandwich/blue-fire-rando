@@ -1,5 +1,5 @@
 [package]
-name = "blue-fire-rando"
+name = "blue-fire-rando-drm-free"
 description = "a gamemode for blue fire which shuffles pickups"
 repository = "https://github.com/bananaturtlesandwich/blue-fire-rando"
 version = "1.0.0"
