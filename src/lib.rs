@@ -6,6 +6,8 @@ mod writing;
 pub struct Rando {
     notifs: egui_modal::Modal,
     pak: std::path::PathBuf,
+    pak_str: String,
+    autoupdate: bool,
     items: bool,
     gems: bool,
     keys: bool,
@@ -20,6 +22,9 @@ pub struct Rando {
     ducks: bool,
 }
 
+#[cfg(not(debug_assertions))]
+const EXE: &str = "blue-fire-rando.exe";
+
 impl Rando {
     pub fn new(ctx: &eframe::CreationContext) -> Self {
         let get_bool = |key: &str| -> bool {
@@ -33,21 +38,41 @@ impl Rando {
                 })
                 .unwrap_or_default()
         };
-        Self {
-            notifs: egui_modal::Modal::new(&ctx.egui_ctx, "dialog"),
-            pak: match ctx.storage.and_then(|storage| storage.get_string("pak")) {
-                Some(path) => path.into(),
-                None => loop {
-                    let Some(path) = rfd::FileDialog::new().set_title("Select where you have Blue Fire installed").pick_folder() else {
-                        continue
-                    };
-                    if !path.ends_with("Blue Fire") || path.ends_with("Blue Fire/Blue Fire"){
-                        continue;
-                    }
-                    break path;
+
+        let notifs = egui_modal::Modal::new(&ctx.egui_ctx, "dialog");
+        let autoupdate = get_bool("autoupdate");
+
+        #[cfg(not(debug_assertions))]
+        if autoupdate {
+            std::thread::spawn(update);
+        }
+        #[cfg(not(debug_assertions))]
+        if std::fs::remove_file(format!("{EXE}.old")).is_ok() {
+            notifs.open_dialog(
+                Some("success"),
+                Some(format!(
+                    "successfully updated to {}",
+                    env!("CARGO_PKG_VERSION")
+                )),
+                Some(egui_modal::Icon::Success),
+            );
+        }
+
+        let pak = match ctx.storage.and_then(|storage| storage.get_string("pak")) {
+            Some(path) => path.into(),
+            None => loop {
+                if let Some(pak) = ask_game_path() {
+                    break pak;
                 }
-                .join("Blue Fire\\Content\\Paks")
             },
+        };
+        let pak_str = get_pak_str(&pak);
+
+        Self {
+            notifs,
+            pak,
+            pak_str,
+            autoupdate,
             items: get_bool("items"),
             gems: get_bool("gems"),
             keys: get_bool("keys"),
@@ -64,6 +89,46 @@ impl Rando {
     }
 }
 
+fn ask_game_path() -> Option<std::path::PathBuf> {
+    let path = rfd::FileDialog::new()
+        .set_title("Select where you have Blue Fire installed (e.g C:/Program Files (x86)/Steam/steamapps/common/Blue Fire)")
+        .pick_folder()?;
+    (path.ends_with("Blue Fire")
+        && !path.ends_with("Blue Fire/Blue Fire")
+        && path.join("Blue Fire/Content/Paks").exists())
+    .then(|| path.join("Blue Fire\\Content\\Paks"))
+}
+
+fn get_pak_str(pak: &std::path::PathBuf) -> String {
+    let mut pak_str = pak.to_str().unwrap_or_default().to_string();
+    pak_str.truncate(pak_str.len() - 13);
+    pak_str = "...".to_string() + &pak_str[(pak_str.len() - 40).clamp(0, 1000)..];
+    pak_str
+}
+
+#[cfg(not(debug_assertions))]
+fn update() {
+    let api = autoupdater::apis::github::GithubApi::new("bananaturtlesandwich", "blue-fire-rando")
+        .current_version(env!("CARGO_PKG_VERSION"));
+    if let Ok(Some(asset)) = api.get_newer(None::<autoupdater::Sort>) {
+        use autoupdater::apis::DownloadApiTrait;
+        if api
+            .download(
+                &asset
+                    .assets
+                    .into_iter()
+                    .find(|asset| asset.name == EXE)
+                    .unwrap(),
+                None::<autoupdater::Download>,
+            )
+            .is_ok()
+        {
+            std::process::Command::new(EXE).spawn().unwrap();
+            std::process::exit(0);
+        }
+    }
+}
+
 macro_rules! notify {
     ($self:expr, $result: expr, $message: literal) => {
         match $result {
@@ -72,11 +137,9 @@ macro_rules! notify {
                 Some($message),
                 Some(egui_modal::Icon::Success),
             ),
-            Err(e) => {
-                $self
-                    .notifs
-                    .open_dialog(Some("whoopsie"), Some(e), Some(egui_modal::Icon::Warning))
-            }
+            Err(e) => $self
+                .notifs
+                .open_dialog(Some(":/"), Some(e), Some(egui_modal::Icon::Error)),
         }
     };
 }
@@ -92,6 +155,22 @@ impl eframe::App for Rando {
                         .size(40.0),
                 );
                 ui.label(egui::RichText::new("by spuds :p").italics().size(15.0));
+            });
+            ui.horizontal(|ui|{
+                ui.checkbox(&mut self.autoupdate, "autoupdate");
+                ui.label(&self.pak_str);
+                if ui.button("...").clicked(){
+                    if let Some(pak) = ask_game_path(){
+                        self.pak_str = get_pak_str(&pak);
+                        self.pak = pak
+                    } else {
+                        self.notifs.open_dialog(
+                            Some(":/"),
+                            Some("that isn't a valid blue fire install location"),
+                            Some(egui_modal::Icon::Warning)
+                        )
+                    }
+                }
             });
             ui.columns(2, |ui| {
                 ui[0].heading(egui::RichText::new("Pool options").underline());
@@ -162,7 +241,6 @@ impl eframe::App for Rando {
                 if ui
                     .button(
                         egui::RichText::new("generate and install seed")
-                            .strong()
                             .size(33.0),
                     )
                     .clicked()
@@ -182,6 +260,7 @@ impl eframe::App for Rando {
 
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
         storage.set_string("pak", self.pak.to_str().unwrap_or_default().to_string());
+        storage.set_string("autoupdate", self.autoupdate.to_string());
         storage.set_string("items", self.items.to_string());
         storage.set_string("gems", self.gems.to_string());
         storage.set_string("keys", self.keys.to_string());
