@@ -98,10 +98,8 @@ pub fn write(data: Data, app: &crate::Rando) -> Result<(), Error> {
         loc.with_extension("uexp"),
     )?;
     let mut spirit_hunter = open(&loc)?;
-    spirit_hunter.exports[440]
-        .get_base_export_mut()
-        .object_name
-        .content = "Pickup_A02_SRF2".to_string();
+    spirit_hunter.exports[440].get_base_export_mut().object_name =
+        spirit_hunter.add_fname("Pickup_A02_SRF2");
     save(&mut spirit_hunter, &loc)?;
     std::thread::scope(|thread| -> Result<(), Error> {
         for thread in [
@@ -149,8 +147,8 @@ fn create_hook<C: std::io::Read + std::io::Seek>(
     let mut hook = get_hook(&loc)?;
     // edit the item given by the kismet bytecode in the hook
     let exports::Export::FunctionExport(
-                    exports::function_export::FunctionExport{
-                        struct_export: struct_export::StructExport{
+                    exports::function_export::FunctionExport {
+                        struct_export: struct_export::StructExport {
                             script_bytecode:Some(bytecode),
                             ..
                         },
