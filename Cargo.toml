@@ -2,7 +2,7 @@
 name = "blue-fire-rando-drm-free"
 description = "a gamemode for blue fire which shuffles pickups"
 repository = "https://github.com/bananaturtlesandwich/blue-fire-rando"
-version = "1.0.0"
+version = "1.1.0"
 authors = ["spuds"]
 edition = "2021"
 

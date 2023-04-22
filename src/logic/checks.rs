@@ -1,7 +1,7 @@
 use super::*;
 use crate::{no_walljump, walljump};
 
-pub const CHECKS: [Check; 252] = [
+pub const CHECKS: [Check; 254] = [
     // Fire Keep
     Check {
         location: Locations::Lab,
@@ -1340,7 +1340,13 @@ pub const CHECKS: [Check; 252] = [
         drop: Drop::Ore(200),
         locks: &[Lock::Movement(&[no_walljump!(0, 3)])],
     },
-    // i can't find pickups 11, 12 and 6
+    // i can't find pickup 6
+    Check {
+        location: Locations::Bunny,
+        context: Context::Overworld("Pickup11"),
+        drop: Drop::Ore(100),
+        locks: &[],
+    },
     Check {
         location: Locations::Bunny,
         context: Context::Cutscene("NPC/Onops/Onop_Speedo/NPC_Onop_Speedo"),
@@ -1350,6 +1356,12 @@ pub const CHECKS: [Check; 252] = [
     Check {
         location: Locations::Bunny,
         context: Context::Overworld("Pickup9"),
+        drop: Drop::Ore(150),
+        locks: &[Lock::Movement(&[no_walljump!(0, 1)])],
+    },
+    Check {
+        location: Locations::Bunny,
+        context: Context::Overworld("Pickup12"),
         drop: Drop::Ore(150),
         locks: &[Lock::Movement(&[no_walljump!(0, 1)])],
     },

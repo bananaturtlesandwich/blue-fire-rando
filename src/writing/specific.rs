@@ -2,7 +2,7 @@ use super::*;
 
 pub fn write(cases: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Result<(), Error> {
     for Check { context, drop, .. } in cases {
-        let Context::Specific(case,index) = context else{
+        let Context::Specific(case, index) = context else {
             return Err(Error::Assumption)?
         };
         create_hook(

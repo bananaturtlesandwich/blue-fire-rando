@@ -273,6 +273,7 @@ pub fn write(
                         _ => (),
                     }
                 }
+                map.rebuild_name_map()?;
                 save(&mut map, &loc)?;
                 Ok(())
             }));

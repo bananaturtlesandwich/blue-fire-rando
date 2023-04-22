@@ -154,7 +154,9 @@ impl Locations {
                 Lock::Item(Items::KeyHolyMaster),
             ]],
             Locations::TempleGardens => &[&[
-                Lock::Location(Locations::Stoneheart),
+                Lock::Item(Items::OldKey),
+                Lock::Item(Items::KeyHolyMaster),
+                Lock::Location(Locations::UthasEnd),
                 Lock::Movement(&[no_walljump!(1, 0)]),
             ]],
             Locations::AbandonedPath => &[&[

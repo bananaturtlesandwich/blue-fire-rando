@@ -142,6 +142,7 @@ pub fn write(
         .value
         .remove(i);
     }
+    savegame.rebuild_name_map()?;
     save(&mut savegame, savegame_loc)?;
     Ok(())
 }
