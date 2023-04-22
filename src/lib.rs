@@ -1,9 +1,12 @@
+use eframe::egui;
+
 mod io;
 mod logic;
 mod map;
 mod writing;
 
 pub struct Rando {
+    font: egui::FontDefinitions,
     notifs: egui_modal::Modal,
     pak: std::path::PathBuf,
     pak_str: String,
@@ -39,6 +42,16 @@ impl Rando {
                 .unwrap_or_default()
         };
 
+        let mut font = egui::FontDefinitions::default();
+        font.font_data.insert(
+            "cinzel".to_string(),
+            egui::FontData::from_static(include_bytes!("Cinzel-Regular.ttf")),
+        );
+        font.families
+            .get_mut(&egui::FontFamily::Proportional)
+            .unwrap()
+            .insert(0, "cinzel".to_string());
+
         let notifs = egui_modal::Modal::new(&ctx.egui_ctx, "dialog");
         let autoupdate = get_bool("autoupdate");
 
@@ -69,6 +82,7 @@ impl Rando {
         let pak_str = get_pak_str(&pak);
 
         Self {
+            font,
             notifs,
             pak,
             pak_str,
@@ -146,20 +160,7 @@ macro_rules! notify {
 
 impl eframe::App for Rando {
     fn update(&mut self, ctx: &eframe::egui::Context, _: &mut eframe::Frame) {
-        use eframe::egui;
-
-        let mut fonts = egui::FontDefinitions::default();
-        fonts.font_data.insert(
-            "cinzel".to_string(),
-            egui::FontData::from_static(include_bytes!("Cinzel-Regular.ttf")),
-        );
-        fonts
-            .families
-            .get_mut(&egui::FontFamily::Proportional)
-            .unwrap()
-            .insert(0, "cinzel".to_string());
-        ctx.set_fonts(fonts);
-
+        ctx.set_fonts(self.font.clone());
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.heading(
