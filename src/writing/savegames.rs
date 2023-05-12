@@ -122,7 +122,55 @@ pub fn write(
                             .value += *amount;
                     }
                     Drop::Duck => add_item(&mut savegame, Drop::Item(Items::Duck, 1))?,
-                    _ => add_item(&mut savegame, drop)?,
+                    Drop::Item(..) => add_item(&mut savegame, drop)?,
+                    Drop::Spirit(spirit) => {
+                        let spirits = savegame.exports[1]
+                            .get_normal_export_mut()
+                            .and_then(|default| {
+                                cast!(Property, StructProperty, &mut default.properties[14])
+                            })
+                            .and_then(|equipment| {
+                                cast!(Property, ArrayProperty, &mut equipment.value[0])
+                            })
+                            .ok_or(Error::Assumption)?;
+                        spirits.value.push(byte_property(
+                            &spirits.value.len().to_string(),
+                            "Spirits",
+                            spirit.as_ref(),
+                        ))
+                    }
+                    Drop::Weapon(weapon) => {
+                        let weapons = savegame.exports[1]
+                            .get_normal_export_mut()
+                            .and_then(|default| {
+                                cast!(Property, StructProperty, &mut default.properties[14])
+                            })
+                            .and_then(|equipment| {
+                                cast!(Property, ArrayProperty, &mut equipment.value[4])
+                            })
+                            .ok_or(Error::Assumption)?;
+                        weapons.value.push(byte_property(
+                            &weapons.value.len().to_string(),
+                            "Weapons",
+                            weapon.as_ref(),
+                        ))
+                    }
+                    Drop::Tunic(tunic) => {
+                        let tunics = savegame.exports[1]
+                            .get_normal_export_mut()
+                            .and_then(|default| {
+                                cast!(Property, StructProperty, &mut default.properties[14])
+                            })
+                            .and_then(|equipment| {
+                                cast!(Property, ArrayProperty, &mut equipment.value[2])
+                            })
+                            .ok_or(Error::Assumption)?;
+                        tunics.value.push(byte_property(
+                            &tunics.value.len().to_string(),
+                            "Tunics",
+                            tunic.as_ref(),
+                        ))
+                    }
                 }
             }
             _ => (),
