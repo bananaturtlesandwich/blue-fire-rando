@@ -103,12 +103,10 @@ pub fn write(data: Data, app: &crate::Rando) -> Result<(), Error> {
     save(&mut spirit_hunter, &loc)?;
     std::thread::scope(|thread| -> Result<(), Error> {
         for thread in [
-            thread.spawn(|| -> Result<(), Error> { overworld::write(data.overworld, app, &pak) }),
-            thread.spawn(|| -> Result<(), Error> { cutscenes::write(data.cutscenes, app, &pak) }),
-            thread.spawn(|| -> Result<(), Error> {
-                savegames::write(data.savegames, data.shop_emotes, app, &pak)
-            }),
-            thread.spawn(|| -> Result<(), Error> { specific::write(data.cases, app, &pak) }),
+            thread.spawn(|| overworld::write(data.overworld, app, &pak)),
+            thread.spawn(|| cutscenes::write(data.cutscenes, app, &pak)),
+            thread.spawn(|| savegames::write(data.savegames, data.shop_emotes, app, &pak)),
+            thread.spawn(|| specific::write(data.cases, app, &pak)),
         ] {
             thread.join().unwrap()?
         }
