@@ -4,7 +4,7 @@ pub fn write(cutscenes: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Res
     std::thread::scope(|thread| -> Result<(), Error> {
         let mut threads = Vec::with_capacity(cutscenes.len());
         for Check { context, drop, .. } in cutscenes {
-            threads.push(thread.spawn(move || -> Result<(), Error> {
+            threads.push(thread.spawn(move || {
                 let Context::Cutscene(cutscene) = context else {
                     return Err(Error::Assumption);
                 };
