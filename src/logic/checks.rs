@@ -1,7 +1,7 @@
 use super::*;
 use crate::{no_walljump, walljump};
 
-pub const CHECKS: [Check; 254] = [
+pub const CHECKS: [Check; 255] = [
     // Fire Keep
     Check {
         location: Locations::Lab,
@@ -1574,6 +1574,12 @@ pub const CHECKS: [Check; 254] = [
         context: Context::Cutscene("NPC/Onops/Onop_Nuno/NPC_Onop_Nuno"),
         drop: Drop::Ore(3000),
         locks: &[Lock::Item(Items::RareSnow)],
+    },
+    Check {
+        location: Locations::RustVillage,
+        context: Context::Overworld("Dance_Platform_Aggresive_Chest"),
+        drop: Drop::Item(Items::RareGlasses, 1),
+        locks: &[Lock::Emote(Emotes::Aggressive)],
     },
     Check {
         location: Locations::RustVillage,

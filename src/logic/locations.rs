@@ -8,7 +8,7 @@ pub enum Locations {
     Lab,
     #[strum(serialize = "A02_ArcaneTunnels/A02_GameIntro_Exterior")]
     Bitoven,
-    #[strum(serialize = "A02_ArcaneTunnels/A02_GameIntro")]
+    #[strum(serialize = "A02_ArcaneTunnels/A02_GameIntro_DLC_VoidMaster")]
     KeepDucks,
     #[strum(serialize = "A02_ArcaneTunnels/A02_GameIntro_KeepEast")]
     KeepVessel,
