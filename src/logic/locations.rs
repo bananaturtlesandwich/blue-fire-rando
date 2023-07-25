@@ -168,7 +168,7 @@ impl Locations {
                 Lock::Location(Locations::AbandonedPath),
                 Lock::Location(Locations::LakeMolva),
                 Lock::Location(Locations::TempleGardens),
-                Lock::Location(Locations::SanctuaryStone),
+                Lock::Item(Items::SanctuaryStone),
                 Lock::Item(Items::BeiraVessel),
                 // needs walljump for temple gardens blocked stairway soul
                 // also requires climbing tower
@@ -252,8 +252,6 @@ impl Locations {
             Locations::WaterwayDucks => &[&[Lock::Location(Locations::Waterway)]],
             Locations::Samael => &[&[
                 Lock::Location(Locations::ArcaneSouth),
-                // for the tower elevator
-                Lock::Location(Locations::SanctuaryStone),
                 Lock::Location(Locations::LakeMolva),
                 // movement requirements for oliver's diary area
                 Lock::Movement(&[walljump!(0, 4), no_walljump!(0, 8)]),
