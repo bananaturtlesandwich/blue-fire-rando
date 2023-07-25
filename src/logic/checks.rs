@@ -1179,86 +1179,61 @@ pub const CHECKS: [Check; 255] = [
         location: Locations::AbandonedPath,
         context: Context::Overworld("A01_Graveyard_EmoteStatue_No"),
         drop: Drop::Emote(Emotes::No),
-        locks: &[Lock::Location(Locations::SanctuaryStone)],
+        locks: &[],
     },
     Check {
         location: Locations::AbandonedPath,
         context: Context::Overworld("Pickup_Rose2"),
         drop: Drop::Item(Items::Rose, 1),
-        locks: &[
-            Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[walljump!(0, 2), no_walljump!(0, 3)]),
-        ],
+        locks: &[Lock::Movement(&[walljump!(0, 2), no_walljump!(0, 3)])],
     },
     Check {
         location: Locations::AbandonedPath,
         context: Context::Overworld("Duck"),
         drop: Drop::Duck,
-        locks: &[
-            Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[no_walljump!(0, 3)]),
-        ],
+        locks: &[Lock::Movement(&[no_walljump!(0, 3)])],
     },
     Check {
         location: Locations::AbandonedPath,
         context: Context::Overworld("Pickup_BremurPicture"),
         drop: Drop::Item(Items::BremurPicture, 1),
-        locks: &[
-            Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[walljump!(0, 1), no_walljump!(0, 2)]),
-        ],
+        locks: &[Lock::Movement(&[walljump!(0, 1), no_walljump!(0, 2)])],
     },
     Check {
         location: Locations::AbandonedPath,
         context: Context::Overworld("Chest_A01_Graveyard_IceDestroyers"),
         drop: Drop::Weapon(Weapons::IceDestroyers),
-        locks: &[
-            Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)]),
-        ],
+        locks: &[Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)])],
     },
     Check {
         location: Locations::AbandonedPath,
         context: Context::Overworld("Chest_A02_Tunic_HolyAttire"),
         drop: Drop::Tunic(Tunics::OnopCoat),
-        locks: &[
-            Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)]),
-        ],
+        locks: &[Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)])],
     },
     Check {
         location: Locations::AbandonedPath,
         context: Context::Overworld("Pickup_Rose"),
         drop: Drop::Item(Items::Rose, 1),
-        locks: &[
-            Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)]),
-        ],
+        locks: &[Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)])],
     },
     Check {
         location: Locations::AbandonedPath,
         context: Context::Overworld("Chest_A01_Graveyard_Loot_01"),
         drop: Drop::Item(Items::SapphireOre, 1),
-        locks: &[
-            Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)]),
-        ],
+        locks: &[Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)])],
     },
     Check {
         location: Locations::AbandonedPath,
         context: Context::Overworld("Chest_A01_Graveyard_Loot_02"),
         drop: Drop::Item(Items::SapphireOre, 1),
-        locks: &[
-            Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)]),
-        ],
+        locks: &[Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)])],
     },
     Check {
         location: Locations::AbandonedPath,
         context: Context::Overworld("Dance_Platform_Levitation_Chest"),
         drop: Drop::Item(Items::SeagulSoup, 1),
         locks: &[
-            Lock::Location(Locations::SanctuaryStone),
             Lock::Emote(Emotes::Levitation),
             Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)]),
         ],
@@ -1277,10 +1252,7 @@ pub const CHECKS: [Check; 255] = [
         location: Locations::AbandonedPath,
         context: Context::Cutscene("Cinematics/VesselVon/VesselVon_Controller"),
         drop: Drop::Item(Items::BeiraVessel, 1),
-        locks: &[
-            Lock::Location(Locations::SanctuaryStone),
-            Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)]),
-        ],
+        locks: &[Lock::Movement(&[walljump!(1, 1), no_walljump!(4, 0)])],
     },
     // Firefall River
     Check {
