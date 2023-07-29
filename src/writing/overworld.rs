@@ -96,8 +96,9 @@ pub fn write(
                                         insert,
                                         &mut map,
                                         loc,
-                                        // some of the ducks are impossible to physically reach
+                                        // some of the ducks are impossible to physically reach otherwise
                                         match location {
+                                            Locations::KeepDucks => (500.0, 0.0, 0.0),
                                             Locations::ArcaneDucks => (0.0, 150.0, 0.0),
                                             Locations::ForestDucks if name == "Duck" => {
                                                 (0.0, 0.0, 800.0)
