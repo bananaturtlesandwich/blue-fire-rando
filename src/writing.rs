@@ -1,6 +1,6 @@
 use super::logic::*;
 use crate::{io::*, map::*};
-use unreal_asset::{exports::*, properties::*, types::fname::FName, *};
+use unreal_asset::{exports::*, properties::*, *};
 
 mod cutscenes;
 mod overworld;
@@ -45,19 +45,27 @@ fn extract(
     Ok((open(&loc)?, loc))
 }
 
-fn byte_property(name: &str, enum_type: &str, val: &str) -> Property {
+fn byte_property(
+    name: &str,
+    enum_ty: &str,
+    val: &str,
+    name_map: &mut containers::shared_resource::SharedResource<asset::name_map::NameMap>,
+) -> Property {
+    let name = name_map.get_mut().add_fname(name);
+    let enum_type = Some(name_map.get_mut().add_fname(enum_ty));
     Property::ByteProperty(int_property::ByteProperty {
-        name: FName::from_slice(name),
+        name,
         ancestry: unversioned::ancestry::Ancestry {
             ancestry: Vec::new(),
         },
         property_guid: None,
         duplication_index: 0,
-        enum_type: Some(FName::from_slice(enum_type)),
-        value: int_property::BytePropertyValue::FName(FName::new_dummy(
-            format!("{}::NewEnumerator{}", enum_type, val),
-            0,
-        )),
+        enum_type,
+        value: int_property::BytePropertyValue::FName(
+            name_map
+                .get_mut()
+                .add_fname(&format!("{}::NewEnumerator{}", enum_ty, val)),
+        ),
     })
 }
 
@@ -66,6 +74,7 @@ fn set_byte(
     enum_type: &str,
     val: &str,
     export: &mut normal_export::NormalExport,
+    name_map: &mut containers::shared_resource::SharedResource<asset::name_map::NameMap>,
 ) -> Result<(), Error> {
     match export
         .properties
@@ -74,10 +83,13 @@ fn set_byte(
     {
         Some(byte) => {
             use int_property::BytePropertyValue;
-            *cast!(BytePropertyValue, FName, &mut byte.value).ok_or(Error::Assumption)? =
-                FName::new_dummy(format!("{}::NewEnumerator{}", enum_type, val), 0)
+            *cast!(BytePropertyValue, FName, &mut byte.value).ok_or(Error::Assumption)? = name_map
+                .get_mut()
+                .add_fname(&format!("{}::NewEnumerator{}", enum_type, val))
         }
-        None => export.properties.push(byte_property(name, enum_type, val)),
+        None => export
+            .properties
+            .push(byte_property(name, enum_type, val, name_map)),
     }
     Ok(())
 }
@@ -233,7 +245,23 @@ fn create_hook<C: std::io::Read + std::io::Seek>(
 }
 
 impl Drop {
-    pub fn as_shop_entry(&self, price: i32) -> Vec<unreal_asset::properties::Property> {
+    pub fn as_shop_entry(
+        &self,
+        price: i32,
+        name_map: &mut containers::shared_resource::SharedResource<asset::name_map::NameMap>,
+    ) -> Vec<unreal_asset::properties::Property> {
+        let amount_name = name_map
+            .get_mut()
+            .add_fname("Amount_6_185C591747EF40A592FB63886FDB4281");
+        let resets_name = name_map
+            .get_mut()
+            .add_fname("Resets_8_E303F5DF4270CCEE83F05F974F3661C9");
+        let original_amounts_name = name_map
+            .get_mut()
+            .add_fname("OriginalAmount_11_58C3C17D426D49A439C0EE85D7E9B6EC");
+        let price_name = name_map
+            .get_mut()
+            .add_fname("Price_26_80A37F3645AE8292A9F311B86094C095");
         use int_property::*;
         [
             byte_property(
@@ -245,9 +273,10 @@ impl Drop {
                     Drop::Duck => Items::Duck.as_ref(),
                     _ => "25",
                 },
+                name_map,
             ),
             Property::IntProperty(IntProperty {
-                name: FName::from_slice("Amount_6_185C591747EF40A592FB63886FDB4281"),
+                name: amount_name,
                 ancestry: unversioned::ancestry::Ancestry {
                     ancestry: Vec::new(),
                 },
@@ -260,7 +289,7 @@ impl Drop {
                 },
             }),
             Property::BoolProperty(BoolProperty {
-                name: FName::from_slice("Resets_8_E303F5DF4270CCEE83F05F974F3661C9"),
+                name: resets_name,
                 ancestry: unversioned::ancestry::Ancestry {
                     ancestry: Vec::new(),
                 },
@@ -269,7 +298,7 @@ impl Drop {
                 value: false,
             }),
             Property::IntProperty(IntProperty {
-                name: FName::from_slice("OriginalAmount_11_58C3C17D426D49A439C0EE85D7E9B6EC"),
+                name: original_amounts_name,
                 ancestry: unversioned::ancestry::Ancestry {
                     ancestry: Vec::new(),
                 },
@@ -284,6 +313,7 @@ impl Drop {
                 "Type_17_9B84CFD04716464F71190CB4CECE0F49",
                 "InventoryItemType",
                 self.as_ref(),
+                name_map,
             ),
             byte_property(
                 "Tunic_23_B7D465CA4DCF57F409450789A6DB8590",
@@ -293,6 +323,7 @@ impl Drop {
                 } else {
                     "0"
                 },
+                name_map,
             ),
             byte_property(
                 "Weapon_22_F3B61F384438EE8A8193F385AE45F88A",
@@ -302,6 +333,7 @@ impl Drop {
                 } else {
                     "0"
                 },
+                name_map,
             ),
             byte_property(
                 "Spirit_21_55691F2E4B399DB3F381209D33BBE30B",
@@ -311,9 +343,10 @@ impl Drop {
                 } else {
                     "0"
                 },
+                name_map,
             ),
             Property::IntProperty(IntProperty {
-                name: FName::from_slice("Price_26_80A37F3645AE8292A9F311B86094C095"),
+                name: price_name,
                 ancestry: unversioned::ancestry::Ancestry {
                     ancestry: Vec::new(),
                 },
@@ -333,6 +366,7 @@ impl Drop {
                 } else {
                     "0"
                 },
+                name_map,
             ),
         ]
         .to_vec()
