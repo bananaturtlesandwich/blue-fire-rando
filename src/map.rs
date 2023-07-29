@@ -1,4 +1,9 @@
-use unreal_asset::{exports::*, properties::*, types::*, *};
+use unreal_asset::{
+    exports::*,
+    properties::*,
+    types::{fname::FName, *},
+    *,
+};
 
 mod delete;
 pub use delete::delete;
@@ -14,7 +19,7 @@ fn get_actor_exports<C: std::io::Seek + std::io::Read>(
     offset: usize,
 ) -> Vec<Export> {
     // get references to all the actor's children
-    let mut child_indexes: Vec<PackageIndex> = asset.exports[index]
+    let mut child_indexes: Vec<PackageIndex> = asset.asset_data.exports[index]
         .get_base_export()
         .create_before_serialization_dependencies
         .iter()
@@ -50,11 +55,15 @@ fn get_actor_exports<C: std::io::Seek + std::io::Read>(
 /// creates and assigns a unique name
 fn give_unique_name<C: std::io::Seek + std::io::Read>(orig: &mut FName, asset: &mut Asset<C>) {
     // for the cases where the number is unnecessary
-    if asset.search_name_reference(&orig.content).is_none() {
-        *orig = asset.add_fname(&orig.content);
+
+    if orig
+        .get_content(|name| asset.search_name_reference(name))
+        .is_none()
+    {
+        *orig = orig.get_content(|name| asset.add_fname(name));
         return;
     }
-    let mut name = orig.content.clone();
+    let mut name = orig.get_owned_content();
     let mut counter: u16 = match name.rfind(|ch: char| ch.to_digit(10).is_none()) {
         Some(index) if index != name.len() - 1 => {
             name.drain(index + 1..).collect::<String>().parse().unwrap()

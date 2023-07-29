@@ -7,10 +7,10 @@ authors = ["spuds"]
 edition = "2021"
 
 [dependencies]
-eframe = { version = "0.21", default-features = false, features = ["glow", "persistence"] }
-unreal_asset = { git = "https://github.com/astrotechies/unrealmodding", package = "unreal_asset" }
+eframe = { version = "0.22", default-features = false, features = ["glow", "persistence"] }
+unreal_asset = { git = "https://github.com/astrotechies/unrealmodding", package = "unreal_asset", rev = "b1d5553"}
 unpak = { version = "1.0", default-features = false, features = ["asset-paths"] }
-strum = { version = "0.24", features = ["derive"] }
+strum = { version = "0.25", features = ["derive"] }
 rand = "0.8"
 egui-modal = "0.2"
 rfd = "0.11"
