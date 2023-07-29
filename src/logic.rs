@@ -33,7 +33,7 @@ pub enum Shop {
 }
 
 impl Shop {
-    pub fn location(&self) -> unreal_asset::types::vector::Vector<f32> {
+    pub fn location(&self) -> unreal_asset::types::vector::Vector<f64> {
         use unreal_asset::types::vector::Vector;
         match self {
             Shop::Mork => Vector::new(52459.4, -17121.4, -35.13),

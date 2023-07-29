@@ -7,7 +7,7 @@ pub fn write(
     pak: &unpak::Pak,
 ) -> Result<(), Error> {
     let (mut savegame, savegame_loc) = extract(app, pak, SAVEGAME)?;
-    let default = savegame.exports[1]
+    let default = savegame.asset_data.exports[1]
         .get_normal_export_mut()
         .ok_or(Error::Assumption)?;
     if app.dash {
@@ -25,7 +25,7 @@ pub fn write(
     for Check { context, drop, .. } in checks {
         match context {
             Context::Shop(shop, index, price) => {
-                savegame.exports[1]
+                savegame.asset_data.exports[1]
                     .get_normal_export_mut()
                     .and_then(|norm| {
                         cast!(Property, ArrayProperty, &mut norm.properties[shop as usize])
@@ -34,6 +34,9 @@ pub fn write(
                     .value[index] = Property::StructProperty(
                     unreal_asset::properties::struct_property::StructProperty {
                         name: FName::from_slice(shop.as_ref()),
+                        ancestry: unversioned::ancestry::Ancestry {
+                            ancestry: Vec::new(),
+                        },
                         struct_type: Some(FName::from_slice("Inventory")),
                         struct_guid: None,
                         property_guid: None,
@@ -45,7 +48,7 @@ pub fn write(
             }
             Context::Starting => {
                 fn add_item(savegame: &mut Asset<std::fs::File>, drop: Drop) -> Result<(), Error> {
-                    savegame.exports[1]
+                    savegame.asset_data.exports[1]
                         .get_normal_export_mut()
                         .and_then(|default| {
                             cast!(Property, StructProperty, &mut default.properties[3])
@@ -70,6 +73,9 @@ pub fn write(
                                     }
                                     _ => "Inventory_23_288399C5416269F828550FB7376E7942",
                                 }),
+                                ancestry: unversioned::ancestry::Ancestry {
+                                    ancestry: Vec::new(),
+                                },
                                 struct_type: Some(FName::from_slice("Inventory")),
                                 struct_guid: None,
                                 property_guid: None,
@@ -83,7 +89,7 @@ pub fn write(
                 match &drop {
                     Drop::Ability(ability) => {
                         add_item(&mut savegame, Drop::Item(ability.as_item(), 1))?;
-                        savegame.exports[1]
+                        savegame.asset_data.exports[1]
                             .get_normal_export_mut()
                             .and_then(|default| {
                                 cast!(Property, StructProperty, &mut default.properties[2])
@@ -99,7 +105,7 @@ pub fn write(
                             .value = true;
                     }
                     Drop::Emote(emote) => {
-                        let emotes = savegame.exports[1]
+                        let emotes = savegame.asset_data.exports[1]
                             .get_normal_export_mut()
                             .and_then(|default| {
                                 cast!(Property, ArrayProperty, &mut default.properties[15])
@@ -112,7 +118,7 @@ pub fn write(
                         ))
                     }
                     Drop::Ore(amount) => {
-                        savegame.exports[1]
+                        savegame.asset_data.exports[1]
                             .get_normal_export_mut()
                             .and_then(|default| {
                                 cast!(Property, StructProperty, &mut default.properties[3])
@@ -124,7 +130,7 @@ pub fn write(
                     Drop::Duck => add_item(&mut savegame, Drop::Item(Items::Duck, 1))?,
                     Drop::Item(..) => add_item(&mut savegame, drop)?,
                     Drop::Spirit(spirit) => {
-                        let spirits = savegame.exports[1]
+                        let spirits = savegame.asset_data.exports[1]
                             .get_normal_export_mut()
                             .and_then(|default| {
                                 cast!(Property, StructProperty, &mut default.properties[14])
@@ -140,7 +146,7 @@ pub fn write(
                         ))
                     }
                     Drop::Weapon(weapon) => {
-                        let weapons = savegame.exports[1]
+                        let weapons = savegame.asset_data.exports[1]
                             .get_normal_export_mut()
                             .and_then(|default| {
                                 cast!(Property, StructProperty, &mut default.properties[14])
@@ -156,7 +162,7 @@ pub fn write(
                         ))
                     }
                     Drop::Tunic(tunic) => {
-                        let tunics = savegame.exports[1]
+                        let tunics = savegame.asset_data.exports[1]
                             .get_normal_export_mut()
                             .and_then(|default| {
                                 cast!(Property, StructProperty, &mut default.properties[14])
@@ -177,7 +183,7 @@ pub fn write(
         }
     }
     // clear out external shop items
-    let default = savegame.exports[1]
+    let default = savegame.asset_data.exports[1]
         .get_normal_export_mut()
         .ok_or(Error::Assumption)?;
     for (shopkeep, i) in shop_emotes {
@@ -190,7 +196,7 @@ pub fn write(
         .value
         .remove(i);
     }
-    savegame.rebuild_name_map()?;
+    savegame.rebuild_name_map();
     save(&mut savegame, savegame_loc)?;
     Ok(())
 }

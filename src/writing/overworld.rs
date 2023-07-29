@@ -1,3 +1,5 @@
+use unreal_asset::reader::archive_trait::ArchiveTrait;
+
 use super::*;
 
 pub fn write(
@@ -15,7 +17,7 @@ pub fn write(
                     for Check { context, drop, .. } in checks {
                         match context {
                             Context::Shop(shop, index, ..) => {
-                                let insert = map.exports.len();
+                                let insert = map.asset_data.exports.len();
                                 transplant(
                                     match drop {
                                         Drop::Ability(..) => 36,
@@ -31,16 +33,16 @@ pub fn write(
                                     )?,
                                 );
                                 let mut pos = shop.location();
-                                let (x, y) = (9.0 * index as f32).to_radians().sin_cos();
+                                let (x, y) = (9.0 * index as f64).to_radians().sin_cos();
                                 pos.x -= 1000.0 * x;
                                 pos.y -= 1000.0 * y;
                                 set_location(insert, &mut map, pos, (0.0, 0.0, 0.0));
-                                let norm = map.exports[insert]
+                                let norm = map.asset_data.exports[insert]
                                     .get_normal_export_mut()
                                     .ok_or(Error::Assumption)?;
                                 if let Drop::Emote(emote) = drop {
                                     use int_property::BytePropertyValue;
-                                    cast!(
+                                    *cast!(
                                         BytePropertyValue,
                                         FName,
                                         &mut cast!(Property, ByteProperty, &mut norm.properties[2])
@@ -48,7 +50,7 @@ pub fn write(
                                             .value
                                     )
                                     .ok_or(Error::Assumption)?
-                                    .content = format!("E_Emotes::NewEnumerator{}", emote.as_ref());
+                                     = FName::new_dummy(format!("E_Emotes::NewEnumerator{}", emote.as_ref()), 0);
                                 }
                                 if let Drop::Ability(ability) = drop {
                                     set_byte("Ability", "Abilities", ability.as_ref(), norm)?;
@@ -68,13 +70,14 @@ pub fn write(
                             }
                             Context::Overworld(name) => {
                                 let mut i = map
+                                    .asset_data
                                     .exports
                                     .iter()
-                                    .position(|ex| ex.get_base_export().object_name.content == name)
+                                    .position(|ex| ex.get_base_export().object_name == name)
                                     .ok_or(Error::Assumption)?;
                                 let class = map
-                                    .get_import(map.exports[i].get_base_export().class_index)
-                                    .map(|import| import.object_name.content.to_owned())
+                                    .get_import(map.asset_data.exports[i].get_base_export().class_index)
+                                    .map(|import| import.object_name.get_owned_content())
                                     .unwrap_or_default();
                                 let is_chest = || {
                                     matches!(
@@ -89,7 +92,7 @@ pub fn write(
                                         include_bytes!("../blueprints/collectibles.uexp"),
                                     )?;
                                     delete(i, &mut map);
-                                    let insert = map.exports.len();
+                                    let insert = map.asset_data.exports.len();
                                     transplant(actor, &mut map, &donor);
                                     let loc = get_location(i, &map);
                                     set_location(
@@ -133,17 +136,18 @@ pub fn write(
                                         counter += 1;
                                     }
                                     used.lock().unwrap().push(format!("{name}{counter}"));
-                                    let norm = &mut map.exports[insert]
+                                    let norm = &mut map.asset_data.exports[insert]
                                         .get_normal_export_mut()
                                         .ok_or(Error::Assumption)?;
                                     match norm.properties.iter_mut().find_map(|prop| {
                                         cast!(Property, StrProperty, prop)
-                                            .filter(|id| id.name.content == "ID")
+                                            .filter(|id| id.name == "ID")
                                     }) {
                                         Some(id) => id.value = Some(format!("{name}{counter}")),
                                         None => norm.properties.push(Property::StrProperty(
                                             str_property::StrProperty {
                                                 name: FName::from_slice("ID"),
+                                                ancestry: unversioned::ancestry::Ancestry { ancestry: Vec::new() },
                                                 property_guid: None,
                                                 duplication_index: 0,
                                                 value: Some(format!("{name}{counter}")),
@@ -158,7 +162,7 @@ pub fn write(
                                         if !is_chest() {
                                             replace(36)?;
                                         }
-                                        let chest = map.exports[i]
+                                        let chest = map.asset_data.exports[i]
                                             .get_normal_export_mut()
                                             .ok_or(Error::Assumption)?;
                                         set_byte(
@@ -170,13 +174,14 @@ pub fn write(
                                         set_byte("Item", "Items", item.as_ref(), chest)?;
                                         match chest.properties.iter_mut().find_map(|prop| {
                                             cast!(Property, BoolProperty, prop)
-                                                .filter(|bool| bool.name.content == "KeyItem")
+                                                .filter(|bool| bool.name == "KeyItem")
                                         }) {
                                             Some(key_item) => key_item.value = item.key_item(),
                                             None if item.key_item() => {
                                                 chest.properties.push(Property::BoolProperty(
                                                     int_property::BoolProperty {
                                                         name: FName::from_slice("KeyItem"),
+                                                        ancestry: unversioned::ancestry::Ancestry { ancestry: Vec::new() },
                                                         property_guid: None,
                                                         duplication_index: 0,
                                                         value: true,
@@ -187,12 +192,13 @@ pub fn write(
                                         }
                                         match chest.properties.iter_mut().find_map(|prop| {
                                             cast!(Property, IntProperty, prop)
-                                                .filter(|amount| amount.name.content == "Amount")
+                                                .filter(|amount| amount.name == "Amount")
                                         }) {
                                             Some(num) => num.value = *amount,
                                             None => chest.properties.push(Property::IntProperty(
                                                 int_property::IntProperty {
                                                     name: FName::from_slice("Amount"),
+                                                        ancestry: unversioned::ancestry::Ancestry { ancestry: Vec::new() },
                                                     property_guid: None,
                                                     duplication_index: 0,
                                                     value: *amount,
@@ -204,7 +210,7 @@ pub fn write(
                                         if !is_chest() {
                                             replace(36)?;
                                         }
-                                        let chest = map.exports[i]
+                                        let chest = map.asset_data.exports[i]
                                             .get_normal_export_mut()
                                             .ok_or(Error::Assumption)?;
                                         set_byte(
@@ -219,7 +225,7 @@ pub fn write(
                                         if !is_chest() {
                                             replace(36)?;
                                         }
-                                        let chest = map.exports[i]
+                                        let chest = map.asset_data.exports[i]
                                             .get_normal_export_mut()
                                             .ok_or(Error::Assumption)?;
                                         set_byte(
@@ -231,7 +237,7 @@ pub fn write(
                                         set_byte("Tunic", "Tunics", tunic.as_ref(), chest)?;
                                     }
                                     Drop::Spirit(spirit) if is_chest() => {
-                                        let chest = map.exports[i]
+                                        let chest = map.asset_data.exports[i]
                                             .get_normal_export_mut()
                                             .ok_or(Error::Assumption)?;
                                         set_byte(
@@ -246,7 +252,7 @@ pub fn write(
                                         if class != "Spirit_C" {
                                             replace(26)?;
                                         }
-                                        let spirit_bp = map.exports[i]
+                                        let spirit_bp = map.asset_data.exports[i]
                                             .get_normal_export_mut()
                                             .ok_or(Error::Assumption)?;
                                         set_byte("Amulet", "Spirits", spirit.as_ref(), spirit_bp)?;
@@ -255,7 +261,7 @@ pub fn write(
                                         if !is_chest() {
                                             replace(36)?;
                                         }
-                                        let chest = map.exports[i]
+                                        let chest = map.asset_data.exports[i]
                                             .get_normal_export_mut()
                                             .ok_or(Error::Assumption)?;
                                         set_byte(
@@ -270,7 +276,7 @@ pub fn write(
                                         if class != "EmoteStatue_BP_C" {
                                             replace(20)?;
                                         }
-                                        let statue = map.exports[i]
+                                        let statue = map.asset_data.exports[i]
                                             .get_normal_export_mut()
                                             .ok_or(Error::Assumption)?;
                                         set_byte("Emote", "E_Emotes", emote.as_ref(), statue)?;
@@ -279,19 +285,20 @@ pub fn write(
                                         if class != "Pickup_C" {
                                             replace(5)?;
                                         }
-                                        let pickup = map.exports[i]
+                                        let pickup = map.asset_data.exports[i]
                                             .get_normal_export_mut()
                                             .ok_or(Error::Assumption)?;
                                         set_byte("Type", "PickUpList", "5", pickup)?;
                                         match pickup.properties.iter_mut().find_map(|prop| {
                                             cast!(Property, IntProperty, prop).filter(|amount| {
-                                                amount.name.content == "Souls/LifeAmount"
+                                                amount.name == "Souls/LifeAmount"
                                             })
                                         }) {
                                             Some(num) => num.value = *amount,
                                             None => pickup.properties.push(Property::IntProperty(
                                                 int_property::IntProperty {
                                                     name: FName::from_slice("Souls/LifeAmount"),
+                                                        ancestry: unversioned::ancestry::Ancestry { ancestry: Vec::new() },
                                                     property_guid: None,
                                                     duplication_index: 0,
                                                     value: *amount,
@@ -305,7 +312,7 @@ pub fn write(
                             _ => (),
                         }
                     }
-                    map.rebuild_name_map()?;
+                    map.rebuild_name_map();
                     save(&mut map, &loc)?;
                     Ok(())
                 }))

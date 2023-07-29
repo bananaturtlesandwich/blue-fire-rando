@@ -1,6 +1,6 @@
 use super::logic::*;
 use crate::{io::*, map::*};
-use unreal_asset::{exports::*, properties::*, reader::asset_trait::AssetTrait, types::FName, *};
+use unreal_asset::{exports::*, properties::*, types::fname::FName, *};
 
 mod cutscenes;
 mod overworld;
@@ -48,10 +48,13 @@ fn extract(
 fn byte_property(name: &str, enum_type: &str, val: &str) -> Property {
     Property::ByteProperty(int_property::ByteProperty {
         name: FName::from_slice(name),
+        ancestry: unversioned::ancestry::Ancestry {
+            ancestry: Vec::new(),
+        },
         property_guid: None,
         duplication_index: 0,
         enum_type: Some(FName::from_slice(enum_type)),
-        value: int_property::BytePropertyValue::FName(FName::new(
+        value: int_property::BytePropertyValue::FName(FName::new_dummy(
             format!("{}::NewEnumerator{}", enum_type, val),
             0,
         )),
@@ -64,14 +67,15 @@ fn set_byte(
     val: &str,
     export: &mut normal_export::NormalExport,
 ) -> Result<(), Error> {
-    match export.properties.iter_mut().find_map(|prop| {
-        cast!(Property, ByteProperty, prop).filter(|byte| byte.name.content == name)
-    }) {
+    match export
+        .properties
+        .iter_mut()
+        .find_map(|prop| cast!(Property, ByteProperty, prop).filter(|byte| byte.name == name))
+    {
         Some(byte) => {
             use int_property::BytePropertyValue;
-            cast!(BytePropertyValue, FName, &mut byte.value)
-                .ok_or(Error::Assumption)?
-                .content = format!("{}::NewEnumerator{}", enum_type, val)
+            *cast!(BytePropertyValue, FName, &mut byte.value).ok_or(Error::Assumption)? =
+                FName::new_dummy(format!("{}::NewEnumerator{}", enum_type, val), 0)
         }
         None => export.properties.push(byte_property(name, enum_type, val)),
     }
@@ -98,8 +102,9 @@ pub fn write(data: Data, app: &crate::Rando) -> Result<(), Error> {
         loc.with_extension("uexp"),
     )?;
     let mut spirit_hunter = open(&loc)?;
-    spirit_hunter.exports[440].get_base_export_mut().object_name =
-        spirit_hunter.add_fname("Pickup_A02_SRF2");
+    spirit_hunter.asset_data.exports[440]
+        .get_base_export_mut()
+        .object_name = spirit_hunter.add_fname("Pickup_A02_SRF2");
     save(&mut spirit_hunter, &loc)?;
     std::thread::scope(|thread| -> Result<(), Error> {
         for thread in [
@@ -152,7 +157,7 @@ fn create_hook<C: std::io::Read + std::io::Seek>(
                         },
                         ..
                     }
-                ) = &mut hook.exports[index] else {
+                ) = &mut hook.asset_data.exports[index] else {
                     return Err(Error::Assumption)
                 };
     use unreal_asset::kismet::*;
@@ -187,13 +192,17 @@ fn create_hook<C: std::io::Read + std::io::Seek>(
         _ => KismetExpression::ExFalse(ExFalse::default()),
     };
     let self_refs: Vec<usize> = hook
+        .get_name_map()
+        .get_ref()
         .get_name_map_index_list()
         .iter()
         .enumerate()
         .filter_map(|(i, name)| name.contains("hook").then_some(i))
         .collect();
     for i in self_refs {
-        let name = hook.get_name_reference_mut(i as i32);
+        let mut map = hook.get_name_map();
+        let mut map = map.get_mut();
+        let name = map.get_name_reference_mut(i as i32);
         *name = name.replace("hook", &new_name);
     }
     save(&mut hook, loc)?;
@@ -206,13 +215,17 @@ fn create_hook<C: std::io::Read + std::io::Seek>(
     )?;
     let mut cutscene = open(&loc)?;
     let universal_refs: Vec<usize> = cutscene
+        .get_name_map()
+        .get_ref()
         .get_name_map_index_list()
         .iter()
         .enumerate()
         .filter_map(|(i, name)| name.contains("UniversalFunctions").then_some(i))
         .collect();
     for i in universal_refs {
-        let name = cutscene.get_name_reference_mut(i as i32);
+        let mut map = cutscene.get_name_map();
+        let mut map = map.get_mut();
+        let name = map.get_name_reference_mut(i as i32);
         *name = name.replace("UniversalFunctions", &new_name);
     }
     save(&mut cutscene, &loc)?;
@@ -235,6 +248,9 @@ impl Drop {
             ),
             Property::IntProperty(IntProperty {
                 name: FName::from_slice("Amount_6_185C591747EF40A592FB63886FDB4281"),
+                ancestry: unversioned::ancestry::Ancestry {
+                    ancestry: Vec::new(),
+                },
                 property_guid: None,
                 duplication_index: 0,
                 value: match self {
@@ -245,12 +261,18 @@ impl Drop {
             }),
             Property::BoolProperty(BoolProperty {
                 name: FName::from_slice("Resets_8_E303F5DF4270CCEE83F05F974F3661C9"),
+                ancestry: unversioned::ancestry::Ancestry {
+                    ancestry: Vec::new(),
+                },
                 property_guid: None,
                 duplication_index: 0,
                 value: false,
             }),
             Property::IntProperty(IntProperty {
                 name: FName::from_slice("OriginalAmount_11_58C3C17D426D49A439C0EE85D7E9B6EC"),
+                ancestry: unversioned::ancestry::Ancestry {
+                    ancestry: Vec::new(),
+                },
                 property_guid: None,
                 duplication_index: 0,
                 value: match self {
@@ -292,6 +314,9 @@ impl Drop {
             ),
             Property::IntProperty(IntProperty {
                 name: FName::from_slice("Price_26_80A37F3645AE8292A9F311B86094C095"),
+                ancestry: unversioned::ancestry::Ancestry {
+                    ancestry: Vec::new(),
+                },
                 property_guid: None,
                 duplication_index: 0,
                 value: if let Drop::Ore(amount) = self {

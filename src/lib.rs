@@ -6,7 +6,6 @@ mod map;
 mod writing;
 
 pub struct Rando {
-    font: egui::FontDefinitions,
     notifs: egui_modal::Modal,
     pak: std::path::PathBuf,
     pak_str: String,
@@ -51,6 +50,7 @@ impl Rando {
             .get_mut(&egui::FontFamily::Proportional)
             .unwrap()
             .insert(0, "cinzel".to_string());
+        ctx.egui_ctx.set_fonts(font);
 
         let notifs = egui_modal::Modal::new(&ctx.egui_ctx, "dialog");
         let autoupdate = get_bool("autoupdate");
@@ -82,7 +82,6 @@ impl Rando {
         let pak_str = get_pak_str(&pak);
 
         Self {
-            font,
             notifs,
             pak,
             pak_str,
@@ -113,7 +112,7 @@ fn ask_game_path() -> Option<std::path::PathBuf> {
     .then(|| path.join("Blue Fire\\Content\\Paks"))
 }
 
-fn get_pak_str(pak: &std::path::PathBuf) -> String {
+fn get_pak_str(pak: &std::path::Path) -> String {
     let mut pak_str = pak.to_str().unwrap_or_default().to_string();
     pak_str.truncate(pak_str.len() - 13);
     pak_str = "...".to_string() + &pak_str[(pak_str.len() - 50).clamp(0, 1000)..];
@@ -160,7 +159,6 @@ macro_rules! notify {
 
 impl eframe::App for Rando {
     fn update(&mut self, ctx: &eframe::egui::Context, _: &mut eframe::Frame) {
-        ctx.set_fonts(self.font.clone());
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.heading(

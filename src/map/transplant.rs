@@ -1,11 +1,17 @@
-use unreal_asset::{exports::*, reader::asset_trait::AssetTrait, types::*, *};
+use unreal_asset::{
+    cast,
+    exports::{Export, ExportBaseTrait},
+    reader::archive_trait::ArchiveTrait,
+    types::PackageIndex,
+    Asset, Import,
+};
 
 pub fn transplant<C: std::io::Seek + std::io::Read, D: std::io::Seek + std::io::Read>(
     index: usize,
     recipient: &mut Asset<C>,
     donor: &Asset<D>,
 ) {
-    let mut children = super::get_actor_exports(index, donor, recipient.exports.len());
+    let mut children = super::get_actor_exports(index, donor, recipient.asset_data.exports.len());
 
     // make sure the actor has a unique object name
     super::give_unique_name(
@@ -13,9 +19,10 @@ pub fn transplant<C: std::io::Seek + std::io::Read, D: std::io::Seek + std::io::
         recipient,
     );
 
-    let actor_ref = PackageIndex::new(recipient.exports.len() as i32 + 1);
+    let actor_ref = PackageIndex::new(recipient.asset_data.exports.len() as i32 + 1);
     // add the actor to persistent level
     if let Some((pos, level)) = recipient
+        .asset_data
         .exports
         .iter_mut()
         // least awkward way to get position and reference
@@ -35,7 +42,6 @@ pub fn transplant<C: std::io::Seek + std::io::Read, D: std::io::Seek + std::io::
             .create_before_serialization_dependencies
             .push(actor_ref);
     }
-
     // resolve all import references from exports
     let import_offset = recipient.imports.len() as i32;
     let mut imports = Vec::new();
@@ -47,31 +53,26 @@ pub fn transplant<C: std::io::Seek + std::io::Read, D: std::io::Seek + std::io::
                     &import.class_name,
                     &import.object_name,
                 ) {
+                    // sometimes e.g for GEN_VARIABLEs you want those imports
                     Some(existing)
-                        if donor.get_import(import.outer_index).map(|import| {
-                            (
-                                &import.class_package.content,
-                                &import.class_name.content,
-                                &import.object_name.content,
-                            )
-                        }) == recipient.get_import(PackageIndex::new(existing)).map(
-                            |import| {
-                                (
-                                    &import.class_package.content,
-                                    &import.class_name.content,
-                                    &import.object_name.content,
-                                )
-                            },
-                        ) =>
+                        if donor.get_import(import.outer_index).is_some_and(|imp| {
+                            recipient
+                                .get_import(PackageIndex::new(existing))
+                                .is_some_and(|import| {
+                                    imp.class_package.eq_content(&import.class_package)
+                                        && imp.class_name.eq_content(&import.class_name)
+                                        && imp.object_name.eq_content(&import.object_name)
+                                })
+                        }) =>
                     {
                         existing
                     }
                     _ => {
                         -import_offset
                             - match imports.iter().position(|imp: &Import| {
-                                imp.class_package.content == import.class_package.content
-                                    && imp.class_name.content == import.class_name.content
-                                    && imp.object_name.content == import.object_name.content
+                                imp.class_package.eq_content(&import.class_package)
+                                    && imp.class_name.eq_content(&import.class_name)
+                                    && imp.object_name.eq_content(&import.object_name)
                             }) {
                                 Some(existing) => existing + 1,
                                 None => {
@@ -86,7 +87,7 @@ pub fn transplant<C: std::io::Seek + std::io::Read, D: std::io::Seek + std::io::
         })
     }
     // finally add the exports
-    recipient.exports.append(&mut children);
+    recipient.asset_data.exports.append(&mut children);
 
     // resolve all import references from exports
     let mut i = 0;
@@ -99,30 +100,24 @@ pub fn transplant<C: std::io::Seek + std::io::Read, D: std::io::Seek + std::io::
                 &parent.object_name,
             ) {
                 Some(existing)
-                    if donor.get_import(parent.outer_index).map(|import| {
-                        (
-                            &import.class_package.content,
-                            &import.class_name.content,
-                            &import.object_name.content,
-                        )
-                    }) == recipient
-                        .get_import(PackageIndex::new(existing))
-                        .map(|import| {
-                            (
-                                &import.class_package.content,
-                                &import.class_name.content,
-                                &import.object_name.content,
-                            )
-                        }) =>
+                    if donor.get_import(parent.outer_index).is_some_and(|imp| {
+                        recipient
+                            .get_import(PackageIndex::new(existing))
+                            .is_some_and(|import| {
+                                imp.class_package.eq_content(&import.class_package)
+                                    && imp.class_name.eq_content(&import.class_name)
+                                    && imp.object_name.eq_content(&import.object_name)
+                            })
+                    }) =>
                 {
                     existing
                 }
                 _ => {
                     -import_offset
                         - match imports.iter().position(|import: &Import| {
-                            import.class_package.content == parent.class_package.content
-                                && import.class_name.content == parent.class_name.content
-                                && import.object_name.content == parent.object_name.content
+                            import.class_package.eq_content(&parent.class_package)
+                                && import.class_name.eq_content(&parent.class_name)
+                                && import.object_name.eq_content(&parent.object_name)
                         }) {
                             Some(existing) => existing + 1,
                             None => {
