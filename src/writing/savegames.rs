@@ -22,9 +22,12 @@ pub fn write(
             .value
             .clear()
     }
+    let mut name_map = savegame.get_name_map();
     for Check { context, drop, .. } in checks {
         match context {
             Context::Shop(shop, index, price) => {
+                let name = name_map.get_mut().add_fname(shop.as_ref());
+                let struct_type = Some(name_map.get_mut().add_fname("Inventory"));
                 savegame.asset_data.exports[1]
                     .get_normal_export_mut()
                     .and_then(|norm| {
@@ -33,21 +36,34 @@ pub fn write(
                     .ok_or(Error::Assumption)?
                     .value[index] = Property::StructProperty(
                     unreal_asset::properties::struct_property::StructProperty {
-                        name: FName::from_slice(shop.as_ref()),
+                        name,
                         ancestry: unversioned::ancestry::Ancestry {
                             ancestry: Vec::new(),
                         },
-                        struct_type: Some(FName::from_slice("Inventory")),
+                        struct_type,
                         struct_guid: None,
                         property_guid: None,
                         duplication_index: 0,
                         serialize_none: true,
-                        value: drop.as_shop_entry(price),
+                        value: drop.as_shop_entry(price, &mut name_map),
                     },
                 );
             }
             Context::Starting => {
-                fn add_item(savegame: &mut Asset<std::fs::File>, drop: Drop) -> Result<(), Error> {
+                fn add_item(
+                    savegame: &mut Asset<std::fs::File>,
+                    drop: Drop,
+                    name_map: &mut containers::shared_resource::SharedResource<
+                        asset::name_map::NameMap,
+                    >,
+                ) -> Result<(), Error> {
+                    let name = name_map.get_mut().add_fname(match drop {
+                        Drop::Item(item, ..) if item.key_item() => {
+                            "PassiveInventory_48_636C916F4A37F051CF9B14A1402B4C94"
+                        }
+                        _ => "Inventory_23_288399C5416269F828550FB7376E7942",
+                    });
+                    let struct_type = Some(name_map.get_mut().add_fname("Inventory"));
                     savegame.asset_data.exports[1]
                         .get_normal_export_mut()
                         .and_then(|default| {
@@ -67,28 +83,27 @@ pub fn write(
                         .value
                         .push(unreal_asset::properties::Property::StructProperty(
                             unreal_asset::properties::struct_property::StructProperty {
-                                name: FName::from_slice(match drop {
-                                    Drop::Item(item, ..) if item.key_item() => {
-                                        "PassiveInventory_48_636C916F4A37F051CF9B14A1402B4C94"
-                                    }
-                                    _ => "Inventory_23_288399C5416269F828550FB7376E7942",
-                                }),
+                                name,
                                 ancestry: unversioned::ancestry::Ancestry {
                                     ancestry: Vec::new(),
                                 },
-                                struct_type: Some(FName::from_slice("Inventory")),
+                                struct_type,
                                 struct_guid: None,
                                 property_guid: None,
                                 duplication_index: 0,
                                 serialize_none: true,
-                                value: drop.as_shop_entry(0),
+                                value: drop.as_shop_entry(0, name_map),
                             },
                         ));
                     Ok(())
                 }
                 match &drop {
                     Drop::Ability(ability) => {
-                        add_item(&mut savegame, Drop::Item(ability.as_item(), 1))?;
+                        add_item(
+                            &mut savegame,
+                            Drop::Item(ability.as_item(), 1),
+                            &mut name_map,
+                        )?;
                         savegame.asset_data.exports[1]
                             .get_normal_export_mut()
                             .and_then(|default| {
@@ -115,6 +130,7 @@ pub fn write(
                             &emotes.value.len().to_string(),
                             "E_Emotes",
                             emote.as_ref(),
+                            &mut name_map,
                         ))
                     }
                     Drop::Ore(amount) => {
@@ -127,8 +143,10 @@ pub fn write(
                             .ok_or(Error::Assumption)?
                             .value += *amount;
                     }
-                    Drop::Duck => add_item(&mut savegame, Drop::Item(Items::Duck, 1))?,
-                    Drop::Item(..) => add_item(&mut savegame, drop)?,
+                    Drop::Duck => {
+                        add_item(&mut savegame, Drop::Item(Items::Duck, 1), &mut name_map)?
+                    }
+                    Drop::Item(..) => add_item(&mut savegame, drop, &mut name_map)?,
                     Drop::Spirit(spirit) => {
                         let spirits = savegame.asset_data.exports[1]
                             .get_normal_export_mut()
@@ -143,6 +161,7 @@ pub fn write(
                             &spirits.value.len().to_string(),
                             "Spirits",
                             spirit.as_ref(),
+                            &mut name_map,
                         ))
                     }
                     Drop::Weapon(weapon) => {
@@ -159,6 +178,7 @@ pub fn write(
                             &weapons.value.len().to_string(),
                             "Weapons",
                             weapon.as_ref(),
+                            &mut name_map,
                         ))
                     }
                     Drop::Tunic(tunic) => {
@@ -175,6 +195,7 @@ pub fn write(
                             &tunics.value.len().to_string(),
                             "Tunics",
                             tunic.as_ref(),
+                            &mut name_map,
                         ))
                     }
                 }

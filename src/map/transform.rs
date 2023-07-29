@@ -1,8 +1,7 @@
 use unreal_asset::{
     exports::ExportNormalTrait,
-    // exports::*,
     properties::{struct_property::StructProperty, vector_property::VectorProperty, *},
-    types::{fname::FName, vector::Vector},
+    types::vector::Vector,
     *,
 };
 
@@ -46,6 +45,7 @@ pub fn set_location<C: std::io::Read + std::io::Seek>(
     new: Vector<f64>,
     offset: (f64, f64, f64),
 ) {
+    let mut name_map = asset.get_name_map();
     let (x, y, z) = offset;
     let Some(transform) = get_transform_index(index, asset) else {
         return
@@ -67,28 +67,31 @@ pub fn set_location<C: std::io::Read + std::io::Seek>(
                 }
             }
         }
-        None => norm
-            .properties
-            .push(Property::StructProperty(StructProperty {
-                name: FName::from_slice("RelativeLocation"),
-                ancestry: unversioned::ancestry::Ancestry {
-                    ancestry: Vec::new(),
-                },
-                struct_type: Some(FName::from_slice("Vector")),
-                struct_guid: None,
-                property_guid: None,
-                duplication_index: 0,
-                serialize_none: true,
-                value: vec![Property::VectorProperty(VectorProperty {
-                    name: FName::from_slice("RelativeLocation"),
+        None => {
+            let name = name_map.get_mut().add_fname("RelativeLocation");
+            let struct_type = Some(name_map.clone_resource().get_mut().add_fname("Vector"));
+            norm.properties
+                .push(Property::StructProperty(StructProperty {
+                    name,
                     ancestry: unversioned::ancestry::Ancestry {
                         ancestry: Vec::new(),
                     },
+                    struct_type,
+                    struct_guid: None,
                     property_guid: None,
                     duplication_index: 0,
-                    value: Vector::new(new.x.into(), new.y.into(), new.z.into()),
-                })],
-            })),
+                    serialize_none: true,
+                    value: vec![Property::VectorProperty(VectorProperty {
+                        name: name_map.get_mut().add_fname("RelativeLocation"),
+                        ancestry: unversioned::ancestry::Ancestry {
+                            ancestry: Vec::new(),
+                        },
+                        property_guid: None,
+                        duplication_index: 0,
+                        value: Vector::new(new.x.into(), new.y.into(), new.z.into()),
+                    })],
+                }));
+        }
     }
 }
 

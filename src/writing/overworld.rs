@@ -14,6 +14,7 @@ pub fn write(
             |(location, checks)| -> Result<std::thread::ScopedJoinHandle<Result<(), Error>>, Error> {
                 Ok(thread.spawn(move || {
                     let (mut map, loc) = extract(app, pak, &format!("{PREFIX}{location}.umap"))?;
+                    let mut name_map = map.get_name_map();
                     for Check { context, drop, .. } in checks {
                         match context {
                             Context::Shop(shop, index, ..) => {
@@ -50,11 +51,11 @@ pub fn write(
                                             .value
                                     )
                                     .ok_or(Error::Assumption)?
-                                     = FName::new_dummy(format!("E_Emotes::NewEnumerator{}", emote.as_ref()), 0);
+                                     = name_map.get_mut().add_fname(&format!("E_Emotes::NewEnumerator{}", emote.as_ref()));
                                 }
                                 if let Drop::Ability(ability) = drop {
-                                    set_byte("Ability", "Abilities", ability.as_ref(), norm)?;
-                                    set_byte("Type", "InventoryItemType", drop.as_ref(), norm)?;
+                                    set_byte("Ability", "Abilities", ability.as_ref(), norm, &mut name_map)?;
+                                    set_byte("Type", "InventoryItemType", drop.as_ref(), norm, &mut name_map)?;
                                 }
                                 cast!(
                                     Property,
@@ -146,7 +147,7 @@ pub fn write(
                                         Some(id) => id.value = Some(format!("{name}{counter}")),
                                         None => norm.properties.push(Property::StrProperty(
                                             str_property::StrProperty {
-                                                name: FName::from_slice("ID"),
+                                                name: name_map.get_mut().add_fname("ID"),
                                                 ancestry: unversioned::ancestry::Ancestry { ancestry: Vec::new() },
                                                 property_guid: None,
                                                 duplication_index: 0,
@@ -170,8 +171,9 @@ pub fn write(
                                             "InventoryItemType",
                                             drop.as_ref(),
                                             chest,
+                                            &mut name_map
                                         )?;
-                                        set_byte("Item", "Items", item.as_ref(), chest)?;
+                                        set_byte("Item", "Items", item.as_ref(), chest, &mut name_map)?;
                                         match chest.properties.iter_mut().find_map(|prop| {
                                             cast!(Property, BoolProperty, prop)
                                                 .filter(|bool| bool.name == "KeyItem")
@@ -180,7 +182,7 @@ pub fn write(
                                             None if item.key_item() => {
                                                 chest.properties.push(Property::BoolProperty(
                                                     int_property::BoolProperty {
-                                                        name: FName::from_slice("KeyItem"),
+                                                        name: name_map.get_mut().add_fname("KeyItem"),
                                                         ancestry: unversioned::ancestry::Ancestry { ancestry: Vec::new() },
                                                         property_guid: None,
                                                         duplication_index: 0,
@@ -197,7 +199,7 @@ pub fn write(
                                             Some(num) => num.value = *amount,
                                             None => chest.properties.push(Property::IntProperty(
                                                 int_property::IntProperty {
-                                                    name: FName::from_slice("Amount"),
+                                                    name: name_map.get_mut().add_fname("Amount"),
                                                         ancestry: unversioned::ancestry::Ancestry { ancestry: Vec::new() },
                                                     property_guid: None,
                                                     duplication_index: 0,
@@ -218,8 +220,9 @@ pub fn write(
                                             "InventoryItemType",
                                             drop.as_ref(),
                                             chest,
+                                            &mut name_map
                                         )?;
-                                        set_byte("Weapon", "Weapons", weapon.as_ref(), chest)?;
+                                        set_byte("Weapon", "Weapons", weapon.as_ref(), chest, &mut name_map)?;
                                     }
                                     Drop::Tunic(tunic) => {
                                         if !is_chest() {
@@ -233,8 +236,9 @@ pub fn write(
                                             "InventoryItemType",
                                             drop.as_ref(),
                                             chest,
+                                            &mut name_map
                                         )?;
-                                        set_byte("Tunic", "Tunics", tunic.as_ref(), chest)?;
+                                        set_byte("Tunic", "Tunics", tunic.as_ref(), chest, &mut name_map)?;
                                     }
                                     Drop::Spirit(spirit) if is_chest() => {
                                         let chest = map.asset_data.exports[i]
@@ -245,8 +249,9 @@ pub fn write(
                                             "InventoryItemType",
                                             drop.as_ref(),
                                             chest,
+                                            &mut name_map
                                         )?;
-                                        set_byte("Amulet", "Spirits", spirit.as_ref(), chest)?;
+                                        set_byte("Amulet", "Spirits", spirit.as_ref(), chest, &mut name_map)?;
                                     }
                                     Drop::Spirit(spirit) => {
                                         if class != "Spirit_C" {
@@ -255,7 +260,7 @@ pub fn write(
                                         let spirit_bp = map.asset_data.exports[i]
                                             .get_normal_export_mut()
                                             .ok_or(Error::Assumption)?;
-                                        set_byte("Amulet", "Spirits", spirit.as_ref(), spirit_bp)?;
+                                        set_byte("Amulet", "Spirits", spirit.as_ref(), spirit_bp, &mut name_map)?;
                                     }
                                     Drop::Ability(ability) => {
                                         if !is_chest() {
@@ -269,8 +274,9 @@ pub fn write(
                                             "InventoryItemType",
                                             drop.as_ref(),
                                             chest,
+                                            &mut name_map
                                         )?;
-                                        set_byte("Ability", "Abilities", ability.as_ref(), chest)?;
+                                        set_byte("Ability", "Abilities", ability.as_ref(), chest, &mut name_map)?;
                                     }
                                     Drop::Emote(emote) => {
                                         if class != "EmoteStatue_BP_C" {
@@ -279,7 +285,7 @@ pub fn write(
                                         let statue = map.asset_data.exports[i]
                                             .get_normal_export_mut()
                                             .ok_or(Error::Assumption)?;
-                                        set_byte("Emote", "E_Emotes", emote.as_ref(), statue)?;
+                                        set_byte("Emote", "E_Emotes", emote.as_ref(), statue, &mut name_map)?;
                                     }
                                     Drop::Ore(amount) => {
                                         if class != "Pickup_C" {
@@ -288,7 +294,7 @@ pub fn write(
                                         let pickup = map.asset_data.exports[i]
                                             .get_normal_export_mut()
                                             .ok_or(Error::Assumption)?;
-                                        set_byte("Type", "PickUpList", "5", pickup)?;
+                                        set_byte("Type", "PickUpList", "5", pickup, &mut name_map)?;
                                         match pickup.properties.iter_mut().find_map(|prop| {
                                             cast!(Property, IntProperty, prop).filter(|amount| {
                                                 amount.name == "Souls/LifeAmount"
@@ -297,8 +303,8 @@ pub fn write(
                                             Some(num) => num.value = *amount,
                                             None => pickup.properties.push(Property::IntProperty(
                                                 int_property::IntProperty {
-                                                    name: FName::from_slice("Souls/LifeAmount"),
-                                                        ancestry: unversioned::ancestry::Ancestry { ancestry: Vec::new() },
+                                                    name: name_map.get_mut().add_fname("Souls/LifeAmount"),
+                                                    ancestry: unversioned::ancestry::Ancestry { ancestry: Vec::new() },
                                                     property_guid: None,
                                                     duplication_index: 0,
                                                     value: *amount,
