@@ -6,6 +6,7 @@ pub fn open(file: impl AsRef<Path>) -> Result<Asset<File>, Error> {
         File::open(&file)?,
         File::open(file.as_ref().with_extension("uexp")).ok(),
         VER_UE4_25,
+        None,
     )
 }
 
@@ -13,7 +14,12 @@ pub fn open_from_bytes<'chain>(
     asset: &'chain [u8],
     bulk: &'chain [u8],
 ) -> Result<Asset<Cursor<&'chain [u8]>>, Error> {
-    Asset::new(Cursor::new(asset), Some(Cursor::new(bulk)), VER_UE4_25)
+    Asset::new(
+        Cursor::new(asset),
+        Some(Cursor::new(bulk)),
+        VER_UE4_25,
+        None,
+    )
 }
 
 pub fn save<C: std::io::Read + std::io::Seek>(

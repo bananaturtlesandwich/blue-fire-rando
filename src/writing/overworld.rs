@@ -1,4 +1,4 @@
-use unreal_asset::reader::archive_trait::ArchiveTrait;
+use unreal_asset::reader::ArchiveTrait;
 
 use super::*;
 
@@ -148,7 +148,7 @@ pub fn write(
                                         None => norm.properties.push(Property::StrProperty(
                                             str_property::StrProperty {
                                                 name: name_map.get_mut().add_fname("ID"),
-                                                ancestry: unversioned::ancestry::Ancestry { ancestry: Vec::new() },
+                                                ancestry: Ancestry { ancestry: Vec::new() },
                                                 property_guid: None,
                                                 duplication_index: 0,
                                                 value: Some(format!("{name}{counter}")),
@@ -183,7 +183,7 @@ pub fn write(
                                                 chest.properties.push(Property::BoolProperty(
                                                     int_property::BoolProperty {
                                                         name: name_map.get_mut().add_fname("KeyItem"),
-                                                        ancestry: unversioned::ancestry::Ancestry { ancestry: Vec::new() },
+                                                        ancestry: Ancestry { ancestry: Vec::new() },
                                                         property_guid: None,
                                                         duplication_index: 0,
                                                         value: true,
@@ -200,7 +200,7 @@ pub fn write(
                                             None => chest.properties.push(Property::IntProperty(
                                                 int_property::IntProperty {
                                                     name: name_map.get_mut().add_fname("Amount"),
-                                                        ancestry: unversioned::ancestry::Ancestry { ancestry: Vec::new() },
+                                                        ancestry: Ancestry { ancestry: Vec::new() },
                                                     property_guid: None,
                                                     duplication_index: 0,
                                                     value: *amount,
@@ -304,7 +304,7 @@ pub fn write(
                                             None => pickup.properties.push(Property::IntProperty(
                                                 int_property::IntProperty {
                                                     name: name_map.get_mut().add_fname("Souls/LifeAmount"),
-                                                    ancestry: unversioned::ancestry::Ancestry { ancestry: Vec::new() },
+                                                    ancestry: Ancestry { ancestry: Vec::new() },
                                                     property_guid: None,
                                                     duplication_index: 0,
                                                     value: *amount,
