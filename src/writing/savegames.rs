@@ -34,28 +34,24 @@ pub fn write(
                         cast!(Property, ArrayProperty, &mut norm.properties[shop as usize])
                     })
                     .ok_or(Error::Assumption)?
-                    .value[index] = Property::StructProperty(
-                    unreal_asset::properties::struct_property::StructProperty {
-                        name,
-                        ancestry: unversioned::ancestry::Ancestry {
-                            ancestry: Vec::new(),
-                        },
-                        struct_type,
-                        struct_guid: None,
-                        property_guid: None,
-                        duplication_index: 0,
-                        serialize_none: true,
-                        value: drop.as_shop_entry(price, &mut name_map),
+                    .value[index] = Property::StructProperty(struct_property::StructProperty {
+                    name,
+                    ancestry: Ancestry {
+                        ancestry: Vec::new(),
                     },
-                );
+                    struct_type,
+                    struct_guid: None,
+                    property_guid: None,
+                    duplication_index: 0,
+                    serialize_none: true,
+                    value: drop.as_shop_entry(price, &mut name_map),
+                });
             }
             Context::Starting => {
                 fn add_item(
-                    savegame: &mut Asset<std::fs::File>,
+                    savegame: &mut unreal_asset::Asset<std::fs::File>,
                     drop: Drop,
-                    name_map: &mut containers::shared_resource::SharedResource<
-                        asset::name_map::NameMap,
-                    >,
+                    name_map: &mut SharedResource<NameMap>,
                 ) -> Result<(), Error> {
                     let name = name_map.get_mut().add_fname(match drop {
                         Drop::Item(item, ..) if item.key_item() => {
@@ -81,20 +77,18 @@ pub fn write(
                         })
                         .ok_or(Error::Assumption)?
                         .value
-                        .push(unreal_asset::properties::Property::StructProperty(
-                            unreal_asset::properties::struct_property::StructProperty {
-                                name,
-                                ancestry: unversioned::ancestry::Ancestry {
-                                    ancestry: Vec::new(),
-                                },
-                                struct_type,
-                                struct_guid: None,
-                                property_guid: None,
-                                duplication_index: 0,
-                                serialize_none: true,
-                                value: drop.as_shop_entry(0, name_map),
+                        .push(Property::StructProperty(struct_property::StructProperty {
+                            name,
+                            ancestry: Ancestry {
+                                ancestry: Vec::new(),
                             },
-                        ));
+                            struct_type,
+                            struct_guid: None,
+                            property_guid: None,
+                            duplication_index: 0,
+                            serialize_none: true,
+                            value: drop.as_shop_entry(0, name_map),
+                        }));
                     Ok(())
                 }
                 match &drop {

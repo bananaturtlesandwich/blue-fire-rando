@@ -1,6 +1,12 @@
 use super::logic::*;
 use crate::{io::*, map::*};
-use unreal_asset::{exports::*, properties::*, *};
+use unreal_asset::{
+    cast,
+    containers::{NameMap, SharedResource},
+    exports::*,
+    properties::*,
+    unversioned::Ancestry,
+};
 
 mod cutscenes;
 mod overworld;
@@ -10,7 +16,7 @@ mod specific;
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("unreal_asset: {0}")]
-    UnrealAsset(#[from] unreal_asset::error::Error),
+    UnrealAsset(#[from] unreal_asset::Error),
     #[error("unpak: {0}")]
     Unpak(#[from] unpak::Error),
     #[error("io: {0}")]
@@ -29,7 +35,7 @@ fn extract(
     app: &crate::Rando,
     pak: &unpak::Pak,
     path: &str,
-) -> Result<(Asset<std::fs::File>, std::path::PathBuf), Error> {
+) -> Result<(unreal_asset::Asset<std::fs::File>, std::path::PathBuf), Error> {
     let loc = app.pak.join(MOD).join(path);
     if path != "Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap" {
         std::fs::create_dir_all(loc.parent().expect("is a file"))?;
@@ -49,13 +55,13 @@ fn byte_property(
     name: &str,
     enum_ty: &str,
     val: &str,
-    name_map: &mut containers::shared_resource::SharedResource<asset::name_map::NameMap>,
+    name_map: &mut SharedResource<NameMap>,
 ) -> Property {
     let name = name_map.get_mut().add_fname(name);
     let enum_type = Some(name_map.get_mut().add_fname(enum_ty));
     Property::ByteProperty(int_property::ByteProperty {
         name,
-        ancestry: unversioned::ancestry::Ancestry {
+        ancestry: Ancestry {
             ancestry: Vec::new(),
         },
         property_guid: None,
@@ -74,7 +80,7 @@ fn set_byte(
     enum_type: &str,
     val: &str,
     export: &mut normal_export::NormalExport,
-    name_map: &mut containers::shared_resource::SharedResource<asset::name_map::NameMap>,
+    name_map: &mut SharedResource<NameMap>,
 ) -> Result<(), Error> {
     match export
         .properties
@@ -150,7 +156,7 @@ pub fn write(data: Data, app: &crate::Rando) -> Result<(), Error> {
 fn create_hook<C: std::io::Read + std::io::Seek>(
     app: &crate::Rando,
     pak: &unpak::Pak,
-    get_hook: impl Fn(&std::path::PathBuf) -> Result<Asset<C>, Error>,
+    get_hook: impl Fn(&std::path::PathBuf) -> Result<unreal_asset::Asset<C>, Error>,
     drop: &Drop,
     cutscene: &str,
     index: usize,
@@ -161,8 +167,8 @@ fn create_hook<C: std::io::Read + std::io::Seek>(
     loc = loc.join(&new_name).with_extension("uasset");
     let mut hook = get_hook(&loc)?;
     // edit the item given by the kismet bytecode in the hook
-    let exports::Export::FunctionExport(
-                    exports::function_export::FunctionExport {
+    let Export::FunctionExport(
+                    function_export::FunctionExport {
                         struct_export: struct_export::StructExport {
                             script_bytecode:Some(bytecode),
                             ..
@@ -248,8 +254,8 @@ impl Drop {
     pub fn as_shop_entry(
         &self,
         price: i32,
-        name_map: &mut containers::shared_resource::SharedResource<asset::name_map::NameMap>,
-    ) -> Vec<unreal_asset::properties::Property> {
+        name_map: &mut SharedResource<NameMap>,
+    ) -> Vec<Property> {
         let amount_name = name_map
             .get_mut()
             .add_fname("Amount_6_185C591747EF40A592FB63886FDB4281");
@@ -277,7 +283,7 @@ impl Drop {
             ),
             Property::IntProperty(IntProperty {
                 name: amount_name,
-                ancestry: unversioned::ancestry::Ancestry {
+                ancestry: Ancestry {
                     ancestry: Vec::new(),
                 },
                 property_guid: None,
@@ -290,7 +296,7 @@ impl Drop {
             }),
             Property::BoolProperty(BoolProperty {
                 name: resets_name,
-                ancestry: unversioned::ancestry::Ancestry {
+                ancestry: Ancestry {
                     ancestry: Vec::new(),
                 },
                 property_guid: None,
@@ -299,7 +305,7 @@ impl Drop {
             }),
             Property::IntProperty(IntProperty {
                 name: original_amounts_name,
-                ancestry: unversioned::ancestry::Ancestry {
+                ancestry: Ancestry {
                     ancestry: Vec::new(),
                 },
                 property_guid: None,
@@ -347,7 +353,7 @@ impl Drop {
             ),
             Property::IntProperty(IntProperty {
                 name: price_name,
-                ancestry: unversioned::ancestry::Ancestry {
+                ancestry: Ancestry {
                     ancestry: Vec::new(),
                 },
                 property_guid: None,
