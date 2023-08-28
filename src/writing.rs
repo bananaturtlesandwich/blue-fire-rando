@@ -17,8 +17,8 @@ mod specific;
 pub enum Error {
     #[error("unreal_asset: {0}")]
     UnrealAsset(#[from] unreal_asset::Error),
-    #[error("unpak: {0}")]
-    Unpak(#[from] unpak::Error),
+    #[error("repak: {0}")]
+    Repak(#[from] repak::Error),
     #[error("io: {0}")]
     Io(#[from] std::io::Error),
     #[error("data was not as expected - you may have an older version of the game")]
@@ -33,19 +33,24 @@ const PREFIX: &str = "Maps/World/";
 
 fn extract(
     app: &crate::Rando,
-    pak: &unpak::Pak,
+    pak: &repak::PakReader,
     path: &str,
 ) -> Result<(unreal_asset::Asset<std::fs::File>, std::path::PathBuf), Error> {
     let loc = app.pak.join(MOD).join(path);
     if path != "Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap" {
         std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-        pak.read_to_file(&format!("/Game/BlueFire/{path}"), &loc)?;
-        pak.read_to_file(
+        pak.read_file(
+            &format!("Blue Fire/Content/BlueFire/{path}"),
+            &mut app.pak()?,
+            &mut std::fs::File::create(&loc)?,
+        )?;
+        pak.read_file(
             &format!(
-                "/Game/BlueFire/{}",
+                "Blue Fire/Content/BlueFire/{}",
                 path.replace(".uasset", ".uexp").replace(".umap", ".uexp")
             ),
-            loc.with_extension("uexp"),
+            &mut app.pak()?,
+            &mut std::fs::File::create(loc.with_extension("uexp"))?,
         )?;
     }
     Ok((open(&loc)?, loc))
@@ -101,23 +106,23 @@ fn set_byte(
 }
 
 pub fn write(data: Data, app: &crate::Rando) -> Result<(), Error> {
-    let pak = unpak::Pak::new(
-        app.pak.join("Blue Fire-WindowsNoEditor.pak"),
-        unpak::Version::FrozenIndex,
-    )?;
+    let mut sync = app.pak()?;
+    let pak = repak::PakReader::new(&mut sync, repak::Version::V9)?;
     // correct the shenanigans in spirit hunter
     let loc = app
         .pak
         .join(MOD)
         .join("Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap");
     std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-    pak.read_to_file(
-        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap",
-        &loc,
+    pak.read_file(
+        "Blue Fire/Content/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap",
+        &mut sync,
+        &mut std::fs::File::create(&loc)?,
     )?;
-    pak.read_to_file(
-        "/Game/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.uexp",
-        loc.with_extension("uexp"),
+    pak.read_file(
+        "Blue Fire/Content/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.uexp",
+        &mut sync,
+        &mut std::fs::File::create(loc.with_extension("uexp"))?,
     )?;
     let mut spirit_hunter = open(&loc)?;
     spirit_hunter.asset_data.exports[440]
@@ -155,7 +160,7 @@ pub fn write(data: Data, app: &crate::Rando) -> Result<(), Error> {
 
 fn create_hook<C: std::io::Read + std::io::Seek>(
     app: &crate::Rando,
-    pak: &unpak::Pak,
+    pak: &repak::PakReader,
     get_hook: impl Fn(&std::path::PathBuf) -> Result<unreal_asset::Asset<C>, Error>,
     drop: &Drop,
     cutscene: &str,
@@ -167,37 +172,30 @@ fn create_hook<C: std::io::Read + std::io::Seek>(
     loc = loc.join(&new_name).with_extension("uasset");
     let mut hook = get_hook(&loc)?;
     // edit the item given by the kismet bytecode in the hook
-    let Export::FunctionExport(
-                    function_export::FunctionExport {
-                        struct_export: struct_export::StructExport {
-                            script_bytecode:Some(bytecode),
-                            ..
-                        },
-                        ..
-                    }
-                ) = &mut hook.asset_data.exports[index] else {
-                    return Err(Error::Assumption)
-                };
+    let Export::FunctionExport(function_export::FunctionExport {
+        struct_export:
+            struct_export::StructExport {
+                script_bytecode: Some(bytecode),
+                ..
+            },
+        ..
+    }) = &mut hook.asset_data.exports[index]
+    else {
+        return Err(Error::Assumption);
+    };
     use unreal_asset::kismet::*;
-    let [
-            KismetExpression::ExLet(item_type),
-            KismetExpression::ExLet(index),
-            KismetExpression::ExLet(amount),
-            KismetExpression::ExLetBool(key_item)
-        ] = &mut bytecode[0..4] else {
-            return Err(Error::Assumption)
-        };
-    let [
-            KismetExpression::ExByteConst(item_type),
-            KismetExpression::ExByteConst(index),
-            KismetExpression::ExIntConst(amount),
-        ] = [
-            item_type.expression.as_mut(),
-            index.expression.as_mut(),
-            amount.expression.as_mut(),
-        ] else {
-            return Err(Error::Assumption)
-        };
+    let [KismetExpression::ExLet(item_type), KismetExpression::ExLet(index), KismetExpression::ExLet(amount), KismetExpression::ExLetBool(key_item)] =
+        &mut bytecode[0..4]
+    else {
+        return Err(Error::Assumption);
+    };
+    let [KismetExpression::ExByteConst(item_type), KismetExpression::ExByteConst(index), KismetExpression::ExIntConst(amount)] = [
+        item_type.expression.as_mut(),
+        index.expression.as_mut(),
+        amount.expression.as_mut(),
+    ] else {
+        return Err(Error::Assumption);
+    };
     item_type.value = drop.as_u8();
     index.value = drop.inner_as_u8();
     amount.value = match &drop {
@@ -226,10 +224,15 @@ fn create_hook<C: std::io::Read + std::io::Seek>(
     save(&mut hook, loc)?;
     let loc = app.pak.join(MOD).join(cutscene).with_extension("uasset");
     std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-    pak.read_to_file(&format!("/Game/BlueFire/{cutscene}.uasset"), &loc)?;
-    pak.read_to_file(
-        &format!("/Game/BlueFire/{cutscene}.uexp"),
-        loc.with_extension("uexp"),
+    pak.read_file(
+        &format!("Blue Fire/Content/BlueFire/{cutscene}.uasset"),
+        &mut app.pak()?,
+        &mut std::fs::File::create(&loc)?,
+    )?;
+    pak.read_file(
+        &format!("Blue Fire/Content/BlueFire/{cutscene}.uexp"),
+        &mut app.pak()?,
+        &mut std::fs::File::create(loc.with_extension("uexp"))?,
     )?;
     let mut cutscene = open(&loc)?;
     let universal_refs: Vec<usize> = cutscene
