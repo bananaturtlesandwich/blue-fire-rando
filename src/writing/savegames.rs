@@ -5,8 +5,12 @@ pub fn write(
     shop_emotes: Vec<(Shop, usize)>,
     app: &crate::Rando,
     pak: &repak::PakReader,
+    mod_pak: &Mod,
 ) -> Result<(), Error> {
-    let (mut savegame, savegame_loc) = extract(app, pak, SAVEGAME)?;
+    if checks.is_empty() && shop_emotes.is_empty() {
+        return Ok(());
+    }
+    let mut savegame = extract(app, pak, SAVEGAME)?;
     let default = savegame.asset_data.exports[1]
         .get_normal_export_mut()
         .ok_or(Error::Assumption)?;
@@ -49,7 +53,7 @@ pub fn write(
             }
             Context::Starting => {
                 fn add_item(
-                    savegame: &mut unreal_asset::Asset<std::fs::File>,
+                    savegame: &mut unreal_asset::Asset<std::io::Cursor<Vec<u8>>>,
                     drop: Drop,
                     name_map: &mut SharedResource<NameMap>,
                 ) -> Result<(), Error> {
@@ -212,6 +216,6 @@ pub fn write(
         .remove(i);
     }
     savegame.rebuild_name_map();
-    save(&mut savegame, savegame_loc)?;
+    save(&mut savegame, mod_pak, &format!("{MOD}{SAVEGAME}"))?;
     Ok(())
 }

@@ -6,6 +6,7 @@ pub fn write(
     checks: std::collections::HashMap<Locations, Vec<Check>>,
     app: &crate::Rando,
     pak: &repak::PakReader,
+    mod_pak: &Mod,
 ) -> Result<(), Error> {
     // reference so it isn't moved
     let used = &std::sync::Arc::new(std::sync::Mutex::new(Vec::with_capacity(checks.len())));
@@ -13,7 +14,16 @@ pub fn write(
         for thread in checks.into_iter().map(
             |(location, checks)| -> Result<std::thread::ScopedJoinHandle<Result<(), Error>>, Error> {
                 Ok(thread.spawn(move || {
-                    let (mut map, loc) = extract(app, pak, &format!("{PREFIX}{location}.umap"))?;
+                    let mut path = format!("{PREFIX}{location}.umap");
+                    let mut map = extract(app, pak, &path)?;
+                    if path.ends_with("Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap"){
+                       // correct the shenanigans in spirit hunter
+                        map.asset_data.exports[440]
+                            .get_base_export_mut()
+                            .object_name = map.add_fname("Pickup_A02_SRF2");
+                
+                    }
+                    path = MOD.to_string() + &path;
                     let mut name_map = map.get_name_map();
                     for Check { context, drop, .. } in checks {
                         match context {
@@ -26,13 +36,11 @@ pub fn write(
                                         _ => unimplemented!(),
                                     },
                                     &mut map,
-                                    &open_from_bytes(
-                                        include_bytes!("../blueprints/collectibles.umap")
-                                            .as_slice(),
-                                        include_bytes!("../blueprints/collectibles.uexp")
-                                            .as_slice(),
+                                    &open_slice(
+                                        include_bytes!("../blueprints/collectibles.umap"),
+                                        include_bytes!("../blueprints/collectibles.uexp"),
                                     )?,
-                                );
+                                )?;
                                 let mut pos = shop.location();
                                 let (x, y) = (9.0 * index as f64).to_radians().sin_cos();
                                 pos.x -= 1000.0 * x;
@@ -88,13 +96,13 @@ pub fn write(
                                 };
                                 let mut replace = |actor: usize| -> Result<(), Error> {
                                     // unfortunately i can't share this between threads
-                                    let donor = open_from_bytes(
+                                    let donor = open_slice(
                                         include_bytes!("../blueprints/collectibles.umap"),
                                         include_bytes!("../blueprints/collectibles.uexp"),
                                     )?;
                                     delete(i, &mut map);
                                     let insert = map.asset_data.exports.len();
-                                    transplant(actor, &mut map, &donor);
+                                    transplant(actor, &mut map, &donor)?;
                                     let loc = get_location(i, &map);
                                     set_location(
                                         insert,
@@ -128,15 +136,14 @@ pub fn write(
                                             Some(index) if index != name.len() - 1 => name
                                                 .drain(index + 1..)
                                                 .collect::<String>()
-                                                .parse()
-                                                .unwrap(),
+                                                .parse()?,
                                             _ => 1,
                                         };
-                                    while used.lock().unwrap().contains(&format!("{name}{counter}"))
+                                    while used.lock()?.contains(&format!("{name}{counter}"))
                                     {
                                         counter += 1;
                                     }
-                                    used.lock().unwrap().push(format!("{name}{counter}"));
+                                    used.lock()?.push(format!("{name}{counter}"));
                                     let norm = &mut map.asset_data.exports[insert]
                                         .get_normal_export_mut()
                                         .ok_or(Error::Assumption)?;
@@ -319,12 +326,12 @@ pub fn write(
                         }
                     }
                     map.rebuild_name_map();
-                    save(&mut map, &loc)?;
+                    save(&mut map, mod_pak, &path)?;
                     Ok(())
                 }))
             },
         ) {
-            thread?.join().unwrap()?
+            thread?.join()??
         }
         Ok(())
     })?;

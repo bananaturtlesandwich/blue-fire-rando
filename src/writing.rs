@@ -1,4 +1,5 @@
 use super::logic::*;
+use super::Mod;
 use crate::{io::*, map::*};
 use unreal_asset::{
     cast,
@@ -21,13 +22,49 @@ pub enum Error {
     Repak(#[from] repak::Error),
     #[error("io: {0}")]
     Io(#[from] std::io::Error),
+    #[error("parse: {0}")]
+    Parse(#[from] std::num::ParseIntError),
+    #[error("locked poisoned name vec")]
+    VecPoison,
+    #[error("locked poisoned writer")]
+    WriterPoison,
+    #[error("extracted poisoned writer")]
+    InnerMutex(#[from] std::sync::PoisonError<repak::PakWriter<std::fs::File>>),
+    #[error("some threads are still using writer")]
+    InnerArc,
     #[error("failed to strip prefix when writing file to pak")]
     Strip(#[from] std::path::StripPrefixError),
+    #[error("thread failed to complete")]
+    Thread,
     #[error("data was not as expected - you may have an older version of the game")]
     Assumption,
 }
 
-pub const MOD: &str = "rando_p/Blue Fire/Content/BlueFire";
+macro_rules! stub {
+    ($type: ty, $variant: ident) => {
+        impl From<$type> for Error {
+            fn from(_: $type) -> Self {
+                Self::$variant
+            }
+        }
+    };
+}
+
+stub!(
+    std::sync::Arc<std::sync::Mutex<repak::PakWriter<std::fs::File>>>,
+    InnerArc
+);
+stub!(
+    std::sync::PoisonError<std::sync::MutexGuard<'_, repak::PakWriter<std::fs::File>>>,
+    WriterPoison
+);
+stub!(
+    std::sync::PoisonError<std::sync::MutexGuard<'_, Vec<String>>>,
+    VecPoison
+);
+stub!(Box<dyn std::any::Any + Send + 'static>, Thread);
+
+pub const MOD: &str = "Blue Fire/Content/BlueFire/";
 
 const SAVEGAME: &str = "Player/Logic/FrameWork/BlueFireSaveGame.uasset";
 
@@ -37,25 +74,20 @@ fn extract(
     app: &crate::Rando,
     pak: &repak::PakReader,
     path: &str,
-) -> Result<(unreal_asset::Asset<std::fs::File>, std::path::PathBuf), Error> {
-    let loc = app.pak.join(MOD).join(path);
-    if path != "Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap" {
-        std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-        pak.read_file(
+) -> Result<super::Asset<Vec<u8>>, Error> {
+    open(
+        pak.get(
             &format!("Blue Fire/Content/BlueFire/{path}"),
             &mut app.pak()?,
-            &mut std::fs::File::create(&loc)?,
-        )?;
-        pak.read_file(
+        )?,
+        pak.get(
             &format!(
                 "Blue Fire/Content/BlueFire/{}",
                 path.replace(".uasset", ".uexp").replace(".umap", ".uexp")
             ),
             &mut app.pak()?,
-            &mut std::fs::File::create(loc.with_extension("uexp"))?,
-        )?;
-    }
-    Ok((open(&loc)?, loc))
+        )?,
+    )
 }
 
 fn byte_property(
@@ -110,83 +142,51 @@ fn set_byte(
 pub fn write(data: Data, app: &crate::Rando) -> Result<(), Error> {
     let mut sync = app.pak()?;
     let pak = repak::PakReader::new(&mut sync, repak::Version::V9)?;
-    // correct the shenanigans in spirit hunter
-    let loc = app
-        .pak
-        .join(MOD)
-        .join("Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap");
-    std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-    pak.read_file(
-        "Blue Fire/Content/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.umap",
-        &mut sync,
-        &mut std::fs::File::create(&loc)?,
-    )?;
-    pak.read_file(
-        "Blue Fire/Content/BlueFire/Maps/World/A02_ArcaneTunnels/A02_EastArcane.uexp",
-        &mut sync,
-        &mut std::fs::File::create(loc.with_extension("uexp"))?,
-    )?;
-    let mut spirit_hunter = open(&loc)?;
-    spirit_hunter.asset_data.exports[440]
-        .get_base_export_mut()
-        .object_name = spirit_hunter.add_fname("Pickup_A02_SRF2");
-    save(&mut spirit_hunter, &loc)?;
-    std::thread::scope(|thread| -> Result<(), Error> {
-        for thread in [
-            thread.spawn(|| overworld::write(data.overworld, app, &pak)),
-            thread.spawn(|| cutscenes::write(data.cutscenes, app, &pak)),
-            thread.spawn(|| savegames::write(data.savegames, data.shop_emotes, app, &pak)),
-            thread.spawn(|| specific::write(data.cases, app, &pak)),
-        ] {
-            thread.join().unwrap()?
-        }
-        Ok(())
-    })?;
-    // change the logo so people know it worked
-    let logo = app.pak.join(MOD).join("HUD/Menu/Blue-Fire-Logo.uasset");
-    std::fs::create_dir_all(logo.parent().expect("is a file"))?;
-    std::fs::write(&logo, include_bytes!("blueprints/logo.uasset"))?;
-    std::fs::write(
-        logo.with_extension("uexp"),
-        include_bytes!("blueprints/logo.uexp"),
-    )?;
-    let mut pak = repak::PakWriter::new(
+    let mod_pak = std::sync::Arc::new(std::sync::Mutex::new(repak::PakWriter::new(
         std::fs::File::create(app.pak.join("rando_p.pak"))?,
         repak::Version::V9,
         "../../../".to_string(),
         None,
-    );
-    for file in walkdir::WalkDir::new(app.pak.join("rando_p"))
-        .into_iter()
-        .filter_map(|entry| entry.ok().filter(|file| file.path().is_file()))
-    {
-        pak.write_file(
-            &file
-                .path()
-                .strip_prefix(&app.pak.join("rando_p"))?
-                .to_str()
-                .unwrap_or_default()
-                .replace("\\", "/"),
-            &mut std::fs::File::open(file.path())?,
-        )?
-    }
-    pak.write_index()?;
+    )));
+    std::thread::scope(|thread| -> Result<(), Error> {
+        for thread in [
+            thread.spawn(|| overworld::write(data.overworld, app, &pak, &mod_pak)),
+            thread.spawn(|| cutscenes::write(data.cutscenes, app, &pak, &mod_pak)),
+            thread
+                .spawn(|| savegames::write(data.savegames, data.shop_emotes, app, &pak, &mod_pak)),
+            thread.spawn(|| specific::write(data.cases, app, &pak, &mod_pak)),
+        ] {
+            thread.join()??
+        }
+        Ok(())
+    })?;
+    let mut mod_pak = Mod::try_unwrap(mod_pak)?.into_inner()?;
+    // change the logo so people know it worked
+    let logo = MOD.to_string() + "HUD/Menu/Blue-Fire-Logo.uasset";
+    mod_pak.write_file(
+        &logo,
+        &mut std::io::Cursor::new(include_bytes!("blueprints/logo.uasset")),
+    )?;
+    mod_pak.write_file(
+        &logo.replace(".uasset", ".uexp"),
+        &mut std::io::Cursor::new(include_bytes!("blueprints/logo.uexp")),
+    )?;
+    mod_pak.write_index()?;
     Ok(())
 }
 
 fn create_hook<C: std::io::Read + std::io::Seek>(
     app: &crate::Rando,
     pak: &repak::PakReader,
-    get_hook: impl Fn(&std::path::PathBuf) -> Result<unreal_asset::Asset<C>, Error>,
+    mod_pak: &Mod,
+    hook: &mut unreal_asset::Asset<C>,
     drop: &Drop,
     cutscene: &str,
     index: usize,
 ) -> Result<(), Error> {
-    let mut loc = app.pak.join(MOD).join("Libraries");
-    std::fs::create_dir_all(&loc)?;
+    let mut loc = MOD.to_string() + "Libraries";
     let new_name = format!("{}_Hook", cutscene.split('/').last().unwrap_or_default());
-    loc = loc.join(&new_name).with_extension("uasset");
-    let mut hook = get_hook(&loc)?;
+    loc = format!("{loc}/{new_name}.uasset");
     // edit the item given by the kismet bytecode in the hook
     let Export::FunctionExport(function_export::FunctionExport {
         struct_export:
@@ -237,20 +237,18 @@ fn create_hook<C: std::io::Read + std::io::Seek>(
         let name = map.get_name_reference_mut(i as i32);
         *name = name.replace("hook", &new_name);
     }
-    save(&mut hook, loc)?;
-    let loc = app.pak.join(MOD).join(cutscene).with_extension("uasset");
-    std::fs::create_dir_all(loc.parent().expect("is a file"))?;
-    pak.read_file(
-        &format!("Blue Fire/Content/BlueFire/{cutscene}.uasset"),
-        &mut app.pak()?,
-        &mut std::fs::File::create(&loc)?,
+    save(hook, mod_pak, &loc)?;
+    let loc = format!("{MOD}{cutscene}.uasset");
+    let mut cutscene = open(
+        pak.get(
+            &format!("Blue Fire/Content/BlueFire/{cutscene}.uasset"),
+            &mut app.pak()?,
+        )?,
+        pak.get(
+            &format!("Blue Fire/Content/BlueFire/{cutscene}.uexp"),
+            &mut app.pak()?,
+        )?,
     )?;
-    pak.read_file(
-        &format!("Blue Fire/Content/BlueFire/{cutscene}.uexp"),
-        &mut app.pak()?,
-        &mut std::fs::File::create(loc.with_extension("uexp"))?,
-    )?;
-    let mut cutscene = open(&loc)?;
     let universal_refs: Vec<usize> = cutscene
         .get_name_map()
         .get_ref()
@@ -265,7 +263,7 @@ fn create_hook<C: std::io::Read + std::io::Seek>(
         let name = map.get_name_reference_mut(i as i32);
         *name = name.replace("UniversalFunctions", &new_name);
     }
-    save(&mut cutscene, &loc)?;
+    save(&mut cutscene, mod_pak, &loc)?;
     Ok(())
 }
 

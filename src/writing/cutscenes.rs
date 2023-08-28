@@ -4,6 +4,7 @@ pub fn write(
     cutscenes: Vec<Check>,
     app: &crate::Rando,
     pak: &repak::PakReader,
+    mod_pak: &Mod,
 ) -> Result<(), Error> {
     std::thread::scope(|thread| -> Result<(), Error> {
         let mut threads = Vec::with_capacity(cutscenes.len());
@@ -15,12 +16,11 @@ pub fn write(
                 create_hook(
                     app,
                     pak,
-                    |_| {
-                        Ok(open_from_bytes(
-                            include_bytes!("../blueprints/hook.uasset"),
-                            include_bytes!("../blueprints/hook.uexp"),
-                        )?)
-                    },
+                    mod_pak,
+                    &mut open_slice(
+                        include_bytes!("../blueprints/hook.uasset"),
+                        include_bytes!("../blueprints/hook.uexp"),
+                    )?,
                     &drop,
                     cutscene,
                     69,
@@ -29,7 +29,7 @@ pub fn write(
             }));
         }
         for thread in threads {
-            thread.join().unwrap()?;
+            thread.join()??;
         }
         Ok(())
     })?;
