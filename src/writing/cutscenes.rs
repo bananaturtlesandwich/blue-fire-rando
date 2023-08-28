@@ -1,6 +1,10 @@
 use super::*;
 
-pub fn write(cutscenes: Vec<Check>, app: &crate::Rando, pak: &unpak::Pak) -> Result<(), Error> {
+pub fn write(
+    cutscenes: Vec<Check>,
+    app: &crate::Rando,
+    pak: &repak::PakReader,
+) -> Result<(), Error> {
     std::thread::scope(|thread| -> Result<(), Error> {
         let mut threads = Vec::with_capacity(cutscenes.len());
         for Check { context, drop, .. } in cutscenes {

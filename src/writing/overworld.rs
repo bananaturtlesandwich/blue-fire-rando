@@ -5,7 +5,7 @@ use super::*;
 pub fn write(
     checks: std::collections::HashMap<Locations, Vec<Check>>,
     app: &crate::Rando,
-    pak: &unpak::Pak,
+    pak: &repak::PakReader,
 ) -> Result<(), Error> {
     // reference so it isn't moved
     let used = &std::sync::Arc::new(std::sync::Mutex::new(Vec::with_capacity(checks.len())));

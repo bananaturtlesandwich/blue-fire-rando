@@ -4,7 +4,7 @@ pub fn write(
     checks: Vec<Check>,
     shop_emotes: Vec<(Shop, usize)>,
     app: &crate::Rando,
-    pak: &unpak::Pak,
+    pak: &repak::PakReader,
 ) -> Result<(), Error> {
     let (mut savegame, savegame_loc) = extract(app, pak, SAVEGAME)?;
     let default = savegame.asset_data.exports[1]

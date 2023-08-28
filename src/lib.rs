@@ -100,6 +100,9 @@ impl Rando {
             ducks: get_bool("ducks"),
         }
     }
+    fn pak(&self) -> Result<std::fs::File, std::io::Error> {
+        std::fs::File::open(self.pak.join("Blue Fire-WindowsNoEditor.pak"))
+    }
 }
 
 fn ask_game_path() -> Option<std::path::PathBuf> {
