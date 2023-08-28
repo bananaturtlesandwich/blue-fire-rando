@@ -10,6 +10,7 @@ edition = "2021"
 eframe = { version = "0.22", default-features = false, features = ["glow", "persistence"] }
 unreal_asset = { git = "https://github.com/astrotechies/unrealmodding", package = "unreal_asset", rev = "dfcc3e2"}
 repak = { git = "https://github.com/bananaturtlesandwich/repak", branch = "features-redo", default-features = false }
+walkdir = "2.3"
 strum = { version = "0.25", features = ["derive"] }
 rand = "0.8"
 egui-modal = "0.2"
