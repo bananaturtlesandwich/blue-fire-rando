@@ -5,6 +5,9 @@ mod logic;
 mod map;
 mod writing;
 
+type Mod = std::sync::Arc<std::sync::Mutex<repak::PakWriter<std::fs::File>>>;
+type Asset<T> = unreal_asset::Asset<std::io::Cursor<T>>;
+
 pub struct Rando {
     notifs: egui_modal::Modal,
     pak: std::path::PathBuf,
@@ -260,13 +263,11 @@ impl eframe::App for Rando {
                     )
                     .clicked()
                 {
-                    std::fs::remove_dir_all(self.pak.join("rando_p")).unwrap_or_default();
                     notify!(
                         self,
                         logic::randomise(self),
                         "seed has been generated, written and installed"
-                    );
-                    std::fs::remove_dir_all(self.pak.join("rando_p")).unwrap_or_default();
+                    )
                 }
             });
             self.notifs.show_dialog();

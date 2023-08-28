@@ -1,6 +1,30 @@
 use super::*;
 
-pub fn write(cases: Vec<Check>, app: &crate::Rando, pak: &repak::PakReader) -> Result<(), Error> {
+pub fn write(
+    cases: Vec<Check>,
+    app: &crate::Rando,
+    pak: &repak::PakReader,
+    mod_pak: &Mod,
+) -> Result<(), Error> {
+    if cases.is_empty() {
+        return Ok(());
+    }
+    let mut angels = open_slice(
+        include_bytes!("../blueprints/angel_hook.uasset"),
+        include_bytes!("../blueprints/angel_hook.uexp"),
+    )?;
+    let mut bremur = open_slice(
+        include_bytes!("../blueprints/bremur_hook.uasset"),
+        include_bytes!("../blueprints/bremur_hook.uexp"),
+    )?;
+    let mut paulale = open_slice(
+        include_bytes!("../blueprints/paulale_hook.uasset"),
+        include_bytes!("../blueprints/paulale_hook.uexp"),
+    )?;
+    let mut player = open_slice(
+        include_bytes!("../blueprints/player_hook.uasset"),
+        include_bytes!("../blueprints/player_hook.uexp"),
+    )?;
     for Check { context, drop, .. } in cases {
         let Context::Specific(case, index) = context else {
             return Err(Error::Assumption)?;
@@ -8,44 +32,12 @@ pub fn write(cases: Vec<Check>, app: &crate::Rando, pak: &repak::PakReader) -> R
         create_hook(
             app,
             pak,
-            |loc| {
-                if !loc.exists() {
-                    std::fs::write(
-                        loc,
-                        match case {
-                            Case::Bremur => {
-                                include_bytes!("../blueprints/bremur_hook.uasset").as_slice()
-                            }
-                            Case::Paulale => {
-                                include_bytes!("../blueprints/paulale_hook.uasset").as_slice()
-                            }
-                            Case::Angels => {
-                                include_bytes!("../blueprints/angel_hook.uasset").as_slice()
-                            }
-                            Case::AllVoids => {
-                                include_bytes!("../blueprints/player_hook.uasset").as_slice()
-                            }
-                        },
-                    )?;
-                    std::fs::write(
-                        loc.with_extension("uexp"),
-                        match case {
-                            Case::Bremur => {
-                                include_bytes!("../blueprints/bremur_hook.uexp").as_slice()
-                            }
-                            Case::Paulale => {
-                                include_bytes!("../blueprints/paulale_hook.uexp").as_slice()
-                            }
-                            Case::Angels => {
-                                include_bytes!("../blueprints/angel_hook.uexp").as_slice()
-                            }
-                            Case::AllVoids => {
-                                include_bytes!("../blueprints/player_hook.uexp").as_slice()
-                            }
-                        },
-                    )?;
-                }
-                Ok(open(loc)?)
+            mod_pak,
+            match case {
+                Case::Bremur => &mut bremur,
+                Case::Paulale => &mut paulale,
+                Case::Angels => &mut angels,
+                Case::AllVoids => &mut player,
             },
             &drop,
             case.as_ref(),
