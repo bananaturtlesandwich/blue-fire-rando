@@ -29,7 +29,7 @@ pub enum Error {
     #[error("locked poisoned writer")]
     WriterPoison,
     #[error("extracted poisoned writer")]
-    InnerMutex(#[from] std::sync::PoisonError<repak::PakWriter<std::fs::File>>),
+    InnerMutex(#[from] std::sync::PoisonError<repak::PakWriter<std::io::BufWriter<std::fs::File>>>),
     #[error("some threads are still using writer")]
     InnerArc,
     #[error("failed to strip prefix when writing file to pak")]
@@ -51,11 +51,13 @@ macro_rules! stub {
 }
 
 stub!(
-    std::sync::Arc<std::sync::Mutex<repak::PakWriter<std::fs::File>>>,
+    std::sync::Arc<std::sync::Mutex<repak::PakWriter<std::io::BufWriter<std::fs::File>>>>,
     InnerArc
 );
 stub!(
-    std::sync::PoisonError<std::sync::MutexGuard<'_, repak::PakWriter<std::fs::File>>>,
+    std::sync::PoisonError<
+        std::sync::MutexGuard<'_, repak::PakWriter<std::io::BufWriter<std::fs::File>>>,
+    >,
     WriterPoison
 );
 stub!(
@@ -143,7 +145,7 @@ pub fn write(data: Data, app: &crate::Rando) -> Result<(), Error> {
     let mut sync = app.pak()?;
     let pak = repak::PakReader::new(&mut sync, repak::Version::V9)?;
     let mod_pak = std::sync::Arc::new(std::sync::Mutex::new(repak::PakWriter::new(
-        std::fs::File::create(app.pak.join("rando_p.pak"))?,
+        std::io::BufWriter::new(std::fs::File::create(app.pak.join("rando_p.pak"))?),
         repak::Version::V9,
         "../../../".to_string(),
         None,
