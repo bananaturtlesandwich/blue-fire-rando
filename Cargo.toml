@@ -2,14 +2,14 @@
 name = "blue-fire-rando-drm-free"
 description = "a gamemode for blue fire which shuffles pickups"
 repository = "https://github.com/bananaturtlesandwich/blue-fire-rando"
-version = "1.1.3"
+version = "1.1.4"
 authors = ["spuds"]
 edition = "2021"
 
 [dependencies]
 eframe = { version = "0.22", default-features = false, features = ["glow", "persistence"] }
 unreal_asset = { git = "https://github.com/astrotechies/unrealmodding", package = "unreal_asset", rev = "186842c"}
-repak = { git = "https://github.com/bananaturtlesandwich/repak", branch = "features-redo", default-features = false }
+repak = { git = "https://github.com/trumank/repak", rev = "a749449", default-features = false }
 strum = { version = "0.25", features = ["derive"] }
 rand = "0.8"
 egui-modal = "0.2"

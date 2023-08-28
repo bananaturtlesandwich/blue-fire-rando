@@ -5,7 +5,7 @@ mod logic;
 mod map;
 mod writing;
 
-type Mod = std::sync::Arc<std::sync::Mutex<repak::PakWriter<std::fs::File>>>;
+type Mod = std::sync::Arc<std::sync::Mutex<repak::PakWriter<std::io::BufWriter<std::fs::File>>>>;
 type Asset<T> = unreal_asset::Asset<std::io::Cursor<T>>;
 
 pub struct Rando {
@@ -103,8 +103,9 @@ impl Rando {
             ducks: get_bool("ducks"),
         }
     }
-    fn pak(&self) -> Result<std::fs::File, std::io::Error> {
+    fn pak(&self) -> Result<std::io::BufReader<std::fs::File>, std::io::Error> {
         std::fs::File::open(self.pak.join("Blue Fire-WindowsNoEditor.pak"))
+            .map(std::io::BufReader::new)
     }
 }
 
