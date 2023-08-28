@@ -21,6 +21,8 @@ pub enum Error {
     Repak(#[from] repak::Error),
     #[error("io: {0}")]
     Io(#[from] std::io::Error),
+    #[error("failed to strip prefix when writing file to pak")]
+    Strip(#[from] std::path::StripPrefixError),
     #[error("data was not as expected - you may have an older version of the game")]
     Assumption,
 }
@@ -148,13 +150,27 @@ pub fn write(data: Data, app: &crate::Rando) -> Result<(), Error> {
         logo.with_extension("uexp"),
         include_bytes!("blueprints/logo.uexp"),
     )?;
-    // package the mod in the most scuffed way possible
-    std::fs::write("UnrealPak.exe", include_bytes!("UnrealPak.exe"))?;
-    std::fs::write("pak.bat", include_str!("pak.bat"))?;
-    // for some reason calling with rust doesn't work so a batch file will do
-    std::process::Command::new("./pak.bat")
-        .arg(app.pak.join("rando_p"))
-        .output()?;
+    let mut pak = repak::PakWriter::new(
+        std::fs::File::create(app.pak.join("rando_p.pak"))?,
+        repak::Version::V9,
+        "../../../".to_string(),
+        None,
+    );
+    for file in walkdir::WalkDir::new(app.pak.join("rando_p"))
+        .into_iter()
+        .filter_map(|entry| entry.ok().filter(|file| file.path().is_file()))
+    {
+        pak.write_file(
+            &file
+                .path()
+                .strip_prefix(&app.pak.join("rando_p"))?
+                .to_str()
+                .unwrap_or_default()
+                .replace("\\", "/"),
+            &mut std::fs::File::open(file.path())?,
+        )?
+    }
+    pak.write_index()?;
     Ok(())
 }
 
