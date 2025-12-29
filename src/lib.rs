@@ -47,7 +47,9 @@ impl Rando {
         let mut font = egui::FontDefinitions::default();
         font.font_data.insert(
             "cinzel".to_string(),
-            egui::FontData::from_static(include_bytes!("Cinzel-Regular.ttf")),
+            std::sync::Arc::new(egui::FontData::from_static(include_bytes!(
+                "Cinzel-Regular.ttf"
+            ))),
         );
         font.families
             .get_mut(&egui::FontFamily::Proportional)
@@ -112,11 +114,11 @@ impl Rando {
 fn ask_game_path() -> Option<std::path::PathBuf> {
     let path = rfd::FileDialog::new()
         .set_title("Select where you have Blue Fire installed (e.g C:/Program Files (x86)/Steam/steamapps/common/Blue Fire)")
-        .pick_folder()?;
-    (path.ends_with("Blue Fire")
-        && !path.ends_with("Blue Fire/Blue Fire")
-        && path.join("Blue Fire/Content/Paks").exists())
-    .then(|| path.join("Blue Fire\\Content\\Paks"))
+        .pick_folder()?
+        .join("Blue Fire")
+        .join("Content")
+        .join("Paks");
+    path.exists().then_some(path)
 }
 
 fn get_pak_str(pak: &std::path::Path) -> String {
@@ -152,14 +154,20 @@ fn update() {
 macro_rules! notify {
     ($self:expr, $result: expr, $message: literal) => {
         match $result {
-            Ok(..) => $self.notifs.open_dialog(
-                Some("success"),
-                Some($message),
-                Some(egui_modal::Icon::Success),
-            ),
+            Ok(..) => $self
+                .notifs
+                .dialog()
+                .with_title("success")
+                .with_body($message)
+                .with_icon(egui_modal::Icon::Success)
+                .open(),
             Err(e) => $self
                 .notifs
-                .open_dialog(Some(":/"), Some(e), Some(egui_modal::Icon::Error)),
+                .dialog()
+                .with_title(":/")
+                .with_body(e)
+                .with_icon(egui_modal::Icon::Error)
+                .open(),
         }
     };
 }
@@ -183,11 +191,11 @@ impl eframe::App for Rando {
                         self.pak_str = get_pak_str(&pak);
                         self.pak = pak
                     } else {
-                        self.notifs.open_dialog(
-                            Some(":/"),
-                            Some("that isn't a valid blue fire install location"),
-                            Some(egui_modal::Icon::Warning)
-                        )
+                        self.notifs.dialog()
+                            .with_title(":/")
+                            .with_body("that isn't a valid blue fire install location")
+                            .with_icon(egui_modal::Icon::Warning)
+                            .open();
                     }
                 }
             });

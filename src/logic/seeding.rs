@@ -256,7 +256,7 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
         shop_emotes: Vec::with_capacity(checks.len()),
     };
     let mut locations = Vec::with_capacity(Locations::COUNT);
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     while locations.len() != Locations::COUNT && !pool.is_empty() {
         // shuffle the possible drops
         use rand::seq::SliceRandom;
