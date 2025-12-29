@@ -3,7 +3,7 @@ use unreal_asset::reader::ArchiveTrait;
 use super::*;
 
 pub fn write(
-    checks: std::collections::HashMap<Locations, Vec<Check>>,
+    checks: std::collections::HashMap<Location, Vec<Check>>,
     app: &crate::Rando,
     pak: &repak::PakReader,
     mod_pak: &Mod,
@@ -110,22 +110,22 @@ pub fn write(
                                         loc,
                                         // some of the ducks are impossible to physically reach otherwise
                                         match location {
-                                            Locations::KeepDucks => (500.0, 0.0, 0.0),
-                                            Locations::ArcaneDucks => (0.0, 150.0, 0.0),
-                                            Locations::ForestDucks if name == "Duck" => {
+                                            Location::KeepDucks => (500.0, 0.0, 0.0),
+                                            Location::ArcaneDucks => (0.0, 150.0, 0.0),
+                                            Location::ForestDucks if name == "Duck" => {
                                                 (0.0, 0.0, 800.0)
                                             }
-                                            Locations::AbandonedPath if name == "Duck" => {
+                                            Location::AbandonedPath if name == "Duck" => {
                                                 (0.0, 0.0, 300.0)
                                             }
-                                            Locations::Stoneheart if name == "Duck2" => {
+                                            Location::Stoneheart if name == "Duck2" => {
                                                 (0.0, -100.0, 0.0)
                                             }
-                                            Locations::FirefallDucks | Locations::Sirion => {
+                                            Location::FirefallDucks | Location::Sirion => {
                                                 (0.0, 0.0, 100.0)
                                             }
-                                            Locations::WaterwayDucks => (800.0, 0.0, 100.0),
-                                            Locations::Queen => (500.0, -500.0, 0.0),
+                                            Location::WaterwayDucks => (800.0, 0.0, 100.0),
+                                            Location::Queen => (500.0, -500.0, 0.0),
                                             _ => (0.0, 0.0, 0.0),
                                         },
                                     );

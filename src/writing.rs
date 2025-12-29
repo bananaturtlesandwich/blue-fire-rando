@@ -294,8 +294,8 @@ impl Drop {
                 "Items",
                 match self {
                     Drop::Item(item, ..) => item.as_ref(),
-                    Drop::Ore(..) => Items::KinbankDebitCard.as_ref(),
-                    Drop::Duck => Items::Duck.as_ref(),
+                    Drop::Ore(..) => Item::KinbankDebitCard.as_ref(),
+                    Drop::Duck => Item::Duck.as_ref(),
                     _ => "25",
                 },
                 name_map,
@@ -398,33 +398,33 @@ impl Drop {
     }
 }
 
-impl Abilities {
-    pub fn as_item(&self) -> Items {
+impl Ability {
+    pub fn as_item(&self) -> Item {
         match self {
-            Abilities::DoubleJump => Items::DoubleJump,
-            Abilities::Dash => Items::Dash,
-            Abilities::Attack => todo!(),
-            Abilities::DownSmash => Items::DownSmash,
-            Abilities::WallRun => Items::WallRun,
-            Abilities::Grind => todo!(),
-            Abilities::Sprint => Items::Sprint,
-            Abilities::Spell => Items::FireBall,
-            Abilities::Block => Items::Shield,
-            Abilities::SpinAttack => Items::SpinAttack,
+            Ability::DoubleJump => Item::DoubleJump,
+            Ability::Dash => Item::Dash,
+            Ability::Attack => todo!(),
+            Ability::DownSmash => Item::DownSmash,
+            Ability::WallRun => Item::WallRun,
+            Ability::Grind => todo!(),
+            Ability::Sprint => Item::Sprint,
+            Ability::Spell => Item::FireBall,
+            Ability::Block => Item::Shield,
+            Ability::SpinAttack => Item::SpinAttack,
         }
     }
     pub fn savegame_index(&self) -> usize {
         match self {
-            Abilities::DoubleJump => 2,
-            Abilities::Dash => 1,
-            Abilities::Attack => 0,
-            Abilities::DownSmash => 5,
-            Abilities::WallRun => 3,
-            Abilities::Grind => 7,
-            Abilities::Sprint => 4,
-            Abilities::Spell => 6,
-            Abilities::Block => 8,
-            Abilities::SpinAttack => 9,
+            Ability::DoubleJump => 2,
+            Ability::Dash => 1,
+            Ability::Attack => 0,
+            Ability::DownSmash => 5,
+            Ability::WallRun => 3,
+            Ability::Grind => 7,
+            Ability::Sprint => 4,
+            Ability::Spell => 6,
+            Ability::Block => 8,
+            Ability::SpinAttack => 9,
         }
     }
 }

@@ -2,7 +2,7 @@ use super::*;
 use crate::{no_walljump, walljump};
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, strum::Display, strum::EnumIter, strum::EnumCount)]
-pub enum Locations {
+pub enum Location {
     // Fire Keep
     #[strum(serialize = "A02_ArcaneTunnels/A02_GameIntro_KeepSouth")]
     Lab,
@@ -118,159 +118,159 @@ pub enum Locations {
     TheVoid,
 }
 
-impl Locations {
+impl Location {
     pub const fn locks(&self) -> &[&[Lock]] {
         match self {
-            Locations::Lab => &[&[]],
-            Locations::Bitoven => &[&[Lock::Location(Locations::Lab)]],
-            Locations::KeepDucks => &[&[Lock::Location(Locations::Bitoven)]],
-            Locations::KeepVessel => &[&[Lock::Location(Locations::Lab)]],
-            Locations::Shield => &[&[Lock::Location(Locations::KeepVessel)]],
-            Locations::FirstVoid => &[&[Lock::Location(Locations::Lab), Lock::Item(Items::OldKey)]],
-            Locations::Crates => &[&[Lock::Location(Locations::FirstVoid)]],
-            Locations::Memorial => &[&[Lock::Location(Locations::Crates)]],
-            Locations::ArcaneNorth => &[&[Lock::Location(Locations::Memorial)]],
-            Locations::ArcaneSouth => &[&[Lock::Location(Locations::ArcaneNorth)]],
-            Locations::ArcaneSpiritHunter => &[&[Lock::Location(Locations::ArcaneSouth)]],
-            Locations::ArcaneDucks => &[&[Lock::Location(Locations::ArcaneSpiritHunter)]],
-            Locations::Crossroads => &[&[Lock::Location(Locations::ArcaneSpiritHunter)]],
-            Locations::Well => &[&[
-                Lock::Location(Locations::Crossroads),
+            Location::Lab => &[&[]],
+            Location::Bitoven => &[&[Lock::Location(Location::Lab)]],
+            Location::KeepDucks => &[&[Lock::Location(Location::Bitoven)]],
+            Location::KeepVessel => &[&[Lock::Location(Location::Lab)]],
+            Location::Shield => &[&[Lock::Location(Location::KeepVessel)]],
+            Location::FirstVoid => &[&[Lock::Location(Location::Lab), Lock::Item(Item::OldKey)]],
+            Location::Crates => &[&[Lock::Location(Location::FirstVoid)]],
+            Location::Memorial => &[&[Lock::Location(Location::Crates)]],
+            Location::ArcaneNorth => &[&[Lock::Location(Location::Memorial)]],
+            Location::ArcaneSouth => &[&[Lock::Location(Location::ArcaneNorth)]],
+            Location::ArcaneSpiritHunter => &[&[Lock::Location(Location::ArcaneSouth)]],
+            Location::ArcaneDucks => &[&[Lock::Location(Location::ArcaneSpiritHunter)]],
+            Location::Crossroads => &[&[Lock::Location(Location::ArcaneSpiritHunter)]],
+            Location::Well => &[&[
+                Lock::Location(Location::Crossroads),
                 Lock::Movement(&[no_walljump!(0, 1)]),
             ]],
-            Locations::Stoneheart => &[&[Lock::Location(Locations::ArcaneSpiritHunter)]],
-            Locations::WaterLevels => &[&[Lock::Location(Locations::Stoneheart)]],
-            Locations::NuosClaw => &[&[
-                Lock::Location(Locations::WaterLevels),
-                Lock::Item(Items::OldKey),
+            Location::Stoneheart => &[&[Lock::Location(Location::ArcaneSpiritHunter)]],
+            Location::WaterLevels => &[&[Lock::Location(Location::Stoneheart)]],
+            Location::NuosClaw => &[&[
+                Lock::Location(Location::WaterLevels),
+                Lock::Item(Item::OldKey),
             ]],
-            Locations::Tree => &[&[
-                Lock::Location(Locations::WaterLevels),
+            Location::Tree => &[&[
+                Lock::Location(Location::WaterLevels),
                 Lock::Movement(&[walljump!(0, 1), no_walljump!(2, 0)]),
             ]],
-            Locations::ForestDucks => &[&[Lock::Location(Locations::Tree)]],
-            Locations::Gruh => &[&[
-                Lock::Location(Locations::Tree),
-                Lock::Item(Items::KeyHolyMaster),
+            Location::ForestDucks => &[&[Lock::Location(Location::Tree)]],
+            Location::Gruh => &[&[
+                Lock::Location(Location::Tree),
+                Lock::Item(Item::KeyHolyMaster),
             ]],
-            Locations::TempleGardens => &[&[
-                Lock::Item(Items::OldKey),
-                Lock::Item(Items::KeyHolyMaster),
-                Lock::Location(Locations::UthasEnd),
+            Location::TempleGardens => &[&[
+                Lock::Item(Item::OldKey),
+                Lock::Item(Item::KeyHolyMaster),
+                Lock::Location(Location::UthasEnd),
                 Lock::Movement(&[no_walljump!(1, 0)]),
             ]],
-            Locations::AbandonedPath => &[&[
-                Lock::Location(Locations::Stoneheart),
-                Lock::Item(Items::KeyGraveyardKey),
+            Location::AbandonedPath => &[&[
+                Lock::Location(Location::Stoneheart),
+                Lock::Item(Item::KeyGraveyardKey),
                 Lock::Movement(&[walljump!(0, 1), no_walljump!(0, 3)]),
             ]],
-            Locations::Beira => &[&[
-                Lock::Location(Locations::AbandonedPath),
-                Lock::Location(Locations::LakeMolva),
-                Lock::Location(Locations::TempleGardens),
-                Lock::Item(Items::SanctuaryStone),
-                Lock::Item(Items::BeiraVessel),
+            Location::Beira => &[&[
+                Lock::Location(Location::AbandonedPath),
+                Lock::Location(Location::LakeMolva),
+                Lock::Location(Location::TempleGardens),
+                Lock::Item(Item::SanctuaryStone),
+                Lock::Item(Item::BeiraVessel),
                 // needs walljump for temple gardens blocked stairway soul
                 // also requires climbing tower
                 Lock::Movement(&[walljump!(3, 3)]),
             ]],
-            Locations::UthasStart => &[&[
-                Lock::Location(Locations::AbandonedPath),
+            Location::UthasStart => &[&[
+                Lock::Location(Location::AbandonedPath),
                 Lock::Movement(&[no_walljump!(0, 2)]),
-                Lock::Item(Items::KeyUthasTemple),
+                Lock::Item(Item::KeyUthasTemple),
             ]],
-            Locations::UthasBracelet => &[&[
-                Lock::Location(Locations::UthasStart),
-                Lock::Item(Items::OldKey),
+            Location::UthasBracelet => &[&[
+                Lock::Location(Location::UthasStart),
+                Lock::Item(Item::OldKey),
             ]],
-            Locations::UthasDucks => &[&[Lock::Location(Self::UthasBracelet)]],
-            Locations::UthasPuzzle => &[&[Lock::Location(Self::UthasBracelet)]],
-            Locations::UthasCombat => &[&[
-                Lock::Location(Locations::UthasBracelet),
+            Location::UthasDucks => &[&[Lock::Location(Self::UthasBracelet)]],
+            Location::UthasPuzzle => &[&[Lock::Location(Self::UthasBracelet)]],
+            Location::UthasCombat => &[&[
+                Lock::Location(Location::UthasBracelet),
                 Lock::Movement(&[walljump!(0, 1), no_walljump!(0, 3)]),
-                Lock::Item(Items::OldKey),
+                Lock::Item(Item::OldKey),
             ]],
-            Locations::UthasPlatforming => &[&[
-                Lock::Location(Locations::UthasBracelet),
+            Location::UthasPlatforming => &[&[
+                Lock::Location(Location::UthasBracelet),
                 Lock::Movement(&[no_walljump!(1, 4), walljump!(1, 3)]),
-                Lock::Item(Items::OldKey),
+                Lock::Item(Item::OldKey),
             ]],
-            Locations::UthasEnd => &[
+            Location::UthasEnd => &[
                 &[
-                    Lock::Location(Locations::UthasBracelet),
+                    Lock::Location(Location::UthasBracelet),
                     Lock::Movement(&[walljump!(0, 1), no_walljump!(0, 3)]),
-                    Lock::Item(Items::OldKey),
+                    Lock::Item(Item::OldKey),
                 ],
                 &[
-                    Lock::Location(Locations::UthasBracelet),
+                    Lock::Location(Location::UthasBracelet),
                     Lock::Movement(&[walljump!(0, 1), no_walljump!(4, 3)]),
                 ],
             ],
-            Locations::SanctuaryStone => &[&[
-                Lock::Location(Locations::TempleGardens),
-                Lock::Item(Items::KeyGodMaster),
+            Location::SanctuaryStone => &[&[
+                Lock::Location(Location::TempleGardens),
+                Lock::Item(Item::KeyGodMaster),
             ]],
-            Locations::Queen => &[&[
-                Lock::Location(Locations::SanctuaryStone),
-                Lock::Location(Locations::Samael),
-                Lock::Location(Locations::Sirion),
-                Lock::Location(Locations::Beira),
+            Location::Queen => &[&[
+                Lock::Location(Location::SanctuaryStone),
+                Lock::Location(Location::Samael),
+                Lock::Location(Location::Sirion),
+                Lock::Location(Location::Beira),
             ]],
-            Locations::FirefallSpiritHunter => &[&[Lock::Location(Locations::SanctuaryStone)]],
-            Locations::Bunny => &[&[
+            Location::FirefallSpiritHunter => &[&[Lock::Location(Location::SanctuaryStone)]],
+            Location::Bunny => &[&[
                 Lock::Location(Self::FirefallSpiritHunter),
                 Lock::Movement(&[no_walljump!(0, 3)]),
             ]],
-            Locations::LakeMolva => &[&[
-                Lock::Location(Locations::Bunny),
+            Location::LakeMolva => &[&[
+                Lock::Location(Location::Bunny),
                 Lock::Movement(&[no_walljump!(0, 1)]),
             ]],
-            Locations::FirefallDucks => &[&[Lock::Location(Locations::LakeMolva)]],
-            Locations::SteamHouse => &[&[
-                Lock::Location(Locations::LakeMolva),
+            Location::FirefallDucks => &[&[Lock::Location(Location::LakeMolva)]],
+            Location::SteamHouse => &[&[
+                Lock::Location(Location::LakeMolva),
                 Lock::Movement(&[no_walljump!(1, 2)]),
             ]],
-            Locations::SteamHouseDucks => &[&[Lock::Location(Locations::SteamHouse)]],
-            Locations::SteamHousePlatforming => &[&[
-                Lock::Location(Locations::SteamHouse),
-                Lock::Item(Items::KeySteam),
+            Location::SteamHouseDucks => &[&[Lock::Location(Location::SteamHouse)]],
+            Location::SteamHousePlatforming => &[&[
+                Lock::Location(Location::SteamHouse),
+                Lock::Item(Item::KeySteam),
                 Lock::Movement(&[no_walljump!(1, 4), walljump!(1, 3)]),
             ]],
-            Locations::Sirion => &[&[
-                Lock::Location(Locations::SteamHouse),
-                Lock::Item(Items::KeyFireMaster),
+            Location::Sirion => &[&[
+                Lock::Location(Location::SteamHouse),
+                Lock::Item(Item::KeyFireMaster),
                 Lock::Movement(&[walljump!(0, 4), no_walljump!(0, 5)]),
-                Lock::Item(Items::SanctuaryStone),
+                Lock::Item(Item::SanctuaryStone),
             ]],
-            Locations::RustVillage => &[&[
-                Lock::Location(Locations::SteamHouse),
-                Lock::Location(Locations::SteamHousePlatforming),
+            Location::RustVillage => &[&[
+                Lock::Location(Location::SteamHouse),
+                Lock::Location(Location::SteamHousePlatforming),
                 Lock::Movement(&[no_walljump!(1, 2)]),
                 Lock::IronJustice,
             ]],
-            Locations::Waterway => &[&[Lock::Location(Locations::ArcaneSouth)]],
-            Locations::WaterwayDucks => &[&[Lock::Location(Locations::Waterway)]],
-            Locations::Samael => &[&[
-                Lock::Location(Locations::ArcaneSouth),
-                Lock::Location(Locations::LakeMolva),
+            Location::Waterway => &[&[Lock::Location(Location::ArcaneSouth)]],
+            Location::WaterwayDucks => &[&[Lock::Location(Location::Waterway)]],
+            Location::Samael => &[&[
+                Lock::Location(Location::ArcaneSouth),
+                Lock::Location(Location::LakeMolva),
                 // movement requirements for oliver's diary area
                 Lock::Movement(&[walljump!(0, 4), no_walljump!(0, 8)]),
-                Lock::Item(Items::SanctuaryStone),
+                Lock::Item(Item::SanctuaryStone),
             ]],
-            Locations::PathOfVictory => &[&[Lock::Location(Locations::ArcaneSouth)]],
-            Locations::ArigosChallenge => &[&[Lock::Location(Locations::Tree)]],
-            Locations::BorisasFate => &[&[
-                Lock::Location(Locations::Stoneheart),
+            Location::PathOfVictory => &[&[Lock::Location(Location::ArcaneSouth)]],
+            Location::ArigosChallenge => &[&[Lock::Location(Location::Tree)]],
+            Location::BorisasFate => &[&[
+                Lock::Location(Location::Stoneheart),
                 Lock::Movement(&[walljump!(0, 2), no_walljump!(0, 4)]),
             ]],
-            Locations::JuliansSong => &[&[Lock::Location(Locations::TempleGardens)]],
-            Locations::Alchemist => &[&[Lock::Location(Locations::LakeMolva)]],
-            Locations::TheVoid => &[&[
-                Lock::Location(Locations::PathOfVictory),
-                Lock::Location(Locations::ArigosChallenge),
-                Lock::Location(Locations::BorisasFate),
-                Lock::Location(Locations::JuliansSong),
-                Lock::Location(Locations::Alchemist),
+            Location::JuliansSong => &[&[Lock::Location(Location::TempleGardens)]],
+            Location::Alchemist => &[&[Lock::Location(Location::LakeMolva)]],
+            Location::TheVoid => &[&[
+                Lock::Location(Location::PathOfVictory),
+                Lock::Location(Location::ArigosChallenge),
+                Lock::Location(Location::BorisasFate),
+                Lock::Location(Location::JuliansSong),
+                Lock::Location(Location::Alchemist),
                 Lock::Movement(&[walljump!(1, 3)]),
             ]],
         }

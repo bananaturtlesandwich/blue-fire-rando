@@ -142,7 +142,7 @@ pub fn write(
                             .value += *amount;
                     }
                     Drop::Duck => {
-                        add_item(&mut savegame, Drop::Item(Items::Duck, 1), &mut name_map)?
+                        add_item(&mut savegame, Drop::Item(Item::Duck, 1), &mut name_map)?
                     }
                     Drop::Item(..) => add_item(&mut savegame, drop, &mut name_map)?,
                     Drop::Spirit(spirit) => {

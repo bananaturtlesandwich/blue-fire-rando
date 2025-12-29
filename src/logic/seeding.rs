@@ -3,7 +3,7 @@ use strum::{EnumCount, IntoEnumIterator};
 
 fn update(
     locks: &[Lock],
-    locations: &[Locations],
+    locations: &[Location],
     possible: &mut Vec<Drop>,
     checks: &mut Vec<Check>,
     data: &mut Data,
@@ -23,41 +23,41 @@ fn update(
             let mut current = crate::no_walljump!(0, 0);
             for drop in both() {
                 match drop {
-                    Drop::Ability(Abilities::DoubleJump) | Drop::Ability(Abilities::SpinAttack) => {
+                    Drop::Ability(Ability::DoubleJump) | Drop::Ability(Ability::SpinAttack) => {
                         current.extra_height += 1;
                         current.horizontal += 1;
                     }
-                    Drop::Spirit(Spirits::HolyCentry)
-                        if both().any(|drop| drop == &Drop::Ability(Abilities::DoubleJump)) =>
+                    Drop::Spirit(Spirit::HolyCentry)
+                        if both().any(|drop| drop == &Drop::Ability(Ability::DoubleJump)) =>
                     {
                         current.extra_height += 1;
                         current.horizontal += 1;
                     }
-                    Drop::Spirit(Spirits::PossesedBook)
-                        if both().any(|drop| drop == &Drop::Ability(Abilities::SpinAttack))
-                            && both().any(|drop| drop == &Drop::Ability(Abilities::Dash)) =>
+                    Drop::Spirit(Spirit::PossesedBook)
+                        if both().any(|drop| drop == &Drop::Ability(Ability::SpinAttack))
+                            && both().any(|drop| drop == &Drop::Ability(Ability::Dash)) =>
                     {
                         current.extra_height += 1;
                         current.horizontal += 1;
                     }
-                    Drop::Spirit(Spirits::MoiTheDreadful)
-                        if both().any(|drop| drop == &Drop::Ability(Abilities::SpinAttack)) =>
+                    Drop::Spirit(Spirit::MoiTheDreadful)
+                        if both().any(|drop| drop == &Drop::Ability(Ability::SpinAttack)) =>
                     {
                         current.extra_height += 1;
                         current.horizontal += 1;
                     }
-                    Drop::Ability(Abilities::Sprint) | Drop::Ability(Abilities::Spell) => {
+                    Drop::Ability(Ability::Sprint) | Drop::Ability(Ability::Spell) => {
                         current.horizontal += 1
                     }
-                    Drop::Spirit(Spirits::FlyingOnop) | Drop::Ability(Abilities::Dash) => {
+                    Drop::Spirit(Spirit::FlyingOnop) | Drop::Ability(Ability::Dash) => {
                         current.horizontal += 2
                     }
-                    Drop::Spirit(Spirits::StormCentry)
-                        if both().any(|drop| drop == &Drop::Ability(Abilities::Dash)) =>
+                    Drop::Spirit(Spirit::StormCentry)
+                        if both().any(|drop| drop == &Drop::Ability(Ability::Dash)) =>
                     {
                         current.horizontal += 2
                     }
-                    Drop::Ability(Abilities::WallRun) => current.walljump = true,
+                    Drop::Ability(Ability::WallRun) => current.walljump = true,
                     _ => (),
                 }
             }
@@ -75,28 +75,28 @@ fn update(
             if amount < &3000 {
                 true
             } else if amount < &6000 {
-                both().any(|drop| matches!(drop, Drop::Item(Items::SmallPouch, ..)))
+                both().any(|drop| matches!(drop, Drop::Item(Item::SmallPouch, ..)))
             } else if amount < &10000 {
                 both().any(|drop| {
                     matches!(
                         drop,
-                        Drop::Item(Items::SmallPouch, ..) | Drop::Item(Items::LargePouch, ..)
+                        Drop::Item(Item::SmallPouch, ..) | Drop::Item(Item::LargePouch, ..)
                     )
                 })
             } else {
                 both().any(|drop| {
                     matches!(
                         drop,
-                        Drop::Item(Items::SmallPouch, ..)
-                            | Drop::Item(Items::LargePouch, ..)
-                            | Drop::Item(Items::ExtraLargePouch, ..)
+                        Drop::Item(Item::SmallPouch, ..)
+                            | Drop::Item(Item::LargePouch, ..)
+                            | Drop::Item(Item::ExtraLargePouch, ..)
                     )
                 })
             }
         }
         Lock::Mork => {
             both().fold(0, |acc, drop| {
-                if drop == &Drop::Item(Items::Book, 1) {
+                if drop == &Drop::Item(Item::Book, 1) {
                     acc + 1
                 } else {
                     acc
@@ -112,8 +112,8 @@ fn update(
                 }
             }) >= 10
         }
-        Lock::EvolairTunic => both().any(|drop| drop == &Drop::Tunic(Tunics::SteamWorkerTunic)),
-        Lock::IronJustice => both().any(|drop| drop == &Drop::Weapon(Weapons::IronJustice)),
+        Lock::EvolairTunic => both().any(|drop| drop == &Drop::Tunic(Tunic::SteamWorkerTunic)),
+        Lock::IronJustice => both().any(|drop| drop == &Drop::Weapon(Weapon::IronJustice)),
     }) {
         return false;
     }
@@ -124,15 +124,15 @@ fn update(
             Lock::Movement(..) => possible[0..checks.len()].iter().position(|drop| {
                 matches!(
                     drop,
-                    Drop::Spirit(Spirits::PossesedBook)
-                        | Drop::Spirit(Spirits::MoiTheDreadful)
-                        | Drop::Spirit(Spirits::HolyCentry)
-                        | Drop::Ability(Abilities::DoubleJump)
-                        | Drop::Ability(Abilities::SpinAttack)
-                        | Drop::Ability(Abilities::Sprint)
-                        | Drop::Ability(Abilities::Spell)
-                        | Drop::Ability(Abilities::Dash)
-                        | Drop::Ability(Abilities::WallRun)
+                    Drop::Spirit(Spirit::PossesedBook)
+                        | Drop::Spirit(Spirit::MoiTheDreadful)
+                        | Drop::Spirit(Spirit::HolyCentry)
+                        | Drop::Ability(Ability::DoubleJump)
+                        | Drop::Ability(Ability::SpinAttack)
+                        | Drop::Ability(Ability::Sprint)
+                        | Drop::Ability(Ability::Spell)
+                        | Drop::Ability(Ability::Dash)
+                        | Drop::Ability(Ability::WallRun)
                 )
             }),
             Lock::Item(item) => {
@@ -153,37 +153,37 @@ fn update(
                 } else if amount < &6000 {
                     possible[0..checks.len()]
                         .iter()
-                        .position(|drop| matches!(drop, Drop::Item(Items::SmallPouch, ..)))
+                        .position(|drop| matches!(drop, Drop::Item(Item::SmallPouch, ..)))
                 } else if amount < &10000 {
                     possible[0..checks.len()].iter().position(|drop| {
                         matches!(
                             drop,
-                            Drop::Item(Items::SmallPouch, ..) | Drop::Item(Items::LargePouch, ..)
+                            Drop::Item(Item::SmallPouch, ..) | Drop::Item(Item::LargePouch, ..)
                         )
                     })
                 } else {
                     possible[0..checks.len()].iter().position(|drop| {
                         matches!(
                             drop,
-                            Drop::Item(Items::SmallPouch, ..)
-                                | Drop::Item(Items::LargePouch, ..)
-                                | Drop::Item(Items::ExtraLargePouch, ..)
+                            Drop::Item(Item::SmallPouch, ..)
+                                | Drop::Item(Item::LargePouch, ..)
+                                | Drop::Item(Item::ExtraLargePouch, ..)
                         )
                     })
                 }
             }
             Lock::Mork => possible[0..checks.len()]
                 .iter()
-                .position(|drop| drop == &Drop::Item(Items::Book, 1)),
+                .position(|drop| drop == &Drop::Item(Item::Book, 1)),
             Lock::SpiritHunter => possible[0..checks.len()]
                 .iter()
                 .position(|drop| matches!(drop, Drop::Spirit(..))),
             Lock::EvolairTunic => possible[0..checks.len()]
                 .iter()
-                .position(|drop| drop == &Drop::Tunic(Tunics::SteamWorkerTunic)),
+                .position(|drop| drop == &Drop::Tunic(Tunic::SteamWorkerTunic)),
             Lock::IronJustice => possible[0..checks.len()]
                 .iter()
-                .position(|drop| drop == &Drop::Weapon(Weapons::IronJustice)),
+                .position(|drop| drop == &Drop::Weapon(Weapon::IronJustice)),
         } {
             let mut check = checks.remove(i);
             check.drop = possible.remove(i);
@@ -233,7 +233,7 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
         Drop::Weapon(..) => app.weapons,
         Drop::Tunic(..) => app.tunics,
         Drop::Spirit(..) => app.spirits,
-        Drop::Ability(ability) => match ability == &Abilities::Dash {
+        Drop::Ability(ability) => match ability == &Ability::Dash {
             true => app.dash,
             false => app.abilities,
         },
@@ -249,21 +249,21 @@ pub fn randomise(app: &crate::Rando) -> Result<(), String> {
     let mut possible: Vec<Drop> = pool.iter().map(|check| check.drop).collect();
     let mut checks: Vec<Check> = Vec::with_capacity(pool.len());
     let mut data = Data {
-        overworld: std::collections::HashMap::with_capacity(Locations::COUNT),
+        overworld: std::collections::HashMap::with_capacity(Location::COUNT),
         cutscenes: Vec::with_capacity(checks.len()),
         savegames: Vec::with_capacity(checks.len()),
         cases: Vec::with_capacity(checks.len()),
         shop_emotes: Vec::with_capacity(checks.len()),
     };
-    let mut locations = Vec::with_capacity(Locations::COUNT);
+    let mut locations = Vec::with_capacity(Location::COUNT);
     let mut rng = rand::rng();
-    while locations.len() != Locations::COUNT && !pool.is_empty() {
+    while locations.len() != Location::COUNT && !pool.is_empty() {
         // shuffle the possible drops
         use rand::seq::SliceRandom;
         possible.shuffle(&mut rng);
         checks.shuffle(&mut rng);
         // update accessible locations
-        for loc in Locations::iter() {
+        for loc in Location::iter() {
             if !locations.contains(&loc)
                 && loc
                     .locks()

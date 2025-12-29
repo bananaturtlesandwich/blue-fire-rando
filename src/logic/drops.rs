@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 #[derive(PartialEq, Clone, Copy, Debug, strum::AsRefStr)]
-pub enum Items {
+pub enum Item {
     #[strum(serialize = "0")]
     LargePouch,
     #[strum(serialize = "1")]
@@ -167,81 +167,81 @@ pub enum Items {
     RobiBadge,
 }
 
-impl Items {
+impl Item {
     pub fn treasure(&self) -> bool {
         matches!(
             self,
-            Items::Apple
-                | Items::Boot
-                | Items::FleshEater
-                | Items::IceCrystal
-                | Items::Mandoline
-                | Items::RareCheese
-                | Items::RareGlasses
-                | Items::Rice
-                | Items::SandRelic
-                | Items::SeagulSoup
+            Item::Apple
+                | Item::Boot
+                | Item::FleshEater
+                | Item::IceCrystal
+                | Item::Mandoline
+                | Item::RareCheese
+                | Item::RareGlasses
+                | Item::Rice
+                | Item::SandRelic
+                | Item::SeagulSoup
         )
     }
 
     pub fn gem(&self) -> bool {
         matches!(
             self,
-            Items::RubyOre | Items::SapphireOre | Items::EmeraldOre | Items::VoidOre
+            Item::RubyOre | Item::SapphireOre | Item::EmeraldOre | Item::VoidOre
         )
     }
 
     pub fn key(&self) -> bool {
         matches!(
             self,
-            Items::OldKey
-                | Items::KeyGraveyardKey
-                | Items::KeyUthasTemple
-                | Items::KeyHolyMaster
-                | Items::KeyGodMaster
-                | Items::KeySteam
-                | Items::KeyFireMaster
+            Item::OldKey
+                | Item::KeyGraveyardKey
+                | Item::KeyUthasTemple
+                | Item::KeyHolyMaster
+                | Item::KeyGodMaster
+                | Item::KeySteam
+                | Item::KeyFireMaster
         )
     }
 
     pub fn key_item(&self) -> bool {
         matches!(
             self,
-            Items::BasicPouch
-                | Items::SmallPouch
-                | Items::LargePouch
-                | Items::ExtraLargePouch
-                | Items::OldKey
-                | Items::SanctuaryStone
-                | Items::HouseKey
-                | Items::BremurPicture
-                | Items::Rose
-                | Items::Necklace
-                | Items::Book
-                | Items::ComposerLetter
-                | Items::OddRock
-                | Items::BeiraVessel
-                | Items::RareSnow
-                | Items::FireEssenceSlot
-                | Items::HouseContract
-                | Items::KeyGraveyardKey
-                | Items::KeyUthasTemple
-                | Items::KeyHolyMaster
-                | Items::KeyGodMaster
-                | Items::KeySteam
-                | Items::KeyFireMaster
-                | Items::Shield
-                | Items::FireBall
-                | Items::WallRun
-                | Items::DoubleJump
-                | Items::SpinAttack
-                | Items::Sprint,
+            Item::BasicPouch
+                | Item::SmallPouch
+                | Item::LargePouch
+                | Item::ExtraLargePouch
+                | Item::OldKey
+                | Item::SanctuaryStone
+                | Item::HouseKey
+                | Item::BremurPicture
+                | Item::Rose
+                | Item::Necklace
+                | Item::Book
+                | Item::ComposerLetter
+                | Item::OddRock
+                | Item::BeiraVessel
+                | Item::RareSnow
+                | Item::FireEssenceSlot
+                | Item::HouseContract
+                | Item::KeyGraveyardKey
+                | Item::KeyUthasTemple
+                | Item::KeyHolyMaster
+                | Item::KeyGodMaster
+                | Item::KeySteam
+                | Item::KeyFireMaster
+                | Item::Shield
+                | Item::FireBall
+                | Item::WallRun
+                | Item::DoubleJump
+                | Item::SpinAttack
+                | Item::Sprint,
         )
     }
 }
 
 #[derive(PartialEq, Clone, Copy, Debug, strum::AsRefStr)]
-pub enum Weapons {
+pub enum Weapon {
     #[strum(serialize = "0")]
     DualBlades,
     #[strum(serialize = "1")]
@@ -273,7 +273,7 @@ pub enum Weapons {
 }
 
 #[derive(PartialEq, Clone, Copy, Debug, strum::AsRefStr)]
-pub enum Tunics {
+pub enum Tunic {
     #[strum(serialize = "0")]
     ShadowCloack,
     #[strum(serialize = "1")]
@@ -343,7 +343,7 @@ pub enum Tunics {
 }
 
 #[derive(PartialEq, Clone, Copy, Debug, strum::AsRefStr)]
-pub enum Spirits {
+pub enum Spirit {
     #[strum(serialize = "0")]
     FarasGrace,
     #[strum(serialize = "1")]
@@ -407,7 +407,7 @@ pub enum Spirits {
 }
 
 #[derive(PartialEq, Clone, Copy, Debug, strum::AsRefStr)]
-pub enum Abilities {
+pub enum Ability {
     #[strum(serialize = "3")]
     Attack,
     #[strum(serialize = "2")]
@@ -431,7 +431,7 @@ pub enum Abilities {
 }
 
 #[derive(PartialEq, Clone, Copy, Debug, strum::AsRefStr)]
-pub enum Emotes {
+pub enum Emote {
     #[strum(serialize = "0")]
     Wave,
     #[strum(serialize = "1")]

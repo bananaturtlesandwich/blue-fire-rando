@@ -9,7 +9,7 @@ pub use locations::*;
 
 #[derive(Debug)]
 pub struct Data {
-    pub overworld: std::collections::HashMap<Locations, Vec<Check>>,
+    pub overworld: std::collections::HashMap<Location, Vec<Check>>,
     pub cutscenes: Vec<Check>,
     pub savegames: Vec<Check>,
     pub cases: Vec<Check>,
@@ -70,17 +70,17 @@ pub enum Context {
 #[derive(Clone, Copy, Debug, strum::AsRefStr)]
 pub enum Drop {
     #[strum(serialize = "0")]
-    Item(Items, i32),
+    Item(Item, i32),
     #[strum(serialize = "1")]
-    Weapon(Weapons),
+    Weapon(Weapon),
     #[strum(serialize = "2")]
-    Tunic(Tunics),
+    Tunic(Tunic),
     #[strum(serialize = "3")]
-    Spirit(Spirits),
+    Spirit(Spirit),
     #[strum(serialize = "6")]
-    Ability(Abilities),
+    Ability(Ability),
     #[strum(serialize = "7")]
-    Emote(Emotes),
+    Emote(Emote),
     #[strum(serialize = "0")]
     Ore(i32),
     #[strum(serialize = "0")]
@@ -133,7 +133,7 @@ impl Drop {
 
 #[derive(Debug)]
 pub struct Check {
-    pub location: Locations,
+    pub location: Location,
     pub context: Context,
     pub drop: Drop,
     locks: &'static [Lock],
@@ -141,10 +141,10 @@ pub struct Check {
 
 #[derive(Debug)]
 pub enum Lock {
-    Location(Locations),
+    Location(Location),
     Movement(&'static [Move]),
-    Item(Items),
-    Emote(Emotes),
+    Item(Item),
+    Emote(Emote),
     Money(u32),
     SpiritHunter,
     Mork,
