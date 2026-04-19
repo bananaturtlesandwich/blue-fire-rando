@@ -46,7 +46,7 @@ impl Shop {
     }
 }
 
-#[derive(Debug, strum::AsRefStr)]
+#[derive(Debug, Clone, strum::AsRefStr)]
 pub enum Case {
     #[strum(serialize = "NPC/Bremur/NPC_Bremur")]
     Bremur,
@@ -58,7 +58,7 @@ pub enum Case {
     AllVoids,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Context {
     Shop(Shop, usize, i32),
     Cutscene(&'static str),
@@ -131,7 +131,7 @@ impl Drop {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Check {
     pub location: Location,
     pub context: Context,
